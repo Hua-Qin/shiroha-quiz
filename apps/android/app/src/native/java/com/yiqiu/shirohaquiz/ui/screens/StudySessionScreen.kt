@@ -160,7 +160,7 @@ fun StudySessionScreen(
                     submitted = submitted,
                     onSelectAnswer = { selectedAnswer = it },
                     onSubmit = {
-                        if (QuizRepository.judgeAnswer(currentQuestion, selectedAnswer)) {
+                        if (currentQuestion != null && QuizRepository.judgeAnswer(currentQuestion, selectedAnswer)) {
                             correctCount++
                         }
                         submitted = true

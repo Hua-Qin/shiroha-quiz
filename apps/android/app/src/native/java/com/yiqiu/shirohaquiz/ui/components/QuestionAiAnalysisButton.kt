@@ -26,11 +26,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yiqiu.shirohaquiz.ai.AiSingleQuestionAnalysis
 import com.yiqiu.shirohaquiz.ai.ShirohaAiClient
 import com.yiqiu.shirohaquiz.importer.model.Question
 import com.yiqiu.shirohaquiz.state.QuizRepository
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaColors
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaDimens
+import com.yiqiu.shirohaquiz.ui.theme.ShirohaRadius
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -54,7 +56,7 @@ fun QuestionAiAnalysisButton(
 ) {
     val scope = rememberCoroutineScope()
     var loading by remember(question.id) { mutableStateOf(false) }
-    var result by remember(question.id) { mutableStateOf<ShirohaAiClient.AiSingleQuestionAnalysis?>(null) }
+    var result by remember(question.id) { mutableStateOf<AiSingleQuestionAnalysis?>(null) }
     var errorText by remember(question.id) { mutableStateOf<String?>(null) }
     var showSettingsHint by remember { mutableStateOf(false) }
     var showEnableHint by remember { mutableStateOf(false) }
@@ -165,7 +167,7 @@ fun QuestionAiAnalysisButton(
 }
 
 @Composable
-private fun QuestionAiAnalysisResultCard(result: ShirohaAiClient.AiSingleQuestionAnalysis) {
+private fun QuestionAiAnalysisResultCard(result: AiSingleQuestionAnalysis) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(ShirohaRadius.Lg),
