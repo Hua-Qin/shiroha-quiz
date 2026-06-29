@@ -148,7 +148,7 @@ fun StudySessionScreen(
                     correctCount = 0
                     finished = false
                 },
-                onNext = { onNextSection(nextSectionId(course, sectionId)) },
+                onNext = { nextSectionId(course, sectionId)?.let { onNextSection(it) } },
                 onBack = onBack,
                 hasNext = nextSectionId(course, sectionId) != null
             )

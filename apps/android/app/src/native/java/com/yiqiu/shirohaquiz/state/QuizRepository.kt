@@ -4558,7 +4558,7 @@ object QuizRepository {
                         id = id,
                         chapterTitle = sObj.optString("chapterTitle"),
                         sectionTitle = sObj.optString("sectionTitle"),
-                        order = sObj.optInt("order", sections.size + 1),
+                        order = sObj.optInt("order", this.size + 1),
                         summary = sObj.optString("summary"),
                         content = sObj.optString("content"),
                         codeExample = sObj.optString("codeExample"),
