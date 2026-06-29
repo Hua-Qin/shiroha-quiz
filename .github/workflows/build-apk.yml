@@ -36,12 +36,7 @@ jobs:
               -keyalg RSA -keysize 2048 -validity 10000 \
               -storepass android -keypass android \
               -dname "CN=CI, OU=CI, O=ShirohaQuiz, L=CI, S=CI, C=US"
-            cat > keystore.properties <<EOF
-            storeFile=ci-release.keystore
-            storePassword=android
-            keyAlias=ci-release
-            keyPassword=android
-            EOF
+            printf 'storeFile=ci-release.keystore\nstorePassword=android\nkeyAlias=ci-release\nkeyPassword=android\n' > keystore.properties
             echo "CI signing key generated."
           else
             echo "keystore.properties found, using existing config."
