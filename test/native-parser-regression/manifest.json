@@ -1,0 +1,287 @@
+{
+  "app": "Shiroha Quiz",
+  "scope": "native-parser-regression",
+  "version": 5,
+  "note": "外部回归核对包 v5：新增内嵌多空结构识别、填空题分区继承，以及版本/参数/说明性括号和中等置信候选保护。Runner 以本 manifest 为唯一用例清单。",
+  "cases": [
+    {
+      "id": "01_standard_single",
+      "mode": "single",
+      "sample": "samples/01_standard_single.txt",
+      "expected": "expected/01_standard_single.json",
+      "risk": "标准题不应被复杂策略误伤"
+    },
+    {
+      "id": "02_two_option_single",
+      "mode": "single",
+      "sample": "samples/02_two_option_single.txt",
+      "expected": "expected/02_two_option_single.json",
+      "risk": "A 正确 / B 错误 两选项单选不能误判为判断题"
+    },
+    {
+      "id": "03_trailing_judge",
+      "mode": "single",
+      "sample": "samples/03_trailing_judge.txt",
+      "expected": "expected/03_trailing_judge.json",
+      "risk": "无选项题尾判断答案应识别为判断题"
+    },
+    {
+      "id": "04_answer_section",
+      "mode": "single",
+      "sample": "samples/04_answer_section.txt",
+      "expected": "expected/04_answer_section.json",
+      "risk": "答案解析区不能被解析成新题"
+    },
+    {
+      "id": "05_dual_file",
+      "mode": "dual",
+      "questionSample": "samples/05_dual_questions.txt",
+      "answerSample": "samples/05_dual_answers.txt",
+      "expected": "expected/05_dual_file.json",
+      "risk": "双文件导入应优先按题号合并"
+    },
+    {
+      "id": "06_subjective_text_answer",
+      "mode": "single",
+      "sample": "samples/06_subjective_text_answer.txt",
+      "expected": "expected/06_subjective_text_answer.json",
+      "risk": "简答文本答案不能被拆成 A/B/C 选项"
+    },
+    {
+      "id": "07_compact_format",
+      "mode": "single",
+      "sample": "samples/07_compact_format.txt",
+      "expected": "expected/07_compact_format.json",
+      "risk": "紧凑格式应拆分题目和选项"
+    },
+    {
+      "id": "08_sectioned_types",
+      "mode": "single",
+      "sample": "samples/08_sectioned_types.txt",
+      "expected": "expected/08_sectioned_types.json",
+      "risk": "分区标题应继承题型但不进入题干"
+    },
+    {
+      "id": "09_table_text",
+      "mode": "single",
+      "sample": "samples/09_table_text.tsv",
+      "expected": "expected/09_table_text.json",
+      "risk": "表格文本应按列识别题干、选项、答案和解析"
+    },
+    {
+      "id": "10_shared_stem",
+      "mode": "single",
+      "sample": "samples/10_shared_stem.txt",
+      "expected": "expected/10_shared_stem.json",
+      "risk": "共用题干/材料题应复制材料到每个子题，不能丢失题干背景"
+    },
+    {
+      "id": "11_shared_stem_answer_section",
+      "mode": "single",
+      "sample": "samples/11_shared_stem_answer_section.txt",
+      "expected": "expected/11_shared_stem_answer_section.json",
+      "risk": "共用题干题带答案解析区时，应先拆题再合并答案和解析"
+    },
+    {
+      "id": "12_material_wording_standard_guard",
+      "mode": "single",
+      "sample": "samples/12_material_wording_standard_guard.txt",
+      "expected": "expected/12_material_wording_standard_guard.json",
+      "risk": "普通编号题干里出现材料题字样时，不能被兜底策略误重写"
+    },
+    {
+      "id": "13_compact_multiple_answer_variants",
+      "mode": "single",
+      "sample": "samples/13_compact_multiple_answer_variants.txt",
+      "expected": "expected/13_compact_multiple_answer_variants.json",
+      "risk": "AB、A,B、A B 三种紧凑多选答案都应归一化为 A+B"
+    },
+    {
+      "id": "14_subjective_enumeration_guard",
+      "mode": "single",
+      "sample": "samples/14_subjective_enumeration_guard.txt",
+      "expected": "expected/14_subjective_enumeration_guard.json",
+      "risk": "主观题中的 A/B/C 分项和单字母文本答案不能触发选择题转换"
+    },
+    {
+      "id": "15_text_answer_letter_guard",
+      "mode": "single",
+      "sample": "samples/15_text_answer_letter_guard.txt",
+      "expected": "expected/15_text_answer_letter_guard.json",
+      "risk": "AB法、AI 等文本答案不能被拆成客观答案"
+    },
+    {
+      "id": "16_full_paper_front_matter",
+      "mode": "single",
+      "sample": "samples/16_full_paper_front_matter.txt",
+      "expected": "expected/16_full_paper_front_matter.json",
+      "risk": "完整试卷前言、答题卡提示和结束语不能进入题干"
+    },
+    {
+      "id": "17_full_paper_subjective_letter_answers",
+      "mode": "single",
+      "sample": "samples/17_full_paper_subjective_letter_answers.txt",
+      "expected": "expected/17_full_paper_subjective_letter_answers.json",
+      "risk": "整卷主观题即使答案为 A/B/C/D，也不能被改成带占位选项的客观题"
+    },
+    {
+      "id": "18_empty_no_question",
+      "mode": "single",
+      "sample": "samples/18_empty_no_question.txt",
+      "expected": "expected/18_empty_no_question.json",
+      "risk": "无题目文本必须返回未识别错误"
+    },
+    {
+      "id": "19_dual_dense_full_paper",
+      "mode": "dual",
+      "questionSample": "samples/19_dual_dense_full_paper_questions.txt",
+      "answerSample": "samples/19_dual_dense_full_paper_answers.txt",
+      "expected": "expected/19_dual_dense_full_paper.json",
+      "risk": "双文件密集整卷应在合并答案后允许结构完整的整卷候选接管"
+    },
+    {
+      "id": "20_full_paper_explain_word_guard",
+      "mode": "single",
+      "sample": "samples/20_full_paper_explain_word_guard.txt",
+      "expected": "expected/20_full_paper_explain_word_guard.json",
+      "risk": "题干以说明文字开头时不能被前言过滤器误删"
+    },
+    {
+      "id": "21_english_abbreviation_guard",
+      "mode": "single",
+      "sample": "samples/21_english_abbreviation_guard.txt",
+      "expected": "expected/21_english_abbreviation_guard.json",
+      "risk": "Vitamin A/U.S.A./e.g.中字母不应误判为选项标记"
+    },
+    {
+      "id": "22_multi_blank_explicit",
+      "mode": "single",
+      "sample": "samples/22_multi_blank_explicit.txt",
+      "expected": "expected/22_multi_blank_explicit.json",
+      "risk": "填空题有三个显式空位，答案用分号分隔，应逐空拆分"
+    },
+    {
+      "id": "23_multi_blank_filled",
+      "mode": "single",
+      "sample": "samples/23_multi_blank_filled.txt",
+      "expected": "expected/23_multi_blank_filled.json",
+      "risk": "填空题有三个已填括号，应提取答案并替换为空括号"
+    },
+    {
+      "id": "24_single_blank_guard",
+      "mode": "single",
+      "sample": "samples/24_single_blank_guard.txt",
+      "expected": "expected/24_single_blank_guard.json",
+      "risk": "单选题带单个空括号不应被误判为多空填空题"
+    },
+    {
+      "id": "25_code_expression_guard",
+      "mode": "single",
+      "sample": "samples/25_code_expression_guard.txt",
+      "expected": "expected/25_code_expression_guard.json",
+      "risk": "函数调用、字符串/注释、成员访问和数字表达式不能被误识别为答案、选项或新题"
+    },
+    {
+      "id": "26_code_guard_normal_format",
+      "mode": "single",
+      "sample": "samples/26_code_guard_normal_format.txt",
+      "expected": "expected/26_code_guard_normal_format.json",
+      "risk": "代码保护不能破坏正常括号答案、填空题、标准选项和紧凑选项"
+    },
+    {
+      "id": "27_inline_multi_blank_structures",
+      "mode": "single",
+      "sample": "samples/27_inline_multi_blank_structures.txt",
+      "expected": "expected/27_inline_multi_blank_structures.json",
+      "risk": "普通题库中的组成、分类、并列、对应和连续括号结构应高置信识别为多空填空题"
+    },
+    {
+      "id": "28_sectioned_multi_blank_inheritance",
+      "mode": "single",
+      "sample": "samples/28_sectioned_multi_blank_inheritance.txt",
+      "expected": "expected/28_sectioned_multi_blank_inheritance.json",
+      "risk": "填空题分区继承后，弱结构和序号型内嵌多空仍应提取逐空答案"
+    },
+    {
+      "id": "29_inline_multi_blank_guard",
+      "mode": "single",
+      "sample": "samples/29_inline_multi_blank_guard.txt",
+      "expected": "expected/29_inline_multi_blank_guard.json",
+      "risk": "版本、型号、参数、简称、单括号及答案冲突不得被强制转换为多空填空题"
+    },
+    {
+      "id": "30_answer_table_format",
+      "mode": "dual",
+      "questionSample": "samples/30_answer_table_questions.txt",
+      "answerSample": "samples/30_answer_table_answers.txt",
+      "expected": "expected/30_answer_table_format.json",
+      "risk": "题号/答案双行表格式应合并到对应题目，不能把答案表当成题目"
+    },
+    {
+      "id": "31_range_answer_format",
+      "mode": "dual",
+      "questionSample": "samples/31_range_answer_questions.txt",
+      "answerSample": "samples/31_range_answer_answers.txt",
+      "expected": "expected/31_range_answer_format.json",
+      "risk": "范围答案格式 1-5: A B C D E 应按题号展开并合并"
+    },
+    {
+      "id": "32_compact_answer_line",
+      "mode": "dual",
+      "questionSample": "samples/32_compact_answer_questions.txt",
+      "answerSample": "samples/32_compact_answer_answers.txt",
+      "expected": "expected/32_compact_answer_line.json",
+      "risk": "紧凑答案行 1A2B3C4D5A 应识别为答案区而不是题干"
+    },
+    {
+      "id": "33_inline_multi_answer",
+      "mode": "dual",
+      "questionSample": "samples/33_inline_multi_answer_questions.txt",
+      "answerSample": "samples/33_inline_multi_answer_answers.txt",
+      "expected": "expected/33_inline_multi_answer.json",
+      "risk": "行内多条目答案 1.A 2.B 3.C 应逐题合并"
+    },
+    {
+      "id": "34_solution_choice_extraction",
+      "mode": "single",
+      "sample": "samples/34_solution_choice_extraction.txt",
+      "expected": "expected/34_solution_choice_extraction.json",
+      "risk": "分析/解析末尾的“选B”应提取为答案，不能只保留为解析文本"
+    },
+    {
+      "id": "36_plain_option_inference",
+      "mode": "single",
+      "sample": "samples/36_plain_option_inference.txt",
+      "expected": "expected/36_plain_option_inference.json",
+      "risk": "无 A/B/C/D 标记但结构明显的短行选项应能推断为选项"
+    },
+    {
+      "id": "37_interview_question_number",
+      "mode": "single",
+      "sample": "samples/37_interview_question_number.txt",
+      "expected": "expected/37_interview_question_number.json",
+      "risk": "问题一/问题二等中文题号应分块为主观题"
+    },
+    {
+      "id": "38_glued_question_number",
+      "mode": "single",
+      "sample": "samples/38_glued_question_number.txt",
+      "expected": "expected/38_glued_question_number.json",
+      "risk": "数字与题干粘连时仍应识别题号边界"
+    },
+    {
+      "id": "39_subjective_answer_continuation",
+      "mode": "single",
+      "sample": "samples/39_subjective_answer_continuation.txt",
+      "expected": "expected/39_subjective_answer_continuation.json",
+      "risk": "主观题参考答案中的 1/2/3 分项不能误切成新题"
+    },
+    {
+      "id": "40_material_intro_skip",
+      "mode": "single",
+      "sample": "samples/40_material_intro_skip.txt",
+      "expected": "expected/40_material_intro_skip.json",
+      "risk": "材料一/材料二导语不能被误判为独立题目"
+    }
+  ]
+}
