@@ -60,6 +60,32 @@ data class AiRefactorResult(
     val notes: List<String>
 )
 
+data class AdviceItem(
+    val title: String,
+    val detail: String,
+    val priority: String
+)
+
+data class PersonalizedAdvice(
+    val overallAssessment: String,
+    val weakPoints: List<String>,
+    val suggestions: List<AdviceItem>,
+    val motivationalMessage: String
+)
+
+data class WrongCategory(
+    val name: String,
+    val count: Int,
+    val suggestion: String
+)
+
+data class WrongAnalysis(
+    val summary: String,
+    val patterns: List<String>,
+    val categories: List<WrongCategory>,
+    val studyPlan: String
+)
+
 object ShirohaAiClient {
     fun testConnection(
         apiBaseUrl: String,
@@ -152,6 +178,70 @@ object ShirohaAiClient {
             timeoutSeconds = timeoutSeconds.coerceIn(15, 180)
         )
         return parseSingleQuestionAnalysis(content, question.id)
+    }
+
+    fun generatePersonalizedAdvice(
+        apiBaseUrl: String,
+        apiKey: String,
+        modelName: String,
+        recordsSummary: String,
+        wrongQuestionsSummary: String,
+        timeoutSeconds: Int = DEFAULT_AI_TIMEOUT_SECONDS
+    ): Result<PersonalizedAdvice> {
+        return runCatching {
+            validateConfig(apiBaseUrl, apiKey, modelName)
+            val content = requestChatCompletion(
+                apiBaseUrl = apiBaseUrl,
+                apiKey = apiKey,
+                modelName = modelName,
+                systemPrompt = AiPrompts.AI_PERSONALIZED_ADVICE_SYSTEM_PROMPT,
+                userPayload = JSONObject()
+                    .put("task", "personalized_advice")
+                    .put("recordsSummary", recordsSummary)
+                    .put("wrongQuestionsSummary", wrongQuestionsSummary)
+                    .put("outputFormat", personalizedAdviceOutputContract())
+                    .toString(),
+                timeoutSeconds = timeoutSeconds.coerceIn(15, 180)
+            )
+            parsePersonalizedAdvice(content)
+        }
+    }
+
+    fun analyzeWrongBook(
+        apiBaseUrl: String,
+        apiKey: String,
+        modelName: String,
+        wrongQuestions: List<Question>,
+        userAnswers: Map<String, List<String>>,
+        timeoutSeconds: Int = DEFAULT_AI_TIMEOUT_SECONDS
+    ): Result<WrongAnalysis> {
+        return runCatching {
+            validateConfig(apiBaseUrl, apiKey, modelName)
+            if (wrongQuestions.isEmpty()) {
+                throw IllegalStateException("没有可分析的错题。")
+            }
+            val content = requestChatCompletion(
+                apiBaseUrl = apiBaseUrl,
+                apiKey = apiKey,
+                modelName = modelName,
+                systemPrompt = AiPrompts.AI_WRONG_ANALYSIS_SYSTEM_PROMPT,
+                userPayload = JSONObject()
+                    .put("task", "wrong_book_analysis")
+                    .put("questions", questionsToJson(wrongQuestions))
+                    .put("userAnswers", JSONObject().also { obj ->
+                        userAnswers.forEach { (id, answers) ->
+                            obj.put(
+                                id,
+                                JSONArray().also { array -> answers.forEach { array.put(it) } }
+                            )
+                        }
+                    })
+                    .put("outputFormat", wrongAnalysisOutputContract())
+                    .toString(),
+                timeoutSeconds = timeoutSeconds.coerceIn(15, 180)
+            )
+            parseWrongAnalysis(content)
+        }
     }
 
     fun refactorQuestions(
@@ -425,6 +515,54 @@ object ShirohaAiClient {
         )
     }
 
+    private fun parsePersonalizedAdvice(content: String): PersonalizedAdvice {
+        val root = JSONObject(extractJsonObject(content))
+        val suggestionsJson = root.optJSONArray("suggestions") ?: JSONArray()
+        val suggestions = (0 until suggestionsJson.length()).mapNotNull { index ->
+            val item = suggestionsJson.optJSONObject(index) ?: return@mapNotNull null
+            AdviceItem(
+                title = item.optString("title").trim().ifBlank { "建议" },
+                detail = item.optString("detail").trim().ifBlank { "请结合自身情况复习。" },
+                priority = item.optString("priority").trim().lowercase().ifBlank { "medium" }
+            )
+        }
+        val weakJson = root.optJSONArray("weakPoints") ?: JSONArray()
+        val weakPoints = (0 until weakJson.length())
+            .map { weakJson.optString(it).trim() }
+            .filter { it.isNotBlank() }
+        return PersonalizedAdvice(
+            overallAssessment = root.optString("overallAssessment").trim().ifBlank { "暂无整体评估。" },
+            weakPoints = weakPoints,
+            suggestions = suggestions,
+            motivationalMessage = root.optString("motivationalMessage").trim().ifBlank { "继续加油。" }
+        )
+    }
+
+    private fun parseWrongAnalysis(content: String): WrongAnalysis {
+        val root = JSONObject(extractJsonObject(content))
+        val patternsJson = root.optJSONArray("patterns") ?: JSONArray()
+        val patterns = (0 until patternsJson.length())
+            .map { patternsJson.optString(it).trim() }
+            .filter { it.isNotBlank() }
+        val categoriesJson = root.optJSONArray("categories") ?: JSONArray()
+        val categories = (0 until categoriesJson.length()).mapNotNull { index ->
+            val item = categoriesJson.optJSONObject(index) ?: return@mapNotNull null
+            val name = item.optString("name").trim()
+            if (name.isBlank()) return@mapNotNull null
+            WrongCategory(
+                name = name,
+                count = item.optInt("count", 0),
+                suggestion = item.optString("suggestion").trim().ifBlank { "建议针对性复习。" }
+            )
+        }
+        return WrongAnalysis(
+            summary = root.optString("summary").trim().ifBlank { "暂无错题分析。" },
+            patterns = patterns,
+            categories = categories,
+            studyPlan = root.optString("studyPlan").trim().ifBlank { "建议每天复习对应知识点。" }
+        )
+    }
+
     private fun parseRefactorResult(content: String): AiRefactorResult {
         val root = JSONObject(extractJsonObject(content))
         val questionsJson = root.optJSONArray("questions") ?: root.optJSONArray("items") ?: JSONArray()
@@ -588,6 +726,44 @@ object ShirohaAiClient {
             .put("confidence", "HIGH / MEDIUM / LOW")
             .put("needsReview", false)
             .put("warning", "不确定或疑似题库答案异常时填写；否则为空")
+    }
+
+    private fun personalizedAdviceOutputContract(): JSONObject {
+        return JSONObject()
+            .put("overallAssessment", "整体学习状态评估（2-3 句）")
+            .put(
+                "weakPoints",
+                JSONArray().put("薄弱知识点 1").put("薄弱知识点 2")
+            )
+            .put(
+                "suggestions",
+                JSONArray().put(
+                    JSONObject()
+                        .put("title", "建议标题")
+                        .put("detail", "具体行动建议")
+                        .put("priority", "high / medium / low")
+                )
+            )
+            .put("motivationalMessage", "鼓励性结语")
+    }
+
+    private fun wrongAnalysisOutputContract(): JSONObject {
+        return JSONObject()
+            .put("summary", "错题整体分析（2-3 句）")
+            .put(
+                "patterns",
+                JSONArray().put("错误规律 1").put("错误规律 2")
+            )
+            .put(
+                "categories",
+                JSONArray().put(
+                    JSONObject()
+                        .put("name", "概念理解")
+                        .put("count", 3)
+                        .put("suggestion", "复习建议")
+                )
+            )
+            .put("studyPlan", "未来 1 周复习计划")
     }
 
     private fun refactorOutputContract(): JSONObject {

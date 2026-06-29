@@ -31,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Dashboard
 import androidx.compose.material.icons.rounded.ImportExport
 import androidx.compose.material.icons.rounded.MenuBook
+import androidx.compose.material.icons.rounded.QueryStats
 import androidx.compose.material.icons.rounded.School
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Settings
@@ -80,6 +81,7 @@ import com.yiqiu.shirohaquiz.ui.screens.PracticeScreen
 import com.yiqiu.shirohaquiz.ui.screens.RecordDetailScreen
 import com.yiqiu.shirohaquiz.ui.screens.RecordsScreen
 import com.yiqiu.shirohaquiz.ui.screens.StandardImportFormatScreen
+import com.yiqiu.shirohaquiz.ui.screens.StatisticsScreen
 import com.yiqiu.shirohaquiz.ui.screens.StudyScreen
 import com.yiqiu.shirohaquiz.ui.screens.StudyCourseScreen
 import com.yiqiu.shirohaquiz.ui.screens.StudySessionScreen
@@ -120,7 +122,8 @@ private enum class MainTab(
     About("关于", Icons.Rounded.Settings, showInBottomBar = false),
     Study("边学边答", Icons.Rounded.MenuBook, showInBottomBar = false),
     StudyCourse("课程章节", Icons.Rounded.MenuBook, showInBottomBar = false),
-    StudySession("学习会话", Icons.Rounded.MenuBook, showInBottomBar = false)
+    StudySession("学习会话", Icons.Rounded.MenuBook, showInBottomBar = false),
+    Statistics("学习看板", Icons.Rounded.QueryStats, showInBottomBar = false)
 }
 
 private fun MainTab.fallbackBackTarget(): MainTab? = when (this) {
@@ -150,6 +153,7 @@ private fun MainTab.fallbackBackTarget(): MainTab? = when (this) {
     MainTab.Study -> MainTab.Home
     MainTab.StudyCourse -> MainTab.Study
     MainTab.StudySession -> MainTab.StudyCourse
+    MainTab.Statistics -> MainTab.Home
 }
 
 private data class AppRouteSnapshot(
@@ -367,7 +371,8 @@ fun ShirohaAppShell() {
                             onOpenWrongBook = { navigateTo(MainTab.WrongBook) },
                             onOpenFavorites = { navigateTo(MainTab.Favorites) },
                             onOpenRecords = { navigateTo(MainTab.Records) },
-                            onGoStudy = { navigateTo(MainTab.Study) }
+                            onGoStudy = { navigateTo(MainTab.Study) },
+                            onGoStatistics = { navigateTo(MainTab.Statistics) }
                         )
     
                         MainTab.Practice -> PracticeScreen(
@@ -490,6 +495,9 @@ fun ShirohaAppShell() {
                                     sectionId = nextSectionId
                                 )
                             }
+                        )
+                        MainTab.Statistics -> StatisticsScreen(
+                            onBack = { navigateBack() }
                         )
                     }
                 }

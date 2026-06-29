@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -19,12 +20,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Undo
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Done
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -58,6 +63,7 @@ import com.yiqiu.shirohaquiz.ui.components.EmptyStateIllustration
 import com.yiqiu.shirohaquiz.ui.components.GlassCard
 import com.yiqiu.shirohaquiz.ui.components.IllustrationHeroCard
 import com.yiqiu.shirohaquiz.ui.components.NoticeCard
+import com.yiqiu.shirohaquiz.ui.components.QuestionAiAnalysisButton
 import com.yiqiu.shirohaquiz.ui.components.QuestionImagesBlock
 import com.yiqiu.shirohaquiz.ui.components.ShirohaDangerConfirmDialog
 import com.yiqiu.shirohaquiz.ui.components.ShirohaHeader
@@ -112,6 +118,12 @@ fun WrongBookScreen(
     var customReviewCountText by remember { mutableStateOf("10") }
     var showCustomReviewCountDialog by remember { mutableStateOf(false) }
     var showClearWrongBookConfirm by remember { mutableStateOf(false) }
+    // 手动添加错题流程相关状态
+    var showManualAddDialog by remember { mutableStateOf(false) }
+    var manualAddBankId by remember { mutableStateOf<String?>(null) }
+    var manualAddQuestionId by remember { mutableStateOf("") }
+    var manualAddErrorReason by remember { mutableStateOf("") }
+    var manualAddFeedback by remember { mutableStateOf<String?>(null) }
 
     val selectedBankId = selectedScopeKey
         .takeIf { it.startsWith(WRONG_BOOK_PAGE_SCOPE_BANK_PREFIX) }
@@ -265,6 +277,78 @@ fun WrongBookScreen(
             modifier = Modifier.height(ShirohaDimens.HeroCardHeight),
             imageSize = ShirohaDimens.HeroImageSize
         )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ActionPillButton(
+                icon = Icons.Rounded.Add,
+                text = "手动添加错题",
+                primary = true,
+                enabled = banks.isNotEmpty(),
+                modifier = Modifier
+                    .weight(1f)
+                    .height(46.dp),
+                fillWidthContent = true,
+                onClick = {
+                    manualAddFeedback = null
+                    manualAddQuestionId = ""
+                    manualAddErrorReason = ""
+                    manualAddBankId = selectedBank?.id ?: banks.firstOrNull()?.id
+                    showManualAddDialog = true
+                }
+            )
+            ActionPillButton(
+                icon = Icons.AutoMirrored.Rounded.Undo,
+                text = "返回",
+                primary = false,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(46.dp),
+                fillWidthContent = true,
+                onClick = onBack
+            )
+        }
+
+        if (showManualAddDialog) {
+            WrongBookManualAddDialog(
+                banks = banks,
+                selectedBankId = manualAddBankId,
+                onSelectBank = { manualAddBankId = it },
+                questionId = manualAddQuestionId,
+                onQuestionIdChange = { manualAddQuestionId = it },
+                errorReason = manualAddErrorReason,
+                onErrorReasonChange = { manualAddErrorReason = it },
+                feedback = manualAddFeedback,
+                onConfirm = {
+                    val bankId = manualAddBankId
+                    val qid = manualAddQuestionId.trim()
+                    if (bankId.isNullOrBlank()) {
+                        manualAddFeedback = "请选择题库"
+                    } else if (qid.isBlank()) {
+                        manualAddFeedback = "请输入或选择题目 ID"
+                    } else {
+                        val result = QuizRepository.addWrongContext(
+                            questionId = qid,
+                            bankId = bankId,
+                            userAnswer = emptyList(),
+                            errorReason = manualAddErrorReason.trim(),
+                            addedManually = true
+                        )
+                        if (result != null) {
+                            manualAddFeedback = "已加入错题本"
+                            manualAddQuestionId = ""
+                            manualAddErrorReason = ""
+                        } else {
+                            manualAddFeedback = "未找到该题目，请检查题库与题目 ID"
+                        }
+                    }
+                },
+                onDismiss = { showManualAddDialog = false }
+            )
+        }
 
         GlassCard {
             Row(
@@ -768,6 +852,9 @@ private fun WrongBookSmartReviewSection(
 @Composable
 private fun WrongQuestionPreview(entry: WrongQuestionEntry) {
     var showRemoveConfirm by remember(entry.bankId, entry.question.id) { mutableStateOf(false) }
+    var showDetail by remember(entry.bankId, entry.question.id) { mutableStateOf(false) }
+    var analysisExpanded by remember(entry.bankId, entry.question.id) { mutableStateOf(false) }
+    var reasonExpanded by remember(entry.bankId, entry.question.id) { mutableStateOf(false) }
 
     if (showRemoveConfirm) {
         ShirohaDangerConfirmDialog(
@@ -782,11 +869,27 @@ private fun WrongQuestionPreview(entry: WrongQuestionEntry) {
         )
     }
 
+    if (showDetail) {
+        WrongQuestionDetailDialog(
+            entry = entry,
+            analysisExpanded = analysisExpanded,
+            reasonExpanded = reasonExpanded,
+            onToggleAnalysis = { analysisExpanded = !analysisExpanded },
+            onToggleReason = { reasonExpanded = !reasonExpanded },
+            onDismiss = { showDetail = false }
+        )
+    }
+
     GlassCard {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             StatusChip(displayWrongStatus(entry.status), selected = entry.status != WrongStatus.MASTERED.label)
             StatusChip(typeLabel(entry.question.type))
             StatusChip(entry.bankName)
+            if (entry.addedManually) {
+                StatusChip("手动添加", selected = true)
+            } else {
+                StatusChip("自动记录")
+            }
         }
         Spacer(Modifier.height(12.dp))
         Text(
@@ -813,20 +916,40 @@ private fun WrongQuestionPreview(entry: WrongQuestionEntry) {
                 Spacer(Modifier.height(4.dp))
             }
         }
+        // 正确答案（绿色高亮）
         Spacer(Modifier.height(10.dp))
-        Text(
-            text = if (MultiBlankSupport.hasStructuredAnswers(entry.question)) {
-                "正确答案：\n${MultiBlankSupport.expectedAnswerText(entry.question.blankAnswers)}"
-            } else {
-                "正确答案：${entry.question.answer.joinToString(" / ").ifBlank { "未识别答案" }}"
-            },
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+        WrongBookAnswerLine(
+            label = "正确答案",
+            text = formatCorrectAnswerText(entry),
+            highlightColor = ShirohaColors.StateSuccess
         )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = "上次答案：${entry.lastAnswer.joinToString(" / ").ifBlank { "未作答" }}",
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+        // 你的答案（红色高亮，NEW 标签）
+        WrongBookAnswerLine(
+            label = "你的答案",
+            text = formatUserAnswerText(entry),
+            highlightColor = ShirohaColors.StateDanger,
+            showNewBadge = true
         )
+        // AI 解析折叠
+        if (entry.aiAnalysis.isNotBlank()) {
+            Spacer(Modifier.height(10.dp))
+            WrongBookExpandableSection(
+                title = "AI 解析",
+                expanded = analysisExpanded,
+                onToggle = { analysisExpanded = !analysisExpanded },
+                content = entry.aiAnalysis
+            )
+        }
+        // 错误原因折叠
+        if (entry.errorReason.isNotBlank()) {
+            Spacer(Modifier.height(8.dp))
+            WrongBookExpandableSection(
+                title = "错误原因",
+                expanded = reasonExpanded,
+                onToggle = { reasonExpanded = !reasonExpanded },
+                content = entry.errorReason
+            )
+        }
         Spacer(Modifier.height(8.dp))
         Text(
             text = "错 ${entry.wrongCount} 次 · 对 ${entry.rightCount} 次 · 最近错误 ${formatTimestamp(entry.lastWrongAt)}",
@@ -854,6 +977,16 @@ private fun WrongQuestionPreview(entry: WrongQuestionEntry) {
                 }
             )
             ActionPillButton(
+                icon = Icons.Rounded.Visibility,
+                text = "详情",
+                primary = false,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(46.dp),
+                fillWidthContent = true,
+                onClick = { showDetail = true }
+            )
+            ActionPillButton(
                 icon = Icons.Rounded.DeleteOutline,
                 text = "移出",
                 primary = false,
@@ -864,6 +997,203 @@ private fun WrongQuestionPreview(entry: WrongQuestionEntry) {
                 onClick = { showRemoveConfirm = true }
             )
         }
+        Spacer(Modifier.height(10.dp))
+        QuestionAiAnalysisButton(
+            question = entry.question,
+            userAnswer = entry.lastAnswer
+        )
+    }
+}
+
+@Composable
+private fun WrongBookAnswerLine(
+    label: String,
+    text: String,
+    highlightColor: Color,
+    showNewBadge: Boolean = false
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = "$label：",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = highlightColor,
+            fontWeight = FontWeight.SemiBold
+        )
+        if (showNewBadge) {
+            Spacer(Modifier.width(6.dp))
+            Surface(
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(ShirohaRadius.Pill),
+                color = ShirohaColors.StateDangerSoft
+            ) {
+                Text(
+                    text = "NEW",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = ShirohaColors.StateDanger,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun WrongBookExpandableSection(
+    title: String,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    content: String
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shirohaNoRippleClickable(onClick = onToggle),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(ShirohaRadius.Md),
+        color = ShirohaColors.CardWhite86,
+        border = BorderStroke(1.dp, ShirohaColors.LineSoft)
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = Icons.Rounded.ExpandMore,
+                    contentDescription = if (expanded) "收起" else "展开",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            if (expanded) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = content,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun WrongQuestionDetailDialog(
+    entry: WrongQuestionEntry,
+    analysisExpanded: Boolean,
+    reasonExpanded: Boolean,
+    onToggleAnalysis: () -> Unit,
+    onToggleReason: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("错题详情") },
+        text = {
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 480.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    StatusChip(displayWrongStatus(entry.status), selected = entry.status != WrongStatus.MASTERED.label)
+                    StatusChip(typeLabel(entry.question.type))
+                    StatusChip(entry.bankName)
+                    if (entry.addedManually) {
+                        StatusChip("手动添加", selected = true)
+                    } else {
+                        StatusChip("自动记录")
+                    }
+                }
+                Text(
+                    text = wrongQuestionDisplayTitle(entry),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                if (entry.question.images.isNotEmpty()) {
+                    QuestionImagesBlock(
+                        images = entry.question.images,
+                        maxPreviewHeight = 220.dp,
+                        showMeta = false
+                    )
+                }
+                if (entry.question.options.isNotEmpty()) {
+                    entry.question.options.forEach { option ->
+                        Text(
+                            text = "${option.key}. ${option.text}",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+                WrongBookAnswerLine(
+                    label = "正确答案",
+                    text = formatCorrectAnswerText(entry),
+                    highlightColor = ShirohaColors.StateSuccess
+                )
+                WrongBookAnswerLine(
+                    label = "你的答案",
+                    text = formatUserAnswerText(entry),
+                    highlightColor = ShirohaColors.StateDanger,
+                    showNewBadge = true
+                )
+                if (entry.aiAnalysis.isNotBlank()) {
+                    WrongBookExpandableSection(
+                        title = "AI 解析",
+                        expanded = analysisExpanded,
+                        onToggle = onToggleAnalysis,
+                        content = entry.aiAnalysis
+                    )
+                } else {
+                    NoticeCard("暂无 AI 解析缓存。")
+                }
+                if (entry.errorReason.isNotBlank()) {
+                    WrongBookExpandableSection(
+                        title = "错误原因",
+                        expanded = reasonExpanded,
+                        onToggle = onToggleReason,
+                        content = entry.errorReason
+                    )
+                } else {
+                    NoticeCard("尚未填写错误原因。")
+                }
+                Text(
+                    text = "错 ${entry.wrongCount} 次 · 对 ${entry.rightCount} 次 · 最近错误 ${formatTimestamp(entry.lastWrongAt)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text("关闭") } }
+    )
+}
+
+private fun formatUserAnswerText(entry: WrongQuestionEntry): String {
+    val fromNew = entry.userAnswer.joinToString(" / ").trim()
+    if (fromNew.isNotBlank()) return fromNew
+    // 兼容旧数据：使用 lastAnswer
+    val fromLegacy = entry.lastAnswer.joinToString(" / ").trim()
+    return fromLegacy.ifBlank { "未作答" }
+}
+
+private fun formatCorrectAnswerText(entry: WrongQuestionEntry): String {
+    val fromNew = entry.correctAnswer.joinToString(" / ").trim()
+    if (fromNew.isNotBlank()) return fromNew
+    // 兼容旧数据：从 question.answer 兜底
+    return if (MultiBlankSupport.hasStructuredAnswers(entry.question)) {
+        MultiBlankSupport.expectedAnswerText(entry.question.blankAnswers)
+    } else {
+        entry.question.answer.joinToString(" / ").ifBlank { "未识别答案" }
     }
 }
 
@@ -955,4 +1285,182 @@ private fun typeLabel(type: QuestionType): String = when (type) {
 
 private fun formatTimestamp(timestamp: Long): String {
     return SimpleDateFormat("MM-dd HH:mm", Locale.getDefault()).format(Date(timestamp))
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun WrongBookManualAddDialog(
+    banks: List<QuizBank>,
+    selectedBankId: String?,
+    onSelectBank: (String) -> Unit,
+    questionId: String,
+    onQuestionIdChange: (String) -> Unit,
+    errorReason: String,
+    onErrorReasonChange: (String) -> Unit,
+    feedback: String?,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val currentBank = banks.firstOrNull { it.id == selectedBankId }
+    val questionsInBank = currentBank?.questions.orEmpty()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("手动添加错题") },
+        text = {
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 520.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    text = "选择题库后，从题库列表中点选要加入错题本的题目。",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                // 题库下拉
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shirohaNoRippleClickable { },
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(ShirohaRadius.Md),
+                    color = ShirohaColors.CardWhite86,
+                    border = BorderStroke(1.dp, ShirohaColors.LineStrong)
+                ) {
+                    var bankMenuExpanded by remember { mutableStateOf(false) }
+                    Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .shirohaNoRippleClickable { bankMenuExpanded = true }
+                                .padding(horizontal = 14.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = currentBank?.name ?: "选择题库",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = currentBank?.let { "${it.questions.size} 题 · ${it.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }}" }
+                                        ?: "尚未选择",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.Rounded.ExpandMore,
+                                contentDescription = "选择题库",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = bankMenuExpanded,
+                            onDismissRequest = { bankMenuExpanded = false },
+                            modifier = Modifier.heightIn(max = 320.dp)
+                        ) {
+                            banks.forEach { bank ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Column {
+                                            Text(bank.name, style = MaterialTheme.typography.bodyMedium)
+                                            Text(
+                                                text = "${bank.questions.size} 题 · ${bank.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }}",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        bankMenuExpanded = false
+                                        onSelectBank(bank.id)
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // 题目 ID 输入（同时可作为手动输入）
+                OutlinedTextField(
+                    value = questionId,
+                    onValueChange = onQuestionIdChange,
+                    label = { Text("题目 ID（手动输入或从下方选择）") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // 当前题库题目列表（精简展示）
+                if (questionsInBank.isNotEmpty()) {
+                    Text(
+                        text = "题库题目（点击即选中）",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = ShirohaColors.TextSecondary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    questionsInBank.take(80).forEach { question ->
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .shirohaNoRippleClickable { onQuestionIdChange(question.id) },
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(ShirohaRadius.Sm),
+                            color = if (questionId == question.id) ShirohaColors.BrandPrimarySoft else Color.Transparent,
+                            border = BorderStroke(
+                                1.dp,
+                                if (questionId == question.id) ShirohaColors.LineSelected else ShirohaColors.LineSoft
+                            )
+                        ) {
+                            Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)) {
+                                Text(
+                                    text = wrongQuestionDisplayTitle(WrongQuestionEntry(bankId = currentBank!!.id, bankName = currentBank.name, question = question, lastAnswer = emptyList(), source = "", timestamp = 0L)),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = "ID: ${question.id}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                    if (questionsInBank.size > 80) {
+                        Text(
+                            text = "仅展示前 80 题，剩余请使用上方 ID 输入。",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else if (currentBank != null) {
+                    NoticeCard("所选题库暂无题目。")
+                }
+
+                // 错误原因
+                OutlinedTextField(
+                    value = errorReason,
+                    onValueChange = onErrorReasonChange,
+                    label = { Text("错误原因（可选）") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 2,
+                    maxLines = 4
+                )
+
+                if (!feedback.isNullOrBlank()) {
+                    NoticeCard(feedback)
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) { Text("加入错题本") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("取消") }
+        }
+    )
 }

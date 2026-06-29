@@ -63,7 +63,14 @@ data class WrongQuestionEntry(
     val status: String = WrongStatus.REVIEWING.label,
     val lastReviewedAt: Long? = null,
     val nextReviewAt: Long? = null,
-    val reviewLevel: Int = 0
+    val reviewLevel: Int = 0,
+    // 扩展字段：用户作答与正确答案、解析缓存、错误原因、是否手动添加、更新时间
+    val userAnswer: List<String> = emptyList(),
+    val correctAnswer: List<String> = emptyList(),
+    val aiAnalysis: String = "",
+    val errorReason: String = "",
+    val addedManually: Boolean = false,
+    val updatedAt: Long = 0L
 )
 
 data class SlashedQuestionEntry(
@@ -143,6 +150,43 @@ data class QuestionCheckResult(
     val correct: Boolean,
     val answerText: String,
     val autoScored: Boolean = true
+)
+
+/**
+ * 学习统计看板所用的每日趋势点
+ * @param date "MM-DD" 形式日期字符串
+ * @param total 当天累计答题数
+ * @param correct 当天累计正确数
+ * @param accuracy 当天正确率（0-1，total=0 时为 0）
+ */
+data class DailyTrendPoint(
+    val date: String,
+    val total: Int,
+    val correct: Int,
+    val accuracy: Float
+)
+
+/**
+ * 错题分类计数
+ */
+data class CategoryCount(val name: String, val count: Int)
+
+/**
+ * 学习数据看板聚合结果
+ */
+data class StudyStatistics(
+    val totalQuestionsAnswered: Int = 0,
+    val totalCorrect: Int = 0,
+    val overallAccuracy: Float = 0f,
+    val totalStudySeconds: Long = 0L,
+    val totalStudyMinutesFormatted: String = "0 分钟",
+    val knowledgePointsStudied: Int = 0,
+    val totalKnowledgePoints: Int = 0,
+    val practiceCount: Int = 0,
+    val examCount: Int = 0,
+    val wrongBookSize: Int = 0,
+    val dailyTrend: List<DailyTrendPoint> = emptyList(),
+    val wrongBookByCategory: List<CategoryCount> = emptyList()
 )
 
 object QuizRepository {
@@ -1265,6 +1309,97 @@ object QuizRepository {
         persist()
     }
 
+    /**
+     * 手动将一道题加入错题本。
+     * - bankId / questionId 必传；如传入 null/空字符串则不会写入。
+     * - userAnswer 可选，缺省时存入空列表（表示手动添加时未填写具体作答）。
+     * - addedManually 一律为 true，UI 端通过该字段展示「手动添加」标签。
+     * - 不会修改原 lastAnswer / wrongCount / status 等复习统计字段；统计值仍然按现有错题行为累加。
+     */
+    fun addWrongContext(
+        questionId: String,
+        bankId: String,
+        userAnswer: List<String> = emptyList(),
+        correctAnswer: List<String> = emptyList(),
+        errorReason: String = "",
+        question: Question? = null,
+        addedManually: Boolean = false
+    ): WrongQuestionEntry? {
+        if (questionId.isBlank() || bankId.isBlank()) return null
+        val bank = banks.firstOrNull { it.id == bankId } ?: return null
+        val resolvedQuestion = question ?: bank.questions.firstOrNull { it.id == questionId } ?: return null
+        val finalUserAnswer = if (userAnswer.isNotEmpty()) {
+            userAnswer
+        } else if (correctAnswer.isNotEmpty()) {
+            // 若手动添加时未填用户答案但提供了正确答案，使用空答案作为占位，便于 UI 区分
+            emptyList()
+        } else {
+            emptyList()
+        }
+        val finalCorrectAnswer = if (correctAnswer.isNotEmpty()) {
+            correctAnswer
+        } else {
+            resolvedQuestion.answer
+        }
+        addWrongQuestion(
+            bank = bank,
+            question = resolvedQuestion,
+            userAnswer = finalUserAnswer,
+            source = "手动添加",
+            errorReason = errorReason,
+            addedManually = addedManually
+        )
+        // 同步设置正确答案（addWrongQuestion 内部已根据 question.answer 写入；此处保证调用方显式传入也能覆盖）
+        val index = wrongBook.indexOfFirst { it.bankId == bankId && it.question.id == questionId }
+        if (index >= 0 && finalCorrectAnswer.isNotEmpty()) {
+            val current = wrongBook[index]
+            if (current.correctAnswer != finalCorrectAnswer) {
+                wrongBook[index] = current.copy(
+                    correctAnswer = finalCorrectAnswer,
+                    updatedAt = System.currentTimeMillis()
+                )
+            }
+        }
+        persist()
+        return wrongBook.firstOrNull { it.bankId == bankId && it.question.id == questionId }
+    }
+
+    /**
+     * 自动判错路径委托：传入已判定的 userAnswer/correctAnswer，新增/合并错题记录。
+     * 这是 addWrongQuestion 的对外统一入口；原私有 addWrongQuestion 保留为底层实现。
+     */
+    fun addWrongContext(
+        bank: QuizBank?,
+        question: Question,
+        userAnswer: List<String>,
+        source: String,
+        correctAnswer: List<String> = question.answer,
+        errorReason: String = "",
+        addedManually: Boolean = false
+    ): WrongQuestionEntry? {
+        if (bank == null) return null
+        addWrongQuestion(
+            bank = bank,
+            question = question,
+            userAnswer = userAnswer,
+            source = source,
+            errorReason = errorReason,
+            addedManually = addedManually
+        )
+        val index = wrongBook.indexOfFirst { it.bankId == bank.id && it.question.id == question.id }
+        if (index >= 0 && correctAnswer.isNotEmpty()) {
+            val current = wrongBook[index]
+            if (current.correctAnswer != correctAnswer) {
+                wrongBook[index] = current.copy(
+                    correctAnswer = correctAnswer,
+                    updatedAt = System.currentTimeMillis()
+                )
+            }
+        }
+        persist()
+        return wrongBook.firstOrNull { it.bankId == bank.id && it.question.id == question.id }
+    }
+
     fun markWrongQuestionMastered(entry: WrongQuestionEntry, mastered: Boolean = true) {
         val index = wrongBook.indexOfFirst { it.bankId == entry.bankId && it.question.id == entry.question.id }
         if (index < 0) return
@@ -1864,11 +1999,12 @@ object QuizRepository {
         if (result.autoScored && result.correct) {
             markWrongQuestionRight(bank = bank, question = question)
         } else if (result.autoScored) {
-            addWrongQuestion(
+            addWrongContext(
                 bank = bank,
                 question = question,
                 userAnswer = result.userAnswer,
-                source = currentPracticeWrongSource()
+                source = currentPracticeWrongSource(),
+                correctAnswer = question.answer
             )
         }
         persist()
@@ -1897,11 +2033,12 @@ object QuizRepository {
             if (result.autoScored && result.correct) {
                 markWrongQuestionRight(bank = bank, question = question)
             } else if (result.autoScored) {
-                addWrongQuestion(
+                addWrongContext(
                     bank = bank,
                     question = question,
                     userAnswer = result.userAnswer,
-                    source = currentPracticeWrongSource()
+                    source = currentPracticeWrongSource(),
+                    correctAnswer = question.answer
                 )
             }
         }
@@ -1983,11 +2120,12 @@ object QuizRepository {
             if (result.autoScored && result.correct) {
                 markWrongQuestionRight(bank = bank, question = question)
             } else if (result.autoScored) {
-                addWrongQuestion(
+                addWrongContext(
                     bank = bank,
                     question = question,
                     userAnswer = result.userAnswer,
-                    source = currentPracticeWrongSource()
+                    source = currentPracticeWrongSource(),
+                    correctAnswer = question.answer
                 )
             }
         }
@@ -2253,11 +2391,12 @@ object QuizRepository {
             if (result.autoScored && result.correct) {
                 markWrongQuestionRight(bank = bank, question = question)
             } else if (result.autoScored) {
-                addWrongQuestion(
+                addWrongContext(
                     bank = bank,
                     question = question,
                     userAnswer = userAnswer,
-                    source = "考试"
+                    source = "考试",
+                    correctAnswer = question.answer
                 )
             }
         }
@@ -3781,15 +3920,22 @@ object QuizRepository {
         bank: QuizBank?,
         question: Question,
         userAnswer: List<String>,
-        source: String
+        source: String,
+        errorReason: String = "",
+        addedManually: Boolean = false
     ) {
         val bankId = bank?.id ?: return
         val bankName = bank.name
         val now = System.currentTimeMillis()
+        val correctAnswer = question.answer
         val index = wrongBook.indexOfFirst { it.bankId == bankId && it.question.id == question.id }
         if (index >= 0) {
             val current = wrongBook[index]
             val nextWrongCount = current.wrongCount + 1
+            val mergedUserAnswer = if (userAnswer.isNotEmpty()) userAnswer else current.userAnswer
+            val mergedCorrectAnswer = if (correctAnswer.isNotEmpty()) correctAnswer else current.correctAnswer
+            val mergedErrorReason = if (errorReason.isNotBlank()) errorReason else current.errorReason
+            val mergedAddedManually = current.addedManually || addedManually
             wrongBook[index] = current.copy(
                 bankName = bankName,
                 question = question,
@@ -3803,7 +3949,12 @@ object QuizRepository {
                 status = WrongStatus.NOT_MASTERED.label,
                 lastReviewedAt = now,
                 nextReviewAt = nextDayStart(now),
-                reviewLevel = 0
+                reviewLevel = 0,
+                userAnswer = mergedUserAnswer,
+                correctAnswer = mergedCorrectAnswer,
+                errorReason = mergedErrorReason,
+                addedManually = mergedAddedManually,
+                updatedAt = now
             )
         } else {
             wrongBook.add(
@@ -3824,7 +3975,13 @@ object QuizRepository {
                     status = WrongStatus.NOT_MASTERED.label,
                     lastReviewedAt = now,
                     nextReviewAt = nextDayStart(now),
-                    reviewLevel = 0
+                    reviewLevel = 0,
+                    userAnswer = userAnswer,
+                    correctAnswer = correctAnswer,
+                    aiAnalysis = "",
+                    errorReason = errorReason,
+                    addedManually = addedManually,
+                    updatedAt = now
                 )
             )
         }
@@ -4198,6 +4355,13 @@ object QuizRepository {
             item.put("reviewLevel", entry.reviewLevel)
             item.put("status", entry.status)
             item.put("question", questionToJson(entry.question, assetMapping))
+            // 扩展字段：用户作答、正确答案、AI 解析、错误原因、是否手动添加、更新时间
+            item.put("userAnswerJson", JSONArray(entry.userAnswer))
+            item.put("correctAnswerJson", JSONArray(entry.correctAnswer))
+            item.put("aiAnalysis", entry.aiAnalysis)
+            item.put("errorReason", entry.errorReason)
+            item.put("addedManually", entry.addedManually)
+            item.put("updatedAt", entry.updatedAt)
             array.put(item)
         }
         return array.toString()
@@ -4701,6 +4865,27 @@ object QuizRepository {
                 val normalizedStatus = WrongStatus.normalize(item.optString("status", WrongStatus.NOT_MASTERED.label))
                 val fallbackReviewRightCount = if (normalizedStatus == WrongStatus.MASTERED.label) 2 else 0
                 val fallbackStreakCorrectCount = if (normalizedStatus == WrongStatus.MASTERED.label) 2 else 0
+                // 扩展字段读取（兼容旧数据：缺省时不影响反序列化）
+                val userAnswer = runCatching {
+                    val arr = item.optJSONArray("userAnswerJson") ?: return@runCatching emptyList()
+                    buildList {
+                        for (index in 0 until arr.length()) {
+                            add(arr.optString(index))
+                        }
+                    }
+                }.getOrDefault(emptyList())
+                val correctAnswer = runCatching {
+                    val arr = item.optJSONArray("correctAnswerJson") ?: return@runCatching emptyList()
+                    buildList {
+                        for (index in 0 until arr.length()) {
+                            add(arr.optString(index))
+                        }
+                    }
+                }.getOrDefault(emptyList())
+                val aiAnalysis = runCatching { item.optString("aiAnalysis", "") }.getOrDefault("")
+                val errorReason = runCatching { item.optString("errorReason", "") }.getOrDefault("")
+                val addedManually = runCatching { item.optBoolean("addedManually", false) }.getOrDefault(false)
+                val updatedAt = runCatching { item.optLong("updatedAt", 0L) }.getOrDefault(0L)
                 add(
                     WrongQuestionEntry(
                         bankId = item.optString("bankId"),
@@ -4718,7 +4903,13 @@ object QuizRepository {
                         status = normalizedStatus,
                         lastReviewedAt = if (item.has("lastReviewedAt") && !item.isNull("lastReviewedAt")) item.optLong("lastReviewedAt") else null,
                         nextReviewAt = if (item.has("nextReviewAt") && !item.isNull("nextReviewAt")) item.optLong("nextReviewAt") else null,
-                        reviewLevel = item.optInt("reviewLevel", if (normalizedStatus == WrongStatus.MASTERED.label) 2 else 0)
+                        reviewLevel = item.optInt("reviewLevel", if (normalizedStatus == WrongStatus.MASTERED.label) 2 else 0),
+                        userAnswer = userAnswer,
+                        correctAnswer = correctAnswer,
+                        aiAnalysis = aiAnalysis,
+                        errorReason = errorReason,
+                        addedManually = addedManually,
+                        updatedAt = updatedAt
                     )
                 )
             }
@@ -5146,4 +5337,102 @@ object QuizRepository {
         return backupPath
     }
 
+    /**
+     * 聚合学习数据看板所需的统计指标。
+     * 数据来源：studyRecords / wrongBook / knowledgeCourses / studyProgress。
+     */
+    fun computeStudyStatistics(now: Long = System.currentTimeMillis()): StudyStatistics {
+        val records = studyRecords.toList()
+        val totalQuestionsAnswered = records.sumOf { it.total }
+        val totalCorrect = records.sumOf { it.correct }
+        val overallAccuracy = if (totalQuestionsAnswered == 0) {
+            0f
+        } else {
+            totalCorrect.toFloat() / totalQuestionsAnswered.toFloat()
+        }
+        val totalStudySeconds = records.sumOf { it.durationSeconds ?: 0 }.toLong()
+        val totalStudyMinutesFormatted = formatTotalStudyDuration(totalStudySeconds)
+        val knowledgePointsStudied = studyProgress.values.count { it.studied }
+        val totalKnowledgePoints = knowledgeCourses.sumOf { it.sections.size }
+        val practiceCount = records.count { it.source == "练习" }
+        val examCount = records.count { it.source.contains("考试") }
+
+        // 近 14 天每日聚合
+        val dailyTrend = buildDailyTrend(records, now)
+
+        // 错题按 category 分组
+        val wrongBookByCategory = wrongBook
+            .groupingBy { entry ->
+                val raw = entry.question.category.trim()
+                if (raw.isBlank()) "未分类" else raw
+            }
+            .eachCount()
+            .map { (name, count) -> CategoryCount(name, count) }
+            .sortedByDescending { it.count }
+
+        return StudyStatistics(
+            totalQuestionsAnswered = totalQuestionsAnswered,
+            totalCorrect = totalCorrect,
+            overallAccuracy = overallAccuracy,
+            totalStudySeconds = totalStudySeconds,
+            totalStudyMinutesFormatted = totalStudyMinutesFormatted,
+            knowledgePointsStudied = knowledgePointsStudied,
+            totalKnowledgePoints = totalKnowledgePoints,
+            practiceCount = practiceCount,
+            examCount = examCount,
+            wrongBookSize = wrongBook.size,
+            dailyTrend = dailyTrend,
+            wrongBookByCategory = wrongBookByCategory
+        )
+    }
+
+    private fun buildDailyTrend(
+        records: List<StudyRecord>,
+        now: Long
+    ): List<DailyTrendPoint> {
+        val cal = Calendar.getInstance().apply {
+            timeInMillis = now
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val dayBucket = IntArray(14)
+        val correctBucket = IntArray(14)
+        val todayStart = cal.timeInMillis
+        for (record in records) {
+            if (record.timestamp <= 0L) continue
+            val offsetDays = ((todayStart - record.timestamp) / DAY_MILLIS).toInt()
+            if (offsetDays in 0..13) {
+                val idx = 13 - offsetDays
+                dayBucket[idx] += record.total
+                correctBucket[idx] += record.correct
+            }
+        }
+        val result = ArrayList<DailyTrendPoint>(14)
+        for (i in 0..13) {
+            val target = (cal.clone() as Calendar).apply { add(Calendar.DAY_OF_YEAR, -(13 - i)) }
+            val dateLabel = "%02d-%02d".format(
+                target.get(Calendar.MONTH) + 1,
+                target.get(Calendar.DAY_OF_MONTH)
+            )
+            val total = dayBucket[i]
+            val correct = correctBucket[i]
+            val accuracy = if (total == 0) 0f else correct.toFloat() / total.toFloat()
+            result.add(DailyTrendPoint(dateLabel, total, correct, accuracy))
+        }
+        return result
+    }
+
+    private fun formatTotalStudyDuration(totalSeconds: Long): String {
+        if (totalSeconds <= 0L) return "0 分钟"
+        val totalMinutes = totalSeconds / 60L
+        val hours = totalMinutes / 60L
+        val minutes = totalMinutes % 60L
+        return when {
+            hours > 0L && minutes > 0L -> "$hours 小时 $minutes 分钟"
+            hours > 0L -> "$hours 小时"
+            else -> "$minutes 分钟"
+        }
+    }
 }

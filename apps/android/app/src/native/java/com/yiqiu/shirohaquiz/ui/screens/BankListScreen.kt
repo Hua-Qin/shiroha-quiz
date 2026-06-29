@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.DeleteOutline
@@ -307,6 +308,16 @@ fun BankListScreen(
                                 if (bank.id != "demo-bank") {
                                     deleteTarget = bank
                                 }
+                            },
+                            onAddAllToWrongBook = {
+                                bank.questions.forEach { question ->
+                                    QuizRepository.addWrongContext(
+                                        questionId = question.id,
+                                        bankId = bank.id,
+                                        question = question,
+                                        addedManually = true
+                                    )
+                                }
                             }
                         )
                         Spacer(Modifier.height(12.dp))
@@ -340,7 +351,8 @@ private fun BankCard(
     onSetActive: () -> Unit,
     onEdit: () -> Unit,
     onMove: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onAddAllToWrongBook: () -> Unit
 ) {
     val singleCount = bank.questions.count { it.type == QuestionType.SINGLE }
     val multipleCount = bank.questions.count { it.type == QuestionType.MULTIPLE }
@@ -431,6 +443,14 @@ private fun BankCard(
                         expanded = moreMenuExpanded,
                         onDismissRequest = { moreMenuExpanded = false }
                     ) {
+                        DropdownMenuItem(
+                            text = { Text("加入错题本") },
+                            leadingIcon = { Icon(Icons.Rounded.Add, contentDescription = null) },
+                            onClick = {
+                                moreMenuExpanded = false
+                                onAddAllToWrongBook()
+                            }
+                        )
                         DropdownMenuItem(
                             text = { Text("移动到分组") },
                             leadingIcon = { Icon(Icons.Rounded.Edit, contentDescription = null) },

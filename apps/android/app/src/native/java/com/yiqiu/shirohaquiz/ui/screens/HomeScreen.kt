@@ -22,6 +22,7 @@ import androidx.compose.material.icons.rounded.AutoStories
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.QueryStats
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.Timer
 import androidx.compose.material.icons.rounded.Warning
@@ -62,7 +63,8 @@ fun HomeScreen(
     onOpenWrongBook: () -> Unit,
     onOpenFavorites: () -> Unit,
     onOpenRecords: () -> Unit,
-    onGoStudy: () -> Unit = {}
+    onGoStudy: () -> Unit = {},
+    onGoStatistics: () -> Unit = {}
 ) {
     val activeBank = QuizRepository.activeBank()
     val bankCount = QuizRepository.banks.size
@@ -138,6 +140,12 @@ fun HomeScreen(
 
             Spacer(Modifier.height(homeSectionGap))
 
+            StatisticsEntryCard(
+                onClick = onGoStatistics
+            )
+
+            Spacer(Modifier.height(homeSectionGap))
+
             HomeShortcutGrid(
                 bankCount = bankCount,
                 favoriteCount = QuizRepository.favoriteQuestions.size,
@@ -206,6 +214,48 @@ private fun StudyEntryCard(
                 )
                 Text(
                     text = if (courseCount > 0) "已导入 $courseCount 门课程，点击开始学习" else "导入教程课程包，学完即练",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = ShirohaColors.TextSecondary
+                )
+            }
+            Icon(
+                imageVector = Icons.Rounded.ChevronRight,
+                contentDescription = null,
+                tint = ShirohaColors.TextSecondary
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatisticsEntryCard(
+    onClick: () -> Unit
+) {
+    GlassCard(modifier = Modifier
+        .fillMaxWidth()
+        .shirohaNoRippleClickable(onClick = onClick)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(ShirohaSpacing.Lg),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.QueryStats,
+                contentDescription = null,
+                tint = ShirohaColors.BrandPrimary,
+                modifier = Modifier.size(32.dp)
+            )
+            Spacer(Modifier.size(ShirohaSpacing.Md))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "学习数据看板",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = ShirohaColors.TextPrimary
+                )
+                Text(
+                    text = "查看学习时长、答题量、正确率与错题分布",
                     style = MaterialTheme.typography.bodySmall,
                     color = ShirohaColors.TextSecondary
                 )
