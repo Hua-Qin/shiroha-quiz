@@ -671,15 +671,13 @@ private fun AiAdviceCard(
                         adviceState = AdviceUiState.Loading
                         scope.launch {
                             val result = withContext(Dispatchers.IO) {
-                                runCatching {
-                                    ShirohaAiClient.generatePersonalizedAdvice(
-                                        apiBaseUrl = QuizRepository.aiApiBaseUrl,
-                                        apiKey = QuizRepository.aiApiKey,
-                                        modelName = QuizRepository.aiModelName,
-                                        recordsSummary = buildRecordsSummary(stats),
-                                        wrongQuestionsSummary = buildWrongQuestionsSummary()
-                                    )
-                                }
+                                ShirohaAiClient.generatePersonalizedAdvice(
+                                    apiBaseUrl = QuizRepository.aiApiBaseUrl,
+                                    apiKey = QuizRepository.aiApiKey,
+                                    modelName = QuizRepository.aiModelName,
+                                    recordsSummary = buildRecordsSummary(stats),
+                                    wrongQuestionsSummary = buildWrongQuestionsSummary()
+                                )
                             }
                             adviceState = result.fold(
                                 onSuccess = { AdviceUiState.Loaded(it) },
@@ -976,80 +974,6 @@ private fun LegendDot(color: Color, label: String) {
     }
 }
 
-/**
- * 错题分类横向柱状图
- * 每行：分类名 + 长度条 + 数字
- */
-@Composable
-fun CategoryBarChart(
-    categories: List<CategoryCount>,
-    modifier: Modifier = Modifier
-) {
-    val density = LocalDensity.current
-    val barColor = ShirohaColors.BrandPrimary
-    val trackColor = ShirohaColors.LineSoft
-
-    if (categories.isEmpty()) {
-        NoticeCard("没有可显示的错题分类。", warning = false)
-        return
-    }
-    val maxCount = categories.maxOf { it.count }.coerceAtLeast(1)
-
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)
-    ) {
-        categories.forEach { entry ->
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = entry.name,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        text = "${entry.count} 题",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-                Canvas(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(12.dp)
-                ) {
-                    val cornerRadius = with(density) { 6.dp.toPx() }
-                    val trackHeight = size.height
-                    // 背景轨道
-                    drawRoundRect(
-                        color = trackColor,
-                        size = Size(size.width, trackHeight),
-                        cornerRadius = CornerRadius(cornerRadius, cornerRadius)
-                    )
-                    // 进度条
-                    val progress = entry.count.toFloat() / maxCount.toFloat()
-                    val barWidth = size.width * progress
-                    if (barWidth > 0f) {
-                        drawRoundRect(
-                            color = barColor,
-                            size = Size(barWidth, trackHeight),
-                            cornerRadius = CornerRadius(cornerRadius, cornerRadius)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
 private fun drawEmptyHint(
     density: androidx.compose.ui.unit.Density,
     scope: androidx.compose.ui.graphics.drawscope.DrawScope,
@@ -1122,6 +1046,6 @@ private fun buildWrongQuestionsSummary(): String {
         .take(10)
     return recent.joinToString("\n") { entry ->
         val cat = entry.question.category?.ifBlank { "未分类" } ?: "未分类"
-        "分类 $cat：${entry.question.text.take(60)}"
+        "分类 $cat：${entry.question.question.take(60)}"
     }
 }

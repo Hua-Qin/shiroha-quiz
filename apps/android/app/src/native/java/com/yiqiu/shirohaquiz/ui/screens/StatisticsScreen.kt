@@ -184,15 +184,13 @@ fun StatisticsScreen(
                             adviceState = StatisticsAdviceUiState.Loading
                             scope.launch {
                                 val result = withContext(Dispatchers.IO) {
-                                    runCatching {
-                                        ShirohaAiClient.generatePersonalizedAdvice(
-                                            apiBaseUrl = QuizRepository.aiApiBaseUrl,
-                                            apiKey = QuizRepository.aiApiKey,
-                                            modelName = QuizRepository.aiModelName,
-                                            recordsSummary = buildStatisticsRecordsSummary(data),
-                                            wrongQuestionsSummary = buildStatisticsWrongSummary()
-                                        )
-                                    }
+                                    ShirohaAiClient.generatePersonalizedAdvice(
+                                        apiBaseUrl = QuizRepository.aiApiBaseUrl,
+                                        apiKey = QuizRepository.aiApiKey,
+                                        modelName = QuizRepository.aiModelName,
+                                        recordsSummary = buildStatisticsRecordsSummary(data),
+                                        wrongQuestionsSummary = buildStatisticsWrongSummary()
+                                    )
                                 }
                                 adviceState = result.fold(
                                     onSuccess = { StatisticsAdviceUiState.Loaded(it) },
@@ -760,6 +758,6 @@ private fun buildStatisticsWrongSummary(): String {
         .take(10)
         .joinToString("\n") { entry ->
             val cat = entry.question.category?.ifBlank { "未分类" } ?: "未分类"
-            "分类 $cat：${entry.question.text.take(60)}"
+            "分类 $cat：${entry.question.question.take(60)}"
         }
 }
