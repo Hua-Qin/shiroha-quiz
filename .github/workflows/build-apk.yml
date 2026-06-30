@@ -46,22 +46,9 @@ jobs:
         working-directory: apps/android
         run: chmod +x ./gradlew
 
-      - name: Build web release APK
-        working-directory: apps/android
-        run: ./gradlew assembleWebRelease --no-daemon --stacktrace
-
       - name: Build native release APK
         working-directory: apps/android
         run: ./gradlew assembleNativeRelease --no-daemon --stacktrace
-
-      - name: Upload web APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: apk-web-release
-          path: |
-            apps/android/app/build/outputs/apk/web/release/*.apk
-            apps/android/app/build/outputs/shiroha-quiz/Shiroha-Quiz-*web*.apk
-          if-no-files-found: error
 
       - name: Upload native APK
         uses: actions/upload-artifact@v4
