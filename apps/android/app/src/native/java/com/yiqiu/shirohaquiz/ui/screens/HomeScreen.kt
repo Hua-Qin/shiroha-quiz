@@ -1,5 +1,9 @@
 package com.yiqiu.shirohaquiz.ui.screens
 
+// 入口已迁移到 HomeDashboardScreen.kt，本文件保留为旧版参考实现。
+// 实际路由（MainTab.Statistics / MainTab.Home）已改用 HomeDashboardScreen，
+// 仅当需要兼容旧调用方时本文件才会被引用。
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.rememberScrollState
 import com.yiqiu.shirohaquiz.ui.components.shirohaNoRippleClickable

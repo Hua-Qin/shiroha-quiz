@@ -185,6 +185,7 @@ data class StudyStatistics(
     val practiceCount: Int = 0,
     val examCount: Int = 0,
     val wrongBookSize: Int = 0,
+    val favoriteCount: Int = 0,
     val dailyTrend: List<DailyTrendPoint> = emptyList(),
     val wrongBookByCategory: List<CategoryCount> = emptyList()
 )
@@ -3900,20 +3901,51 @@ object QuizRepository {
 
     private val blankAnswerBoundaryPunctuation = setOf('.', ',', ';', ':', '!', '?', '。', '，', '；', '：', '！', '？', '、')
 
-    private fun recordPracticeResult(bank: QuizBank?, question: Question, result: QuestionCheckResult) {
-        studyRecords.add(
-            0,
-            StudyRecord(
-                id = "practice_${question.id}_${System.currentTimeMillis()}",
-                bankId = bank?.id,
-                bankName = bank?.name ?: "未命名题库",
-                source = "练习",
-                title = question.question.take(24),
-                total = 1,
-                correct = if (result.correct) 1 else 0,
-                timestamp = System.currentTimeMillis()
-            )
+    fun recordPracticeResult(
+        questionId: String,
+        bankId: String?,
+        bankName: String?,
+        source: String = "练习",
+        userAnswer: List<String>,
+        userBlankAnswers: List<String> = emptyList(),
+        correct: Boolean,
+        correctAnswer: List<String>,
+        question: Question? = null,
+        startedAt: Long? = null,
+        durationSeconds: Int? = null
+    ) {
+        val now = System.currentTimeMillis()
+        val resolvedQuestion: Question? = question ?: banks
+            .firstOrNull { it.id == bankId }
+            ?.questions
+            ?.firstOrNull { it.id == questionId }
+        if (resolvedQuestion == null) return
+
+        val questionResult = StudyQuestionResult(
+            question = resolvedQuestion,
+            userAnswer = userAnswer,
+            userBlankAnswers = userBlankAnswers,
+            correct = correct,
+            answerText = correctAnswer.joinToString(" / "),
+            autoScored = true,
+            sourceBankId = bankId,
+            sourceBankName = bankName
         )
+        val record = StudyRecord(
+            id = "practice_${now}_${questionId.take(8)}",
+            bankId = bankId,
+            bankName = bankName ?: "",
+            source = source,
+            title = "${source}·单题记录",
+            total = 1,
+            correct = if (correct) 1 else 0,
+            timestamp = now,
+            durationSeconds = durationSeconds,
+            startedAt = startedAt,
+            questionResults = listOf(questionResult)
+        )
+        studyRecords.add(0, record)
+        persist()
     }
 
     private fun addWrongQuestion(
@@ -4254,7 +4286,7 @@ object QuizRepository {
         return if (this % 1.0 == 0.0) this.toInt().toString() else this.toString().trimEnd('0').trimEnd('.')
     }
 
-    private fun persist() {
+    internal fun persist() {
         val context = appContext ?: return
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit()
@@ -4578,6 +4610,43 @@ object QuizRepository {
             practiceCount = current.practiceCount + 1
         )
         persist()
+    }
+
+    /**
+     * 记录章节内单题作答结果（累加式）
+     * 与 recordSectionResult 不同：本方法按题目粒度逐题累加 correctCount/totalCount/practiceCount，
+     * 并使用 maxOf 保留 bestAccuracy 历史最大值。每次调用都触发 persist() 写盘。
+     */
+    fun markSectionQuestionResult(
+        courseId: String,
+        sectionId: String,
+        isCorrect: Boolean
+    ) {
+        val key = studyProgressKey(courseId, sectionId)
+        val now = System.currentTimeMillis()
+        val current = studyProgress[key] ?: SectionProgress()
+        val newCorrectCount = current.correctCount + (if (isCorrect) 1 else 0)
+        val newTotalCount = current.totalCount + 1
+        val newAccuracy = if (newTotalCount <= 0) 0f
+            else (newCorrectCount.toFloat() / newTotalCount.toFloat()).coerceIn(0f, 1f)
+        studyProgress[key] = current.copy(
+            practiced = true,
+            correctCount = newCorrectCount,
+            totalCount = newTotalCount,
+            lastStudiedAt = now,
+            bestAccuracy = maxOf(current.bestAccuracy, newAccuracy),
+            practiceCount = current.practiceCount + 1
+        )
+        persist()
+    }
+
+    /**
+     * 通过 courseId 获取其关联的题库（便捷方法）
+     */
+    fun getLinkedBankForCourse(courseId: String): QuizBank? {
+        val course = courseById(courseId) ?: return null
+        val bankId = course.linkedBankId ?: return null
+        return banks.firstOrNull { it.id == bankId }
     }
 
     /**
@@ -5354,8 +5423,9 @@ object QuizRepository {
         val totalStudyMinutesFormatted = formatTotalStudyDuration(totalStudySeconds)
         val knowledgePointsStudied = studyProgress.values.count { it.studied }
         val totalKnowledgePoints = knowledgeCourses.sumOf { it.sections.size }
-        val practiceCount = records.count { it.source == "练习" }
+        val practiceCount = records.count { it.source in setOf("练习", "边学边答") }
         val examCount = records.count { it.source.contains("考试") }
+        val favoriteCount = favoriteQuestions.size
 
         // 近 14 天每日聚合
         val dailyTrend = buildDailyTrend(records, now)
@@ -5381,6 +5451,7 @@ object QuizRepository {
             practiceCount = practiceCount,
             examCount = examCount,
             wrongBookSize = wrongBook.size,
+            favoriteCount = favoriteCount,
             dailyTrend = dailyTrend,
             wrongBookByCategory = wrongBookByCategory
         )

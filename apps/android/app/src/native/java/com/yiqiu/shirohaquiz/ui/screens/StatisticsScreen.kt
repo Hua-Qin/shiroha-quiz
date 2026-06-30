@@ -30,7 +30,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -47,6 +51,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yiqiu.shirohaquiz.ai.PersonalizedAdvice
+import com.yiqiu.shirohaquiz.ai.ShirohaAiClient
 import com.yiqiu.shirohaquiz.state.CategoryCount
 import com.yiqiu.shirohaquiz.state.DailyTrendPoint
 import com.yiqiu.shirohaquiz.state.QuizRepository
@@ -59,12 +65,36 @@ import com.yiqiu.shirohaquiz.ui.theme.ShirohaColors
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaDimens
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaRadius
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaSpacing
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun StatisticsScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onOpenWrongBook: () -> Unit = {},
+    onOpenRecords: () -> Unit = {},
+    onOpenFavorites: () -> Unit = {}
 ) {
-    val data = remember { QuizRepository.computeStudyStatistics() }
+    val studyRecords = QuizRepository.studyRecords
+    val wrongBook = QuizRepository.wrongBook
+    val studyProgress = QuizRepository.studyProgress
+    val knowledgeCourses = QuizRepository.knowledgeCourses
+    val favoriteQuestions = QuizRepository.favoriteQuestions
+    val data by remember(
+        studyRecords.size,
+        wrongBook.size,
+        studyProgress.size,
+        knowledgeCourses.size,
+        favoriteQuestions.size
+    ) {
+        mutableStateOf(QuizRepository.computeStudyStatistics())
+    }
+    var adviceState by remember { mutableStateOf<StatisticsAdviceUiState>(StatisticsAdviceUiState.Idle) }
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -139,14 +169,71 @@ fun StatisticsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(ShirohaSpacing.Md))
-            ActionPillButton(
-                icon = Icons.Rounded.AutoAwesome,
-                text = "获取学习建议",
-                primary = true,
-                onClick = {
-                    // TODO(Task 6): 调用 ShirohaAiClient.generatePersonalizedAdvice(stats)
+            when (val state = adviceState) {
+                is StatisticsAdviceUiState.Idle -> {
+                    val isAiConfigured = QuizRepository.isAiConfigured()
+                    ActionPillButton(
+                        icon = Icons.Rounded.AutoAwesome,
+                        text = if (isAiConfigured) "获取学习建议" else "请先在 AI 设置中配置",
+                        primary = true,
+                        onClick = {
+                            if (!isAiConfigured) {
+                                onBack()
+                                return@ActionPillButton
+                            }
+                            adviceState = StatisticsAdviceUiState.Loading
+                            scope.launch {
+                                val result = withContext(Dispatchers.IO) {
+                                    runCatching {
+                                        ShirohaAiClient.generatePersonalizedAdvice(
+                                            apiBaseUrl = QuizRepository.aiApiBaseUrl,
+                                            apiKey = QuizRepository.aiApiKey,
+                                            modelName = QuizRepository.aiModelName,
+                                            recordsSummary = buildStatisticsRecordsSummary(data),
+                                            wrongQuestionsSummary = buildStatisticsWrongSummary()
+                                        )
+                                    }
+                                }
+                                adviceState = result.fold(
+                                    onSuccess = { StatisticsAdviceUiState.Loaded(it) },
+                                    onFailure = {
+                                        StatisticsAdviceUiState.Failed(it.message ?: "未知错误")
+                                    }
+                                )
+                            }
+                        }
+                    )
                 }
-            )
+                is StatisticsAdviceUiState.Loading -> {
+                    ActionPillButton(
+                        icon = Icons.Rounded.AutoAwesome,
+                        text = "生成中…",
+                        primary = true,
+                        enabled = false,
+                        onClick = {}
+                    )
+                }
+                is StatisticsAdviceUiState.Loaded -> {
+                    StatisticsAdviceBlock(advice = state.advice)
+                    Spacer(Modifier.height(ShirohaSpacing.Sm))
+                    ActionPillButton(
+                        icon = Icons.Rounded.AutoAwesome,
+                        text = "重新生成",
+                        primary = false,
+                        onClick = { adviceState = StatisticsAdviceUiState.Idle }
+                    )
+                }
+                is StatisticsAdviceUiState.Failed -> {
+                    NoticeCard("生成失败：${state.message}", warning = true)
+                    Spacer(Modifier.height(ShirohaSpacing.Sm))
+                    ActionPillButton(
+                        icon = Icons.Rounded.AutoAwesome,
+                        text = "重试",
+                        primary = true,
+                        onClick = { adviceState = StatisticsAdviceUiState.Idle }
+                    )
+                }
+            }
             Spacer(Modifier.height(ShirohaSpacing.Md))
             ActionPillButton(
                 icon = Icons.Rounded.AutoAwesome,
@@ -573,4 +660,106 @@ private fun drawEmptyHint(
             paint
         )
     }
+}
+
+@Composable
+private fun StatisticsAdviceBlock(advice: PersonalizedAdvice) {
+    if (advice.overallAssessment.isNotBlank()) {
+        Text(
+            text = advice.overallAssessment,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(ShirohaSpacing.Sm))
+    }
+    if (advice.weakPoints.isNotEmpty()) {
+        Text(
+            text = "薄弱点",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold
+        )
+        Spacer(Modifier.height(4.dp))
+        advice.weakPoints.forEach { point ->
+            Text(
+                text = "· $point",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Spacer(Modifier.height(ShirohaSpacing.Sm))
+    }
+    if (advice.suggestions.isNotEmpty()) {
+        Text(
+            text = "提升建议",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold
+        )
+        Spacer(Modifier.height(4.dp))
+        advice.suggestions.forEach { item ->
+            Column(modifier = Modifier.padding(top = 4.dp)) {
+                Text(
+                    text = "【${item.priority}】${item.title}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                if (item.detail.isNotBlank()) {
+                    Text(
+                        text = item.detail,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = ShirohaColors.TextSecondary
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(ShirohaSpacing.Sm))
+    }
+    if (advice.motivationalMessage.isNotBlank()) {
+        Text(
+            text = advice.motivationalMessage,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+private sealed class StatisticsAdviceUiState {
+    data object Idle : StatisticsAdviceUiState()
+    data object Loading : StatisticsAdviceUiState()
+    data class Loaded(val advice: PersonalizedAdvice) : StatisticsAdviceUiState()
+    data class Failed(val message: String) : StatisticsAdviceUiState()
+}
+
+private fun buildStatisticsRecordsSummary(stats: StudyStatistics): String {
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    val recent = QuizRepository.studyRecords
+        .sortedByDescending { it.timestamp }
+        .take(10)
+        .joinToString("\n") { record ->
+            val date = dateFormat.format(Date(record.timestamp))
+            val accuracy = if (record.total > 0) {
+                (record.correct * 100.0 / record.total).toInt()
+            } else 0
+            "$date ${record.source} 《${record.bankName.ifBlank { record.title }}》 " +
+                "${record.correct}/${record.total} 正确率 $accuracy%"
+        }
+    return buildString {
+        append("累计答题 ${stats.totalQuestionsAnswered} 题，累计正确 ${stats.totalCorrect} 题，")
+        append("平均正确率 ${(stats.overallAccuracy * 100).toInt()}%。")
+        if (recent.isNotEmpty()) {
+            append("\n最近记录：\n")
+            append(recent)
+        }
+    }
+}
+
+private fun buildStatisticsWrongSummary(): String {
+    val wrongBook = QuizRepository.wrongBook
+    if (wrongBook.isEmpty()) return "暂无错题数据。"
+    return wrongBook
+        .sortedByDescending { it.updatedAt.takeIf { updated -> updated > 0 } ?: it.timestamp }
+        .take(10)
+        .joinToString("\n") { entry ->
+            val cat = entry.question.category?.ifBlank { "未分类" } ?: "未分类"
+            "分类 $cat：${entry.question.text.take(60)}"
+        }
 }

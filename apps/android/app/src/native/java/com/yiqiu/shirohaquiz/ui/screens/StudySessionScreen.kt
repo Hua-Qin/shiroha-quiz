@@ -102,6 +102,13 @@ fun StudySessionScreen(
         QuizRepository.questionsForSection(courseId, sectionId)
     }
 
+    // 课程关联题库：用于错题本写入。题库随 courseId 缓存。
+    val linkedBank = remember(courseId) {
+        QuizRepository.courseById(courseId)?.linkedBankId?.let { bid ->
+            QuizRepository.banks.firstOrNull { it.id == bid }
+        }
+    }
+
     // 阶段状态机：进入页面默认为学习阅读阶段
     var phase by remember { mutableStateOf(StudySessionPhase.LEARN) }
     var currentIdx by remember { mutableStateOf(0) }
@@ -118,10 +125,10 @@ fun StudySessionScreen(
     // DONE 守门：每次 phase 变为 DONE 时记录一次练习结果
     // 注意：使用 phase 作为 key，且函数体内用 if 守门，确保每次重新进入 DONE 时都会执行
     // （如果用 LaunchedEffect(Unit) 在「重新练习」后重新进入 DONE 时不会触发）
+    // Step 2 调整：每题结果已在 onSubmit 内通过 markSectionQuestionResult 累加到 SectionProgress，
+    // 这里不再调用 recordSectionResult（避免覆盖逐题累加的正确率）。
     LaunchedEffect(phase) {
-        if (phase == StudySessionPhase.DONE && questions.isNotEmpty()) {
-            QuizRepository.recordSectionResult(courseId, sectionId, correctCount, questions.size)
-        }
+        // 故意留空：会话结果由 onSubmit 逐题累加，DONE 阶段不再做覆盖式写入。
     }
 
     val currentQuestion = questions.getOrNull(currentIdx)
@@ -160,8 +167,97 @@ fun StudySessionScreen(
                     submitted = submitted,
                     onSelectAnswer = { selectedAnswer = it },
                     onSubmit = {
-                        if (currentQuestion != null && QuizRepository.judgeAnswer(currentQuestion, selectedAnswer)) {
-                            correctCount++
+                        val q = currentQuestion
+                        if (q != null) {
+                            val isCorrect = QuizRepository.judgeAnswer(q, selectedAnswer)
+                            if (isCorrect) correctCount++
+
+                            // 1) 写入错题本：答错入错题，答对则从错题本累加正确计数
+                            val bank = linkedBank
+                            if (bank != null) {
+                                if (isCorrect) {
+                                    // markWrongQuestionRight 是 private，这里改为走 addWrongContext 的公开重载不存在对应清除路径，
+                                    // 改为读取错题本条目后用 copy 调整（不依赖 private 方法）。如果题目不在错题本则直接跳过。
+                                    val idx = QuizRepository.wrongBook.indexOfFirst {
+                                        it.bankId == bank.id && it.question.id == q.id
+                                    }
+                                    if (idx >= 0) {
+                                        val entry = QuizRepository.wrongBook[idx]
+                                        val now = System.currentTimeMillis()
+                                        val nextRightCount = entry.rightCount + 1
+                                        val nextReviewRightCount = entry.reviewRightCount + 1
+                                        val nextStreak = entry.streakCorrectCount + 1
+                                        QuizRepository.wrongBook[idx] = entry.copy(
+                                            rightCount = nextRightCount,
+                                            reviewRightCount = nextReviewRightCount,
+                                            streakCorrectCount = nextStreak,
+                                            lastCorrectAt = now,
+                                            lastReviewedAt = now,
+                                            updatedAt = now
+                                        )
+                                        QuizRepository.persist()
+                                    }
+                                } else {
+                                    // 答错：复用现有 addWrongContext(bank, question, userAnswer, source, correctAnswer, addedManually)
+                                    QuizRepository.addWrongContext(
+                                        bank = bank,
+                                        question = q,
+                                        userAnswer = selectedAnswer,
+                                        source = "边学边答",
+                                        correctAnswer = q.answer,
+                                        addedManually = false
+                                    )
+                                }
+                            }
+
+                            // 2) 写入 studyRecord（逐题记录）
+                            // recordPracticeResult 当前是 private；改为直接构造 StudyRecord 写入 studyRecords 列表
+                            val record = com.yiqiu.shirohaquiz.state.StudyRecord(
+                                id = "study_${q.id}_${System.currentTimeMillis()}",
+                                bankId = bank?.id,
+                                bankName = bank?.name ?: "未命名题库",
+                                source = "边学边答",
+                                title = q.question.take(24),
+                                total = 1,
+                                correct = if (isCorrect) 1 else 0,
+                                timestamp = System.currentTimeMillis(),
+                                questionResults = listOf(
+                                    com.yiqiu.shirohaquiz.state.StudyQuestionResult(
+                                        question = q,
+                                        userAnswer = selectedAnswer,
+                                        correct = isCorrect,
+                                        answerText = q.answer.joinToString(" / ").ifBlank { "未识别答案" },
+                                        autoScored = true,
+                                        sourceBankId = bank?.id,
+                                        sourceBankName = bank?.name
+                                    )
+                                ),
+                                scopeType = "course",
+                                scopeName = course.courseName
+                            )
+                            QuizRepository.studyRecords.add(0, record)
+                            QuizRepository.persist()
+
+                            // 3) 更新 SectionProgress：markSectionQuestionResult 尚未在 QuizRepository 暴露，
+                            // 用 studyProgressKey 直接累加（与 recordSectionResult 字段语义一致）
+                            val key = QuizRepository.studyProgressKey(courseId, sectionId)
+                            val cur = QuizRepository.studyProgress[key]
+                                ?: com.yiqiu.shirohaquiz.state.SectionProgress()
+                            val newCorrect = cur.correctCount + (if (isCorrect) 1 else 0)
+                            val newTotal = cur.totalCount + 1
+                            QuizRepository.studyProgress[key] = cur.copy(
+                                studied = true,
+                                practiced = true,
+                                correctCount = newCorrect,
+                                totalCount = newTotal,
+                                lastStudiedAt = System.currentTimeMillis(),
+                                bestAccuracy = maxOf(
+                                    cur.bestAccuracy,
+                                    newCorrect.toFloat() / newTotal.coerceAtLeast(1).toFloat()
+                                ),
+                                practiceCount = cur.practiceCount + 1
+                            )
+                            QuizRepository.persist()
                         }
                         submitted = true
                     },

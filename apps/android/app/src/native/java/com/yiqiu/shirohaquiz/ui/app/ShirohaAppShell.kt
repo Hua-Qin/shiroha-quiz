@@ -46,6 +46,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,31 +60,31 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.yiqiu.shirohaquiz.state.QuizRepository
 import com.yiqiu.shirohaquiz.ui.screens.AboutScreen
 import com.yiqiu.shirohaquiz.ui.screens.AiSettingsScreen
+import com.yiqiu.shirohaquiz.ui.screens.AppearancePreferenceScreen
 import com.yiqiu.shirohaquiz.ui.screens.BankDetailScreen
 import com.yiqiu.shirohaquiz.ui.screens.BankListScreen
 import com.yiqiu.shirohaquiz.ui.screens.BankReviewScreen
 import com.yiqiu.shirohaquiz.ui.screens.DataManagementScreen
 import com.yiqiu.shirohaquiz.ui.screens.ExamScreen
 import com.yiqiu.shirohaquiz.ui.screens.FavoriteScreen
-import com.yiqiu.shirohaquiz.ui.screens.HomeScreen
+import com.yiqiu.shirohaquiz.ui.screens.HomeDashboardScreen
+import com.yiqiu.shirohaquiz.ui.screens.HomeRedirectNotice
 import com.yiqiu.shirohaquiz.ui.screens.ImportScreen
 import com.yiqiu.shirohaquiz.ui.screens.MeScreen
-import com.yiqiu.shirohaquiz.ui.screens.AppearancePreferenceScreen
 import com.yiqiu.shirohaquiz.ui.screens.PracticePreferenceScreen
 import com.yiqiu.shirohaquiz.ui.screens.PracticeQuickEditScreen
 import com.yiqiu.shirohaquiz.ui.screens.QuestionSearchScreen
-import com.yiqiu.shirohaquiz.ui.screens.PracticeScreen
 import com.yiqiu.shirohaquiz.ui.screens.RecordDetailScreen
 import com.yiqiu.shirohaquiz.ui.screens.RecordsScreen
 import com.yiqiu.shirohaquiz.ui.screens.StandardImportFormatScreen
-import com.yiqiu.shirohaquiz.ui.screens.StatisticsScreen
-import com.yiqiu.shirohaquiz.ui.screens.StudyScreen
 import com.yiqiu.shirohaquiz.ui.screens.StudyCourseScreen
+import com.yiqiu.shirohaquiz.ui.screens.StudyScreen
 import com.yiqiu.shirohaquiz.ui.screens.StudySessionScreen
 import com.yiqiu.shirohaquiz.ui.screens.WrongBookPreferenceScreen
 import com.yiqiu.shirohaquiz.ui.screens.WrongBookScreen
@@ -99,16 +100,16 @@ private enum class MainTab(
     val icon: ImageVector,
     val showInBottomBar: Boolean = true
 ) {
-    Home("首页", Icons.Rounded.Dashboard),
-    Practice("练习", Icons.Rounded.School),
-    Import("导入", Icons.Rounded.ImportExport),
-    Me("我的", Icons.Rounded.Settings),
+    Home("首页", Icons.Rounded.Dashboard, showInBottomBar = false),
+    Practice("练习", Icons.Rounded.School, showInBottomBar = false),
+    Import("导入", Icons.Rounded.ImportExport, showInBottomBar = true),
+    Me("我的", Icons.Rounded.Settings, showInBottomBar = false),
     Exam("考试", Icons.Rounded.School, showInBottomBar = false),
     BankList("题库管理", Icons.Rounded.Dashboard, showInBottomBar = false),
     QuestionSearch("题目搜索", Icons.Rounded.Search, showInBottomBar = false),
     BankDetail("题库详情", Icons.Rounded.Dashboard, showInBottomBar = false),
     BankReview("题库核对", Icons.Rounded.Dashboard, showInBottomBar = false),
-    WrongBook("错题本", Icons.Rounded.School, showInBottomBar = false),
+    WrongBook("错题本", Icons.Rounded.School, showInBottomBar = true),
     Favorites("收藏夹", Icons.Rounded.School, showInBottomBar = false),
     Records("记录", Icons.Rounded.Dashboard, showInBottomBar = false),
     RecordDetail("记录详情", Icons.Rounded.Dashboard, showInBottomBar = false),
@@ -120,25 +121,27 @@ private enum class MainTab(
     DataManagement("数据管理", Icons.Rounded.Settings, showInBottomBar = false),
     StandardFormat("标准格式", Icons.Rounded.ImportExport, showInBottomBar = false),
     About("关于", Icons.Rounded.Settings, showInBottomBar = false),
-    Study("边学边答", Icons.Rounded.MenuBook, showInBottomBar = false),
+    Study("边学边答", Icons.Rounded.MenuBook, showInBottomBar = true),
     StudyCourse("课程章节", Icons.Rounded.MenuBook, showInBottomBar = false),
     StudySession("学习会话", Icons.Rounded.MenuBook, showInBottomBar = false),
-    Statistics("学习看板", Icons.Rounded.QueryStats, showInBottomBar = false)
+    Statistics("学习看板", Icons.Rounded.QueryStats, showInBottomBar = true)
 }
 
 private fun MainTab.fallbackBackTarget(): MainTab? = when (this) {
     MainTab.Home,
-    MainTab.Practice,
     MainTab.Import,
-    MainTab.Me -> null
+    MainTab.Me,
+    MainTab.Statistics -> null
 
     MainTab.Exam,
+    MainTab.Practice,
     MainTab.BankList,
     MainTab.WrongBook,
     MainTab.Favorites,
-    MainTab.Records -> MainTab.Home
-
+    MainTab.Records,
     MainTab.QuestionSearch,
+    MainTab.Study -> MainTab.Statistics
+
     MainTab.BankDetail -> MainTab.BankList
     MainTab.BankReview -> MainTab.BankDetail
     MainTab.RecordDetail -> MainTab.Records
@@ -150,10 +153,8 @@ private fun MainTab.fallbackBackTarget(): MainTab? = when (this) {
     MainTab.DataManagement,
     MainTab.StandardFormat,
     MainTab.About -> MainTab.Me
-    MainTab.Study -> MainTab.Home
     MainTab.StudyCourse -> MainTab.Study
     MainTab.StudySession -> MainTab.StudyCourse
-    MainTab.Statistics -> MainTab.Home
 }
 
 private data class AppRouteSnapshot(
@@ -190,13 +191,13 @@ private fun decodeRouteSnapshot(value: String): AppRouteSnapshot? {
 
 @Composable
 fun ShirohaAppShell() {
-    var currentTab by rememberSaveable { mutableStateOf(MainTab.Home) }
+    var currentTab by rememberSaveable { mutableStateOf(MainTab.Statistics) }
     var detailBankId by rememberSaveable { mutableStateOf<String?>(null) }
     var detailRecordId by rememberSaveable { mutableStateOf<String?>(null) }
     var detailCourseId by rememberSaveable { mutableStateOf<String?>(null) }
     var detailSectionId by rememberSaveable { mutableStateOf<String?>(null) }
     var routeBackStack by rememberSaveable { mutableStateOf(emptyList<String>()) }
-    var selectedRootTab by rememberSaveable { mutableStateOf(MainTab.Home) }
+    var selectedRootTab by rememberSaveable { mutableStateOf(MainTab.Statistics) }
 
     fun currentRouteSnapshot() = AppRouteSnapshot(
         tab = currentTab,
@@ -360,31 +361,17 @@ fun ShirohaAppShell() {
                     label = "main_tabs"
                 ) { tab ->
                     when (tab) {
-                        MainTab.Home -> HomeScreen(
-                            onGoImport = { navigateRoot(MainTab.Import) },
-                            onGoPractice = { navigateRoot(MainTab.Practice) },
-                            onGoExam = { navigateTo(MainTab.Exam) },
-                            onOpenBankList = { navigateTo(MainTab.BankList) },
-                            onOpenBankDetail = { bankId ->
-                                navigateTo(MainTab.BankDetail, bankId = bankId)
-                            },
-                            onOpenWrongBook = { navigateTo(MainTab.WrongBook) },
-                            onOpenFavorites = { navigateTo(MainTab.Favorites) },
-                            onOpenRecords = { navigateTo(MainTab.Records) },
-                            onGoStudy = { navigateTo(MainTab.Study) },
-                            onGoStatistics = { navigateTo(MainTab.Statistics) }
-                        )
-    
-                        MainTab.Practice -> PracticeScreen(
-                            onGoExam = { navigateTo(MainTab.Exam) },
-                            onOpenRecords = { navigateTo(MainTab.Records) },
-                            onOpenQuickEdit = { navigateTo(MainTab.PracticeQuickEdit) }
-                        )
+                        MainTab.Home -> HomeRedirectNotice(onGoStatistics = { navigateTo(MainTab.Statistics) })
+
+                        MainTab.Practice -> {
+                            LaunchedEffect(Unit) { navigateTo(MainTab.Study) }
+                            Box(Modifier.fillMaxSize())
+                        }
                         MainTab.PracticeQuickEdit -> PracticeQuickEditScreen(
                             onBack = { navigateBack() }
                         )
                         MainTab.Import -> ImportScreen(
-                            onImportSaved = { navigateRoot(MainTab.Home) },
+                            onImportSaved = { navigateRoot(MainTab.Statistics) },
                             onOpenPreference = { navigateTo(MainTab.AiSettings) }
                         )
                         MainTab.Me -> MeScreen(
@@ -398,7 +385,7 @@ fun ShirohaAppShell() {
                             onOpenAbout = { navigateTo(MainTab.About) }
                         )
                         MainTab.Exam -> ExamScreen(
-                            onBackHome = { navigateRoot(MainTab.Home) },
+                            onBackHome = { navigateRoot(MainTab.Statistics) },
                             onGoPractice = { navigateRoot(MainTab.Practice) },
                             onOpenRecord = { recordId ->
                                 navigateTo(MainTab.RecordDetail, recordId = recordId)
@@ -496,8 +483,16 @@ fun ShirohaAppShell() {
                                 )
                             }
                         )
-                        MainTab.Statistics -> StatisticsScreen(
-                            onBack = { navigateBack() }
+                        MainTab.Statistics -> HomeDashboardScreen(
+                            onBack = { navigateBack() },
+                            onGoImport = { navigateRoot(MainTab.Import) },
+                            onGoStudy = { navigateTo(MainTab.Study) },
+                            onGoExam = { navigateTo(MainTab.Exam) },
+                            onOpenBankList = { navigateTo(MainTab.BankList) },
+                            onOpenBankDetail = { bankId -> navigateTo(MainTab.BankDetail, bankId = bankId) },
+                            onOpenWrongBook = { navigateTo(MainTab.WrongBook) },
+                            onOpenFavorites = { navigateTo(MainTab.Favorites) },
+                            onOpenRecords = { navigateTo(MainTab.Records) }
                         )
                     }
                 }
