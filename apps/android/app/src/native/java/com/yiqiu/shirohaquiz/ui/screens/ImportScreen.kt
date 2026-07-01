@@ -1,4 +1,4 @@
-package com.yiqiu.shirohaquiz.ui.screens
+﻿package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -1063,7 +1063,7 @@ fun ImportScreen(
                                 }
                                 val warningTexts = displayResult.warnings.map { warning ->
                                     val numberText = warning.questionNumber?.takeIf { it.isNotBlank() }?.let { "棰樺彿$it锛" }.orEmpty()
-                                    "${warning.level.name}锛$numberText${warning.message}"
+                                    "${warning.level.name}锛${numberText}${warning.message}"
                                 }.distinct().take(120)
                                 val beforeCount = editableQuestions.size
                                 statusText = "AI 閲嶆瀯涓細浼樺厛娓呮礂鍘熸枃骞堕噸鏂版湰鍦拌В鏋愶紝蹇呰鏃跺啀浣跨敤 AI 鐩存帴閲嶆瀯缁撴灉銆"
@@ -1119,7 +1119,7 @@ fun ImportScreen(
                                                 strategyName = "AI閲嶆瀯閲嶈В鏋${reparsedResult.strategyName}",
                                                 warnings = nextWarnings,
                                                 diagnostics = reparsedResult.diagnostics.copy(
-                                                    notes = (reparsedResult.diagnostics.notes + "AI閲嶆瀯锛氬凡娓呮礂鍘熸枃骞堕噸鏂版湰鍦拌В鏋愶紝鐢?$beforeCount 棰樿В鏋愪负 ${refactoredQuestions.size} 棰樸€" + refactorResult.notes).distinct()
+                                                    notes = (reparsedResult.diagnostics.notes + "AI閲嶆瀯锛氬凡娓呮礂鍘熸枃骞堕噸鏂版湰鍦拌В鏋愶紝鐢?$beforeCount 棰樿В鏋愪負 ${refactoredQuestions.size} 棰樸" + refactorResult.notes).distinct()
                                                 )
                                             )
                                             importResult = nextResult
@@ -2834,7 +2834,7 @@ private fun ReviewQuestionEditorContent(
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "鍗曢€A锛屽閫?ABC锛屽垽鏂?姝ｇ‘/閿欒锛涘绌哄～绌哄彲閫愮┖閰嶇疆涓荤瓟妗堜笌澶囬€夌瓟妗堛€",
+                text = "鍗曞?A锛屽閫?ABC锛屽垽鏂?姝ｇ'/閿欒锛屽绌哄～绌哄彲閫愮閰嶇疆涓荤瓟妗堜笌澶囬夌瓟妗堛",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -2959,7 +2959,7 @@ private fun AiReviewSuggestionCard(
                 text = buildString {
                     append("AI 寤鸿")
                     append(" 路 ").append(riskText)
-                    if (suggestion.confidence > 0.0) append(" 路 缃俊搴").append((suggestion.confidence * 100).toInt()).append("%")
+                    if (suggestion.confidence > 0.0) append(" 路 缃俊搴").append((suggestion.confidence * 100).toInt()).append("%")
                     if (issueText.isNotBlank()) append(" 路 ").append(issueText)
                 },
                 style = MaterialTheme.typography.labelLarge,
@@ -3120,7 +3120,7 @@ private fun suggestionsToImportWarnings(
             ImportWarning(
                 level = if (hard) WarningLevel.ERROR else WarningLevel.WARNING,
                 questionNumber = question.number,
-                message = message.ifBlank { "AI 寤鸿浜哄伐纭鏈锛$AI_WARNING_ID_MARKER${question.id}" }
+                message = message.ifBlank { "AI 寤鸿浜哄伐纭鏈锛$AI_WARNING_ID_MARKER${question.id}" }
             )
         }
 }
