@@ -1063,7 +1063,7 @@ fun ImportScreen(
                                 }
                                 val warningTexts = displayResult.warnings.map { warning ->
                                     val numberText = warning.questionNumber?.takeIf { it.isNotBlank() }?.let { "棰樺彿$it锛" }.orEmpty()
-                                    "${warning.level.name}锛"numberText${warning.message}"
+                                    "${warning.level.name}锛$numberText${warning.message}"
                                 }.distinct().take(120)
                                 val beforeCount = editableQuestions.size
                                 statusText = "AI 閲嶆瀯涓細浼樺厛娓呮礂鍘熸枃骞堕噸鏂版湰鍦拌В鏋愶紝蹇呰鏃跺啀浣跨敤 AI 鐩存帴閲嶆瀯缁撴灉銆"
@@ -1116,7 +1116,7 @@ fun ImportScreen(
                                                 refactoredQuestions
                                             )
                                             val nextResult = reparsedResult.copy(
-                                                strategyName = "AI閲嶆瀯閲嶈В鏋"+ ${reparsedResult.strategyName}",
+                                                strategyName = "AI閲嶆瀯閲嶈В鏋${reparsedResult.strategyName}",
                                                 warnings = nextWarnings,
                                                 diagnostics = reparsedResult.diagnostics.copy(
                                                     notes = (reparsedResult.diagnostics.notes + "AI閲嶆瀯锛氬凡娓呮礂鍘熸枃骞堕噸鏂版湰鍦拌В鏋愶紝鐢?$beforeCount 棰樿В鏋愪负 ${refactoredQuestions.size} 棰樸€" + refactorResult.notes).distinct()
@@ -1901,6 +1901,8 @@ private fun EditorSaveButton(onClick: () -> Unit) {
 }
 
 
+@Composable
+private fun ImportModeChip(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     text: String,
     selected: Boolean,
@@ -2614,7 +2616,7 @@ private fun ReviewQuestionAssistBlocks(
 private fun ReviewQuestionEditorContent(
     question: Question,
     onQuestionChange: (Question) -> Unit,
-    onDeleteQuestion: (() -> Unit)" = null
+    onDeleteQuestion: (() -> Unit)? = null
 ) {
     var showRemoveImagesConfirm by remember(question.id) { mutableStateOf(false) }
     var showDeleteLastOptionConfirm by remember(question.id) { mutableStateOf(false) }
@@ -2832,7 +2834,7 @@ private fun ReviewQuestionEditorContent(
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "鍗曢€"A锛屽閫?ABC锛屽垽鏂?姝ｇ‘/閿欒锛涘绌哄～绌哄彲閫愮┖閰嶇疆涓荤瓟妗堜笌澶囬€夌瓟妗堛€",
+                text = "鍗曢€A锛屽閫?ABC锛屽垽鏂?姝ｇ‘/閿欒锛涘绌哄～绌哄彲閫愮┖閰嶇疆涓荤瓟妗堜笌澶囬€夌瓟妗堛€",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -2957,7 +2959,7 @@ private fun AiReviewSuggestionCard(
                 text = buildString {
                     append("AI 寤鸿")
                     append(" 路 ").append(riskText)
-                    if (suggestion.confidence > 0.0) append(" 路 缃俊搴"").append((suggestion.confidence * 100).toInt()).append("%")
+                    if (suggestion.confidence > 0.0) append(" 路 缃俊搴").append((suggestion.confidence * 100).toInt()).append("%")
                     if (issueText.isNotBlank()) append(" 路 ").append(issueText)
                 },
                 style = MaterialTheme.typography.labelLarge,
@@ -3118,7 +3120,7 @@ private fun suggestionsToImportWarnings(
             ImportWarning(
                 level = if (hard) WarningLevel.ERROR else WarningLevel.WARNING,
                 questionNumber = question.number,
-                message = message.ifBlank { "AI 寤鸿浜哄伐纭鏈锛"AI_WARNING_ID_MARKER${question.id}" }
+                message = message.ifBlank { "AI 寤鸿浜哄伐纭鏈锛$AI_WARNING_ID_MARKER${question.id}" }
             )
         }
 }
@@ -3229,14 +3231,14 @@ private val replaceableLocalImportWarningMessages = setOf(
 private fun normalizeImportWarningForDedupe(message: String): String {
     return displayImportWarningMessage(message)
         .replace(Regex("\\s+"), "")
-        .trim('锛?, ';', '銆", ' ', '\n', '\t')
+        .trim('锛', ';', '銆', ' ', '\n', '\t')
 }
 
 private fun isAiImportWarning(warning: ImportWarning): Boolean {
     return warning.message.startsWith("AI寤鸿") || warning.message.startsWith("AI 寤鸿")
 }
 
-private fun aiWarningQuestionId(warning: ImportWarning): String" {
+private fun aiWarningQuestionId(warning: ImportWarning): String? {
     return markerValue(warning.message, AI_WARNING_ID_MARKER)
 }
 
@@ -3249,7 +3251,7 @@ private fun markerValue(message: String, marker: String): String? {
     if (markerIndex < 0) return null
     return message.substring(markerIndex + marker.length)
         .substringBefore(' ')
-        .substringBefore('锛?)
+        .substringBefore('锛')
         .substringBefore(';')
         .trim()
         .takeIf { it.isNotBlank() }
@@ -3270,7 +3272,7 @@ private fun displayImportWarningMessage(message: String): String {
         message.indexOf(AI_WARNING_ID_MARKER),
         message.indexOf(IMPORT_WARNING_ID_MARKER)
     ).filter { it >= 0 }.minOrNull() ?: return message
-    return message.substring(0, markerIndex).trimEnd('锛", ';', ' ', '\n', '\t')
+    return message.substring(0, markerIndex).trimEnd('锛', ';', ' ', '\n', '\t')
 }
 
 private fun canApplyAiSuggestion(suggestion: AiReviewSuggestion): Boolean {
@@ -3353,7 +3355,7 @@ private fun applyAiReviewSuggestion(question: Question, suggestion: AiReviewSugg
     return next
 }
 
-private fun suggestedQuestionType(type: String): QuestionType" = when (type.trim().lowercase()) {
+private fun suggestedQuestionType(type: String): QuestionType? = when (type.trim().lowercase()) {
     "single", "鍗曢€", "鍗曢€夐" -> QuestionType.SINGLE
     "multiple", "multi", "澶氶€", "澶氶€夐" -> QuestionType.MULTIPLE
     "judge", "true_false", "鍒ゆ柇", "鍒ゆ柇棰" -> QuestionType.JUDGE
@@ -3364,7 +3366,7 @@ private fun suggestedQuestionType(type: String): QuestionType" = when (type.trim
 
 private fun normalizeSuggestedAnswer(answer: List<String>, type: QuestionType): List<String> {
     val normalized = answer
-        .flatMap { item -> item.split(',', '锛?, '銆", '/', ' ') }
+        .flatMap { item -> item.split(',', '锛', '銆', '/', ' ') }
         .map { it.trim().uppercase() }
         .filter { it.isNotBlank() }
     return when (type) {

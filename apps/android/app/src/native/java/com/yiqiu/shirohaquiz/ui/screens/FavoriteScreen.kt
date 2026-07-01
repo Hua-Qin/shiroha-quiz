@@ -623,7 +623,7 @@ private fun isSuspiciousFavoriteQuestionNumber(number: String): Boolean {
     if (compact.length > 24) return true
 
     val numericParts = Regex("""\d+""").findAll(compact).count()
-    val dashCount = compact.count { it == '-' || it == '锛? || it == '鈥" || it == '鈥" }
+    val dashCount = compact.count { it == '-' || it == '\u3001' || it == '\u2013' || it == '\u2014' }
     return numericParts >= 4 && dashCount >= 3
 }
 

@@ -264,7 +264,7 @@ fun WrongBookScreen(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
                 ) {
-                    // 缂栬緫寮$Header:kicker + 琛嚎澶ф爣棰"                    ShirohaHeader(
+                    // 缂栬緫寮忔爣棰樼被 + 棰樺彿          ShirohaHeader(
                         kicker = "Wrong Book",
                         title = "閿欓鏈",
                         subtitle = "鎶婇敊棰樺彉鎴愭彁鍒嗛樁姊",
@@ -1308,7 +1308,7 @@ private fun isSuspiciousWrongQuestionNumber(number: String): Boolean {
     if (compact.length > 24) return true
 
     val numericParts = Regex("""\d+""").findAll(compact).count()
-    val dashCount = compact.count { it == '-' || it == '锛? || it == '鈥" || it == '鈥" }
+    val dashCount = compact.count { it == '-' || it == '\u3001' || it == '\u2013' || it == '\u2014' }
     return numericParts >= 4 && dashCount >= 3
 }
 

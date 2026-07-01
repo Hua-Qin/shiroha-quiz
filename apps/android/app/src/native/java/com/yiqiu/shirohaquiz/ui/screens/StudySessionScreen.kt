@@ -1,4 +1,4 @@
-package com.yiqiu.shirohaquiz.ui.screens
+﻿package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -329,7 +329,7 @@ fun StudySessionScreen(
         }
     }
 
-    // 绛旈闃舵"鏌ョ湅鐭ヨ瘑鐐?鍗婂睆 Dialog锛堝彧璇$ArticleReader锛"    if (showKnowledgeDialog) {
+    // 绛旈闃舵 鏌ョ湅鐭ヨ瘑鐐?鍗婂睆 Dialog 鍙璇诲紑骞抽棶?
         AlertDialog(
             onDismissRequest = { showKnowledgeDialog = false },
             confirmButton = {
