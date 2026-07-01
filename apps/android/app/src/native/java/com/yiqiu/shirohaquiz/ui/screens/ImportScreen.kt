@@ -272,7 +272,7 @@ fun ImportScreen(
         }
         isImportBusy = true
         busyText = "姝ｅ湪璇诲彇棰樺簱鏂囦欢鈥︹€"
-        statusText = fileSizeCheck.warnMessage ?: "姝ｅ湪璇诲彇锛$selectedFileName"
+        statusText = fileSizeCheck.warnMessage ?: "姝ｅ湪璇诲彇锛${selectedFileName}"
         isStatusWarn = fileSizeCheck.warnMessage != null
         clearParsedResult(clearImages = true)
         importScope.launch {
@@ -295,9 +295,9 @@ fun ImportScreen(
                         importedImages = content.images
                         rawTextEditorExpanded = content.text.length <= LARGE_TEXT_PREVIEW_THRESHOLD
                         statusText = if (content.images.isNotEmpty()) {
-                            "宸茶鍙栵細$selectedFileName锛屽惈 ${content.images.size} 寮犲浘鐗囥€"
+                            "宸茶鍙栵細${selectedFileName}锛屽惈 ${content.images.size} 寮犲浘鐗囥€"
                         } else {
-                            "宸茶鍙栵細$selectedFileName銆"
+                            "宸茶鍙栵細${selectedFileName}銆"
                         }
                         isStatusWarn = false
                     }
@@ -321,7 +321,7 @@ fun ImportScreen(
         }
         isImportBusy = true
         busyText = "姝ｅ湪璇诲彇绛旀鏂囦欢鈥︹€"
-        statusText = fileSizeCheck.warnMessage ?: "姝ｅ湪璇诲彇绛旀鏂囦欢锛$selectedAnswerFileName"
+        statusText = fileSizeCheck.warnMessage ?: "姝ｅ湪璇诲彇绛旀鏂囦欢锛${selectedAnswerFileName}"
         isStatusWarn = fileSizeCheck.warnMessage != null
         importScope.launch {
             val result = runCatching {
@@ -342,7 +342,7 @@ fun ImportScreen(
                         answerText = text
                         answerTextEditorExpanded = text.length <= LARGE_TEXT_PREVIEW_THRESHOLD
                         clearParsedResult()
-                        statusText = "宸茶鍙栫瓟妗堟枃浠讹細$selectedAnswerFileName銆"
+                        statusText = "宸茶鍙栫瓟妗堟枃浠讹細${selectedAnswerFileName}銆"
                         isStatusWarn = false
                     }
                 }
@@ -681,9 +681,9 @@ fun ImportScreen(
             Spacer(Modifier.height(12.dp))
             Text(
                 text = if (useDualImport) {
-                    "褰撳墠棰樺簱鏂囦欢锛$selectedFileName\n褰撳墠绛旀鏂囦欢锛$selectedAnswerFileName"
+                    "褰撳墠棰樺簱鏂囦欢锛${selectedFileName}\n褰撳墠绛旀鏂囦欢锛${selectedAnswerFileName}"
                 } else {
-                    "褰撳墠鏂囦欢锛$selectedFileName"
+                    "褰撳墠鏂囦欢锛${selectedFileName}"
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1062,7 +1062,7 @@ fun ImportScreen(
                                     return@ActionPillButton
                                 }
                                 val warningTexts = displayResult.warnings.map { warning ->
-                                    val numberText = warning.questionNumber?.takeIf { it.isNotBlank() }?.let { "棰樺彿$it锛" }.orEmpty()
+                                    val numberText = warning.questionNumber?.takeIf { it.isNotBlank() }?.let { "棰樺彿${it}锛" }.orEmpty()
                                     "${warning.level.name}锛${numberText}${warning.message}"
                                 }.distinct().take(120)
                                 val beforeCount = editableQuestions.size
@@ -1480,7 +1480,7 @@ fun ImportScreen(
                                     val cleanGroupName = newBankGroupName.trim().ifBlank { DEFAULT_BANK_GROUP_NAME }
                                     val bankName = newBankName.trim().ifBlank { defaultImportBankName(selectedFileName) }
                                     QuizRepository.importBank(context, bankName, editableQuestions, cleanGroupName)
-                                    statusText = "宸叉柊寤洪搴擄細$cleanGroupName / $bankName锛屽叡 ${editableQuestions.size} 棰樸€"
+                                    statusText = "宸叉柊寤洪搴擄細$cleanGroupName / ${bankName}锛屽叡 ${editableQuestions.size} 棰樸€"
                                     isStatusWarn = false
                                     onImportSaved()
                                 }
@@ -3147,7 +3147,7 @@ private fun importWarningSummaryText(warning: ImportWarning, questions: List<Que
     } else {
         "绗?${warning.questionNumber} 棰"
     }
-    return "$prefix锛${displayImportWarningMessage(warning.message)}"
+    return "${prefix}锛${displayImportWarningMessage(warning.message)}"
 }
 
 private fun mergeAiWarnings(
@@ -3803,10 +3803,10 @@ private fun checkImportFileSize(context: Context, uri: Uri, fileName: String): I
     val size = queryFileSize(context, uri) ?: return ImportFileSizeCheck()
     return when {
         size > IMPORT_FILE_BLOCK_BYTES -> ImportFileSizeCheck(
-            blockMessage = "鏂囦欢杩囧ぇ锛$fileName锛堢害 ${formatFileSize(size)}锛夈€傚缓璁厛鍘嬬缉鍥剧墖銆佹媶鍒嗛搴擄紝鎴栨敼鐢ㄦ爣鍑嗘枃鏈?Excel/JSON 瀵煎叆銆"
+            blockMessage = "鏂囦欢杩囧ぇ锛${fileName}锛堢害 ${formatFileSize(size)}锛夈€傚缓璁厛鍘嬬缉鍥剧墖銆佹媶鍒嗛搴擄紝鎴栨敼鐢ㄦ爣鍑嗘枃鏈?Excel/JSON 瀵煎叆銆"
         )
         size > IMPORT_FILE_WARN_BYTES -> ImportFileSizeCheck(
-            warnMessage = "鏂囦欢杈冨ぇ锛$fileName锛堢害 ${formatFileSize(size)}锛夛紝鍚ぇ鍥炬垨澶嶆潅 Word 鍐呭鏃跺彲鑳借鍙栬緝鎱€"
+            warnMessage = "鏂囦欢杈冨ぇ锛${fileName}锛堢害 ${formatFileSize(size)}锛夛紝鍚ぇ鍥炬垨澶嶆潅 Word 鍐呭鏃跺彲鑳借鍙栬緝鎱€"
         )
         else -> ImportFileSizeCheck()
     }

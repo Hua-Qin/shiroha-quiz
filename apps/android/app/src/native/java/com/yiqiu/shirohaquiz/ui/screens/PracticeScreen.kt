@@ -2705,6 +2705,7 @@ private fun CustomQuestionCountDialog(
 }
 
 
+private fun normalizeVisiblePracticeCountMode(mode: String, availableCount: Int): String {
     return when {
         mode == "50" && availableCount >= 50 -> "50"
         mode == "100" && availableCount >= 100 -> "100"
