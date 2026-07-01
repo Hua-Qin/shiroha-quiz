@@ -135,7 +135,7 @@ fun WrongBookScreen(
 
     val selectedBankId = selectedScopeKey
         .takeIf { it.startsWith(WRONG_BOOK_PAGE_SCOPE_BANK_PREFIX) }
-        ?.removePrefix(WRONG_BOOK_PAGE_SCOPE_BANK_PREFIX)
+        ".removePrefix(WRONG_BOOK_PAGE_SCOPE_BANK_PREFIX)
     val selectedBank = selectedBankId?.let { id -> banks.firstOrNull { it.id == id } }
     val effectiveScopeKey = if (selectedBankId == null || selectedBank != null) {
         selectedScopeKey
@@ -264,7 +264,7 @@ fun WrongBookScreen(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
                 ) {
-                    // 缂栬緫寮?Header:kicker + 琛嚎澶ф爣棰?                    ShirohaHeader(
+                    // 缂栬緫寮$Header:kicker + 琛嚎澶ф爣棰"                    ShirohaHeader(
                         kicker = "Wrong Book",
                         title = "閿欓鏈",
                         subtitle = "鎶婇敊棰樺彉鎴愭彁鍒嗛樁姊",
@@ -789,7 +789,7 @@ private fun WrongBookScopeDialog(
                         val key = WRONG_BOOK_PAGE_SCOPE_BANK_PREFIX + bank.id
                         WrongBookScopeOption(
                             title = bank.name,
-                            desc = "閿欓 ${wrongCountByBank[bank.id] ?: 0} 棰?路 鍏?${bank.questions.size} 棰",
+                            desc = "閿欓 ${wrongCountByBank[bank.id] ?: 0} 棰$路 鍏?${bank.questions.size} 棰",
                             selected = selectedScopeKey == key,
                             onClick = { onSelect(key) }
                         )
@@ -867,7 +867,7 @@ private fun WrongBookReviewCountDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "璇疯緭鍏?1锝$maxCount 涔嬮棿鐨勯鏁般€",
+                    text = "璇疯緭鍏$1锝$maxCount 涔嬮棿鐨勯鏁般€",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1044,7 +1044,7 @@ private fun WrongQuestionPreview(
         }
         Spacer(Modifier.height((8 * uiScale).dp))
         Text(
-            text = "閿?${entry.wrongCount} 娆?路 瀵?${entry.rightCount} 娆?路 鏈€杩戦敊璇?${formatTimestamp(entry.lastWrongAt)}",
+            text = "閿?${entry.wrongCount} 娆$路 瀵?${entry.rightCount} 娆$路 鏈€杩戦敊璇?${formatTimestamp(entry.lastWrongAt)}",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -1261,7 +1261,7 @@ private fun WrongQuestionDetailDialog(
                     NoticeCard("灏氭湭濉啓閿欒鍘熷洜銆")
                 }
                 Text(
-                    text = "閿?${entry.wrongCount} 娆?路 瀵?${entry.rightCount} 娆?路 鏈€杩戦敊璇?${formatTimestamp(entry.lastWrongAt)}",
+                    text = "閿?${entry.wrongCount} 娆$路 瀵?${entry.rightCount} 娆$路 鏈€杩戦敊璇?${formatTimestamp(entry.lastWrongAt)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1308,7 +1308,7 @@ private fun isSuspiciousWrongQuestionNumber(number: String): Boolean {
     if (compact.length > 24) return true
 
     val numericParts = Regex("""\d+""").findAll(compact).count()
-    val dashCount = compact.count { it == '-' || it == '锛? || it == '鈥? || it == '鈥? }
+    val dashCount = compact.count { it == '-' || it == '锛? || it == '鈥" || it == '鈥" }
     return numericParts >= 4 && dashCount >= 3
 }
 
@@ -1366,7 +1366,7 @@ private fun statusRank(status: String): Int = when (status) {
 }
 
 private fun displayWrongStatus(status: String): String =
-    if (status == WrongStatus.MASTERED.label) "宸叉帉鎻? else "鏈帉鎻?
+    if (status == WrongStatus.MASTERED.label) "宸叉帉鎻" else "鏈帉鎻"
 
 private fun typeLabel(type: QuestionType): String = when (type) {
     QuestionType.SINGLE -> "鍗曢€夐"
@@ -1438,7 +1438,7 @@ private fun WrongBookManualAddDialog(
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Text(
-                                    text = currentBank?.let { "${it.questions.size} 棰?路 ${it.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }}" }
+                                    text = currentBank?.let { "${it.questions.size} 棰$路 ${it.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }}" }
                                         ?: "灏氭湭閫夋嫨",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1462,7 +1462,7 @@ private fun WrongBookManualAddDialog(
                                         Column {
                                             Text(bank.name, style = MaterialTheme.typography.bodyMedium)
                                             Text(
-                                                text = "${bank.questions.size} 棰?路 ${bank.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }}",
+                                                text = "${bank.questions.size} 棰$路 ${bank.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }}",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -1523,7 +1523,7 @@ private fun WrongBookManualAddDialog(
                     }
                     if (questionsInBank.size > 80) {
                         Text(
-                            text = "浠呭睍绀哄墠 80 棰橈紝鍓╀綑璇蜂娇鐢ㄤ笂鏂?ID 杈撳叆銆",
+                            text = "浠呭睍绀哄墠 80 棰橈紝鍓╀綑璇蜂娇鐢ㄤ笂鏂$ID 杈撳叆銆",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

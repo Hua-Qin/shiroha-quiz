@@ -125,7 +125,7 @@ fun StatisticsScreen(
 
             // === 瓒嬪娍鍥?===
             EditorialSection(
-                kicker = "杩?14 澶",
+                kicker = "杩$14 澶",
                 title = "瀛︿範瓒嬪娍",
                 scale = scale
             ) {
@@ -168,7 +168,7 @@ fun StatisticsScreen(
 }
 
 
- * 6 澶ф暟鎹?琛嚎澶ф暟瀛?+ 灏忔爣绛?+ 鍙戜笣涓嬪垝绾? * 2 鍒?脳 3 琛?鍛堢幇鏉傚織灏侀潰绾ф暟鎹? */
+ * 6 澶ф暟鎹"琛嚎澶ф暟瀛"+ 灏忔爣绛"+ 鍙戜笣涓嬪垝绾" * 2 鍒"脳 3 琛$鍛堢幇鏉傚織灏侀潰绾ф暟鎹" */
 @Composable
 private fun EditorialFiguresSection(stats: StudyStatistics, scale: Float = 1f) {
     Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)) {
@@ -252,7 +252,7 @@ private fun AiAdviceCard(
                 val isAiConfigured = QuizRepository.isAiConfigured()
                 ActionPillButton(
                     icon = Icons.Rounded.AutoAwesome,
-                    text = if (isAiConfigured) "鑾峰彇瀛︿範寤鸿" else "璇峰厛鍦?AI 璁剧疆涓厤缃",
+                    text = if (isAiConfigured) "鑾峰彇瀛︿範寤鸿" else "璇峰厛鍦$AI 璁剧疆涓厤缃",
                     primary = true,
                     onClick = {
                         if (!isAiConfigured) {
@@ -664,7 +664,7 @@ private fun buildStatisticsRecordsSummary(stats: StudyStatistics): String {
                 "${record.correct}/${record.total} 姝ｇ‘鐜?$accuracy%"
         }
     return buildString {
-        append("绱绛旈 ${stats.totalQuestionsAnswered} 棰?绱姝ｇ‘ ${stats.totalCorrect} 棰?")
+        append("绱绛旈 ${stats.totalQuestionsAnswered} 棰$绱姝ｇ‘ ${stats.totalCorrect} 棰?")
         append("骞冲潎姝ｇ‘鐜?${(stats.overallAccuracy * 100).toInt()}%銆")
         if (recent.isNotEmpty()) {
             append("\n鏈€杩戣褰?\n")
@@ -680,7 +680,7 @@ private fun buildStatisticsWrongSummary(): String {
         .sortedByDescending { it.updatedAt.takeIf { updated -> updated > 0 } ?: it.timestamp }
         .take(10)
         .joinToString("\n") { entry ->
-            val cat = entry.question.category?.ifBlank { "鏈垎绫? } ?: "鏈垎绫?
+            val cat = entry.question.category?.ifBlank { "鏈垎绫" } ?: "鏈垎绫"
             "鍒嗙被 $cat:${entry.question.question.take(60)}"
         }
 }

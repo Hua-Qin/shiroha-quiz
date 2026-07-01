@@ -212,7 +212,7 @@ fun ImportScreen(
         aiReviewSuggestions = emptyList()
         val hardCount = resultWithExtraWarnings.warnings.count { it.level == WarningLevel.ERROR }
         val softCount = resultWithExtraWarnings.warnings.count { it.level == WarningLevel.WARNING }
-        statusText = "宸插畬鎴${if (useDualImport) "鍙屾枃浠? else "鍘熺敓"}瑙ｆ瀽锛${resultWithExtraWarnings.questions.size} 棰橈紝纭敊璇?$hardCount 鏉★紝鍙‘璁ゆ彁绀?$softCount 鏉°€?
+        statusText = "宸插畬鎴${if (useDualImport) "鍙屾枃浠" else "鍘熺敓"}瑙ｆ瀽锛${resultWithExtraWarnings.questions.size} 棰橈紝纭敊璇?$hardCount 鏉★紝鍙‘璁ゆ彁绀?$softCount 鏉°€"
         isStatusWarn = hardCount > 0 || softCount > 0
     }
 
@@ -371,7 +371,7 @@ fun ImportScreen(
         val imagesSnapshot = importedImages
         val dualSnapshot = useDualImport
         isImportBusy = true
-        busyText = if (dualSnapshot) "姝ｅ湪鍚堝苟棰樼洰鍜岀瓟妗堚€︹€? else "姝ｅ湪瑙ｆ瀽棰樺簱鏂囨湰鈥︹€?
+        busyText = if (dualSnapshot) "姝ｅ湪鍚堝苟棰樼洰鍜岀瓟妗堚€︹€" else "姝ｅ湪瑙ｆ瀽棰樺簱鏂囨湰鈥︹€"
         statusText = busyText
         isStatusWarn = false
         clearParsedResult()
@@ -380,7 +380,7 @@ fun ImportScreen(
                 withContext(Dispatchers.Default) {
                     val jsonPreview = if (!dualSnapshot) QuizRepository.parseImportJsonPreview(rawSnapshot) else null
                     if (jsonPreview != null && jsonPreview.banks.size > 1) {
-                        throw IllegalArgumentException("${jsonPreview.message} 璇峰湪 鎴戠殑 鈫?鏁版嵁绠＄悊 鈫?瀵煎叆棰樺簱 涓鍏ュ棰樺簱 JSON / 澶囦唤鍖呫€")
+                        throw IllegalArgumentException("${jsonPreview.message} 璇峰湪 鎴戠殑 鈫$鏁版嵁绠＄悊 鈫$瀵煎叆棰樺簱 涓鍏ュ棰樺簱 JSON / 澶囦唤鍖呫€")
                     }
                     val jsonBank = jsonPreview?.banks?.singleOrNull()
                     val parsedResult = if (jsonBank != null) {
@@ -453,7 +453,7 @@ fun ImportScreen(
             aiAnalysisAppliedQuestionIds = aiAnalysisAppliedQuestionIds,
             filter = reviewFilterFromName(reviewFilterName)
         )?.let { reviewIndex = it }
-        statusText = "宸蹭粠鏍稿鍒楄〃涓Щ闄?1 棰樸€備繚瀛橀搴撴椂浼氫娇鐢ㄥ綋鍓嶆牳瀵瑰悗鐨勯鐩€"
+        statusText = "宸蹭粠鏍稿鍒楄〃涓Щ闄$1 棰樸€備繚瀛橀搴撴椂浼氫娇鐢ㄥ綋鍓嶆牳瀵瑰悗鐨勯鐩€"
         isStatusWarn = false
     }
 
@@ -496,7 +496,7 @@ fun ImportScreen(
                     }
                     syncEditableQuestions(nextQuestions, baseWarnings)
                     aiReviewSuggestions = aiReviewSuggestions.filterNot { it.questionId == suggestion.questionId }
-                    statusText = "宸查噰绾?1 鏉?AI 鏍稿寤鸿锛屼繚瀛橀搴撳墠浠嶅彲缁х画浜哄伐璋冩暣銆"
+                    statusText = "宸查噰绾$1 鏉$AI 鏍稿寤鸿锛屼繚瀛橀搴撳墠浠嶅彲缁х画浜哄伐璋冩暣銆"
                     isStatusWarn = false
                 }
             },
@@ -565,7 +565,7 @@ fun ImportScreen(
                     }
                     syncEditableQuestions(nextQuestions, baseWarnings)
                     aiReviewSuggestions = aiReviewSuggestions.filterNot { it.questionId == suggestion.questionId }
-                    statusText = "宸查噰绾?1 鏉?AI 鏍稿寤鸿锛屼繚瀛橀搴撳墠浠嶅彲缁х画浜哄伐璋冩暣銆"
+                    statusText = "宸查噰绾$1 鏉$AI 鏍稿寤鸿锛屼繚瀛橀搴撳墠浠嶅彲缁х画浜哄伐璋冩暣銆"
                     isStatusWarn = false
                 }
             },
@@ -986,7 +986,7 @@ fun ImportScreen(
                         )
                         ActionPillButton(
                             icon = Icons.Rounded.CheckCircle,
-                            text = if (previewOnlyAnomaly) "鏄剧ず鍏ㄩ儴棰? else "浠呯湅寮傚父棰?,
+                            text = if (previewOnlyAnomaly) "鏄剧ず鍏ㄩ儴棰" else "浠呯湅寮傚父棰",
                             primary = previewOnlyAnomaly,
                             onClick = {
                                 val nextOnlyAnomaly = !previewOnlyAnomaly
@@ -1039,12 +1039,12 @@ fun ImportScreen(
                             onClick = {
                                 if (!QuizRepository.isAiConfigured()) {
                                     showAiConfigPrompt = true
-                                    statusText = "AI 閲嶆瀯锛氳鍏堝湪涓汉鍋忓ソ 鈫?AI 璁剧疆涓厤缃帴鍙ｃ€"
+                                    statusText = "AI 閲嶆瀯锛氳鍏堝湪涓汉鍋忓ソ 鈫$AI 璁剧疆涓厤缃帴鍙ｃ€"
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
                                 if (!QuizRepository.aiRefactorEnabled) {
-                                    statusText = "AI 閲嶆瀯鏈惎鐢紝璇峰厛鍦ㄤ釜浜哄亸濂?鈫?AI 璁剧疆涓紑鍚€"
+                                    statusText = "AI 閲嶆瀯鏈惎鐢紝璇峰厛鍦ㄤ釜浜哄亸濂$鈫$AI 璁剧疆涓紑鍚€"
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
@@ -1057,13 +1057,13 @@ fun ImportScreen(
                                 }
                                 val sourceLength = sourceText.length + answerSourceText.length
                                 if (sourceLength > QuizRepository.aiRefactorMaxChars) {
-                                    statusText = "AI 閲嶆瀯锛氬師鏂囩害 ${sourceLength} 瀛楋紝瓒呰繃褰撳墠涓婇檺 ${QuizRepository.aiRefactorMaxChars} 瀛椼€傝鍦?AI 璁剧疆涓皟澶т笂闄愶紝鎴栨媶鍒嗛搴撳悗澶勭悊銆"
+                                    statusText = "AI 閲嶆瀯锛氬師鏂囩害 ${sourceLength} 瀛楋紝瓒呰繃褰撳墠涓婇檺 ${QuizRepository.aiRefactorMaxChars} 瀛椼€傝鍦$AI 璁剧疆涓皟澶т笂闄愶紝鎴栨媶鍒嗛搴撳悗澶勭悊銆"
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
                                 val warningTexts = displayResult.warnings.map { warning ->
-                                    val numberText = warning.questionNumber?.takeIf { it.isNotBlank() }?.let { "棰樺彿$it锛" }.orEmpty()
-                                    "${warning.level.name}锛?numberText${warning.message}"
+                                    val numberText = warning.questionNumber?.takeIf { it.isNotBlank() }".let { "棰樺彿$it锛" }.orEmpty()
+                                    "${warning.level.name}锛"numberText${warning.message}"
                                 }.distinct().take(120)
                                 val beforeCount = editableQuestions.size
                                 statusText = "AI 閲嶆瀯涓細浼樺厛娓呮礂鍘熸枃骞堕噸鏂版湰鍦拌В鏋愶紝蹇呰鏃跺啀浣跨敤 AI 鐩存帴閲嶆瀯缁撴灉銆"
@@ -1116,7 +1116,7 @@ fun ImportScreen(
                                                 refactoredQuestions
                                             )
                                             val nextResult = reparsedResult.copy(
-                                                strategyName = "AI閲嶆瀯閲嶈В鏋?+ ${reparsedResult.strategyName}",
+                                                strategyName = "AI閲嶆瀯閲嶈В鏋"+ ${reparsedResult.strategyName}",
                                                 warnings = nextWarnings,
                                                 diagnostics = reparsedResult.diagnostics.copy(
                                                     notes = (reparsedResult.diagnostics.notes + "AI閲嶆瀯锛氬凡娓呮礂鍘熸枃骞堕噸鏂版湰鍦拌В鏋愶紝鐢?$beforeCount 棰樿В鏋愪负 ${refactoredQuestions.size} 棰樸€" + refactorResult.notes).distinct()
@@ -1131,7 +1131,7 @@ fun ImportScreen(
                                             aiAnalyzedQuestionIds = emptyList()
                                             aiAnalysisAppliedQuestionIds = emptyList()
                                             aiReviewSuggestions = emptyList()
-                                            statusText = "AI 閲嶆瀯瀹屾垚锛氬凡娓呮礂鍘熸枃骞堕噸鏂版湰鍦拌В鏋愶紝鐢?$beforeCount 棰樺緱鍒?${refactoredQuestions.size} 棰樸€傝鍏堜汉宸ユ牳瀵癸紝鍐嶇户缁?AI 鏍稿鎴?AI 瑙ｆ瀽銆"
+                                            statusText = "AI 閲嶆瀯瀹屾垚锛氬凡娓呮礂鍘熸枃骞堕噸鏂版湰鍦拌В鏋愶紝鐢"$beforeCount 棰樺緱鍒?${refactoredQuestions.size} 棰樸€傝鍏堜汉宸ユ牳瀵癸紝鍐嶇户缁$AI 鏍稿鎴$AI 瑙ｆ瀽銆"
                                             isStatusWarn = nextWarnings.isNotEmpty()
                                         } else if (directQuestions.isNotEmpty()) {
                                             val refactoredQuestions = directQuestions
@@ -1156,7 +1156,7 @@ fun ImportScreen(
                                             aiAnalyzedQuestionIds = emptyList()
                                             aiAnalysisAppliedQuestionIds = emptyList()
                                             aiReviewSuggestions = emptyList()
-                                            statusText = "AI 閲嶆瀯瀹屾垚锛氱敱 $beforeCount 棰橀噸鏁翠负 ${refactoredQuestions.size} 棰樸€傝鍏堜汉宸ユ牳瀵癸紝鍐嶇户缁?AI 鏍稿鎴?AI 瑙ｆ瀽銆"
+                                            statusText = "AI 閲嶆瀯瀹屾垚锛氱敱 $beforeCount 棰橀噸鏁翠负 ${refactoredQuestions.size} 棰樸€傝鍏堜汉宸ユ牳瀵癸紝鍐嶇户缁$AI 鏍稿鎴$AI 瑙ｆ瀽銆"
                                             isStatusWarn = nextWarnings.isNotEmpty()
                                         } else if (reparsedResult != null) {
                                             statusText = "AI 閲嶆瀯宸茶繑鍥炴竻娲楁枃鏈紝浣嗘湰鍦伴噸瑙ｆ瀽鏈緱鍒板彲鐢ㄩ鐩紝褰撳墠寰呮牳瀵圭粨鏋滄湭鏀瑰姩銆"
@@ -1183,12 +1183,12 @@ fun ImportScreen(
                             onClick = {
                                 if (!QuizRepository.isAiConfigured()) {
                                     showAiConfigPrompt = true
-                                    statusText = "AI 鏍稿锛氳鍏堝湪涓汉鍋忓ソ 鈫?AI 璁剧疆涓厤缃帴鍙ｃ€"
+                                    statusText = "AI 鏍稿锛氳鍏堝湪涓汉鍋忓ソ 鈫$AI 璁剧疆涓厤缃帴鍙ｃ€"
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
                                 if (!QuizRepository.aiReviewEnabled) {
-                                    statusText = "AI 鏍稿鏈惎鐢紝璇峰厛鍦ㄤ釜浜哄亸濂?鈫?AI 璁剧疆涓紑鍚€"
+                                    statusText = "AI 鏍稿鏈惎鐢紝璇峰厛鍦ㄤ釜浜哄亸濂$鈫$AI 璁剧疆涓紑鍚€"
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
@@ -1244,7 +1244,7 @@ fun ImportScreen(
                                             "AI 鏍稿瀹屾垚锛氭湰鎵规湭鍙戠幇閲嶇偣闂锛屽凡澶勭悊 ${processedAfter}/${baseReviewQuestions.size} 棰樸€"
                                         } else {
                                             "AI 鏍稿瀹屾垚锛氭湰鎵圭敓鎴?${aiWarnings.size} 鏉″缓璁紝宸插鐞?${processedAfter}/${baseReviewQuestions.size} 棰樸€"
-                                        } + if (processedAfter < baseReviewQuestions.size) " 鍙户缁偣鍑?AI 鏍稿澶勭悊涓嬩竴鎵广€? else " 褰撳墠鑼冨洿宸插鐞嗗畬銆?
+                                        } + if (processedAfter < baseReviewQuestions.size) " 鍙户缁偣鍑$AI 鏍稿澶勭悊涓嬩竴鎵广€" else " 褰撳墠鑼冨洿宸插鐞嗗畬銆"
                                         isStatusWarn = aiWarnings.isNotEmpty()
                                     }.onFailure { error ->
                                         statusText = "AI 鏍稿澶辫触锛${error.message ?: "璇锋鏌ユ帴鍙ｉ厤缃"}"
@@ -1264,12 +1264,12 @@ fun ImportScreen(
                             onClick = {
                                 if (!QuizRepository.isAiConfigured()) {
                                     showAiConfigPrompt = true
-                                    statusText = "AI 瑙ｆ瀽锛氳鍏堝湪涓汉鍋忓ソ 鈫?AI 璁剧疆涓厤缃帴鍙ｃ€"
+                                    statusText = "AI 瑙ｆ瀽锛氳鍏堝湪涓汉鍋忓ソ 鈫$AI 璁剧疆涓厤缃帴鍙ｃ€"
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
                                 if (!QuizRepository.aiAnalysisEnabled) {
-                                    statusText = "AI 瑙ｆ瀽鏈惎鐢紝璇峰厛鍦ㄤ釜浜哄亸濂?鈫?AI 璁剧疆涓紑鍚€"
+                                    statusText = "AI 瑙ｆ瀽鏈惎鐢紝璇峰厛鍦ㄤ釜浜哄亸濂$鈫$AI 璁剧疆涓紑鍚€"
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
@@ -1344,7 +1344,7 @@ fun ImportScreen(
                                         } else {
                                             ""
                                         } + if (remainingAnalysisCount > 0) {
-                                            " 浠嶆湁绾?${remainingAnalysisCount} 閬撶己瑙ｆ瀽棰橈紝鍙户缁偣鍑?AI 瑙ｆ瀽澶勭悊涓嬩竴鎵广€"
+                                            " 浠嶆湁绾?${remainingAnalysisCount} 閬撶己瑙ｆ瀽棰橈紝鍙户缁偣鍑$AI 瑙ｆ瀽澶勭悊涓嬩竴鎵广€"
                                         } else {
                                             " 褰撳墠鑼冨洿宸插鐞嗗畬銆"
                                         }
@@ -1563,7 +1563,7 @@ fun ImportScreen(
             ) {
                 if (QuizRepository.banks.isEmpty()) {
                     Text(
-                        text = "鏆傛棤宸插鍏ラ搴?瀹屾垚棣栨瀵煎叆鍚庝細鍦ㄨ繖閲屽垪鍑恒€",
+                        text = "鏆傛棤宸插鍏ラ搴$瀹屾垚棣栨瀵煎叆鍚庝細鍦ㄨ繖閲屽垪鍑恒€",
                         style = MaterialTheme.typography.bodyMedium,
                         color = ShirohaColors.TextSecondary
                     )
@@ -1599,7 +1599,7 @@ fun ImportScreen(
                         }
                         if (QuizRepository.banks.size > 5) {
                             Text(
-                                text = "鍙︽湁 ${QuizRepository.banks.size - 5} 涓搴?璇峰埌棰樺簱绠＄悊鏌ョ湅瀹屾暣鍒楄〃銆",
+                                text = "鍙︽湁 ${QuizRepository.banks.size - 5} 涓搴$璇峰埌棰樺簱绠＄悊鏌ョ湅瀹屾暣鍒楄〃銆",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = ShirohaColors.TextSecondary
                             )
@@ -1613,8 +1613,8 @@ fun ImportScreen(
     if (showAiConfigPrompt) {
         AlertDialog(
             onDismissRequest = { showAiConfigPrompt = false },
-            title = { Text("闇€瑕侀厤缃?AI 鎺ュ彛") },
-            text = { Text("璇峰厛鍦?鎴戠殑 鈫?AI 璁剧疆 涓厤缃帴鍙ｃ€") },
+            title = { Text("闇€瑕侀厤缃$AI 鎺ュ彛") },
+            text = { Text("璇峰厛鍦$鎴戠殑 鈫$AI 璁剧疆 涓厤缃帴鍙ｃ€") },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -1803,7 +1803,7 @@ private fun FullImportTextEditorScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = if (useRegexFind) "姝ｅ垯妯″紡宸插紑鍚? else "鏅€氭枃鏈尮閰?,
+                            text = if (useRegexFind) "姝ｅ垯妯″紡宸插紑鍚" else "鏅€氭枃鏈尮閰",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.weight(1f)
@@ -2039,7 +2039,7 @@ private fun NativeImportSummary(
             if (imageQuestionCount > 0) StatusChip("鍥剧墖棰橈細$imageQuestionCount", selected = true)
             StatusChip("纭敊璇細$hardCount", selected = hardCount == 0)
             StatusChip("鎻愮ず锛$softCount", selected = softCount == 0)
-            StatusChip("缂?鐭В鏋愶細$missingAnalysisCount", selected = missingAnalysisCount == 0)
+            StatusChip("缂$鐭В鏋愶細$missingAnalysisCount", selected = missingAnalysisCount == 0)
             if (aiReviewedCount > 0) StatusChip("AI宸叉牳瀵癸細$aiReviewedCount", selected = true)
             if (aiReviewSuggestionCount > 0) StatusChip("AI寤鸿锛$aiReviewSuggestionCount", selected = true)
             if (aiApplicableCount > 0) StatusChip("鍙噰绾筹細$aiApplicableCount", selected = true)
@@ -2124,14 +2124,14 @@ private fun NativeImportPreview(
 ) {
     GlassCard {
         Text(
-            text = if (onlyShowAnomaly) "寮傚父棰橀瑙? else "蹇€熼瑙?,
+            text = if (onlyShowAnomaly) "寮傚父棰橀瑙" else "蹇€熼瑙",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold
         )
         Spacer(Modifier.height(12.dp))
         if (questions.isEmpty()) {
             NoticeCard(
-                text = if (onlyShowAnomaly) "褰撳墠娌℃湁鍙瑙堢殑寮傚父棰樸€? else "褰撳墠娌℃湁鍙瑙堢殑棰樼洰銆?,
+                text = if (onlyShowAnomaly) "褰撳墠娌℃湁鍙瑙堢殑寮傚父棰樸€" else "褰撳墠娌℃湁鍙瑙堢殑棰樼洰銆",
                 warning = false
             )
             return@GlassCard
@@ -2405,7 +2405,7 @@ private fun NativeQuestionReviewScreen(
                 )
                 ReviewCompactButton(
                     icon = Icons.Rounded.ArrowBack,
-                    text = if (activeFilter == ReviewFilter.ALL) "涓婁竴棰? else "涓婁竴鏉?,
+                    text = if (activeFilter == ReviewFilter.ALL) "涓婁竴棰" else "涓婁竴鏉",
                     modifier = Modifier.weight(1f),
                     onClick = {
                         val target = previousIndexInList(visibleIndices, safeIndex) ?: (safeIndex - 1)
@@ -2414,7 +2414,7 @@ private fun NativeQuestionReviewScreen(
                 )
                 ReviewCompactButton(
                     icon = Icons.Rounded.ArrowForward,
-                    text = if (activeFilter == ReviewFilter.ALL) "涓嬩竴棰? else "涓嬩竴鏉?,
+                    text = if (activeFilter == ReviewFilter.ALL) "涓嬩竴棰" else "涓嬩竴鏉",
                     modifier = Modifier.weight(1f),
                     onClick = {
                         val target = nextIndexInList(visibleIndices, safeIndex) ?: (safeIndex + 1)
@@ -2484,7 +2484,7 @@ private fun ReviewQuestionEditScreen(
         ShirohaHeader(
             kicker = "Edit",
             title = "缂栬緫棰樼洰",
-            subtitle = "绗?${questionIndex + 1} / $totalCount 棰?路 ${typeLabel(question.type)} 路 绛旀锛${answerDisplayText(question)}"
+            subtitle = "绗?${questionIndex + 1} / $totalCount 棰$路 ${typeLabel(question.type)} 路 绛旀锛${answerDisplayText(question)}"
         )
 
         GlassCard {
@@ -2614,7 +2614,7 @@ private fun ReviewQuestionAssistBlocks(
 private fun ReviewQuestionEditorContent(
     question: Question,
     onQuestionChange: (Question) -> Unit,
-    onDeleteQuestion: (() -> Unit)? = null
+    onDeleteQuestion: (() -> Unit)" = null
 ) {
     var showRemoveImagesConfirm by remember(question.id) { mutableStateOf(false) }
     var showDeleteLastOptionConfirm by remember(question.id) { mutableStateOf(false) }
@@ -2832,7 +2832,7 @@ private fun ReviewQuestionEditorContent(
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "鍗曢€?A锛屽閫?ABC锛屽垽鏂?姝ｇ‘/閿欒锛涘绌哄～绌哄彲閫愮┖閰嶇疆涓荤瓟妗堜笌澶囬€夌瓟妗堛€",
+                text = "鍗曢€"A锛屽閫$ABC锛屽垽鏂$姝ｇ‘/閿欒锛涘绌哄～绌哄彲閫愮┖閰嶇疆涓荤瓟妗堜笌澶囬€夌瓟妗堛€",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -2942,7 +2942,7 @@ private fun AiReviewSuggestionCard(
         "hard_error" -> "纭敊璇"
         else -> "闇€纭"
     }
-    val issueText = suggestion.issueTypes.takeIf { it.isNotEmpty() }?.joinToString("銆").orEmpty()
+    val issueText = suggestion.issueTypes.takeIf { it.isNotEmpty() }".joinToString("銆").orEmpty()
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -2957,7 +2957,7 @@ private fun AiReviewSuggestionCard(
                 text = buildString {
                     append("AI 寤鸿")
                     append(" 路 ").append(riskText)
-                    if (suggestion.confidence > 0.0) append(" 路 缃俊搴?").append((suggestion.confidence * 100).toInt()).append("%")
+                    if (suggestion.confidence > 0.0) append(" 路 缃俊搴"").append((suggestion.confidence * 100).toInt()).append("%")
                     if (issueText.isNotBlank()) append(" 路 ").append(issueText)
                 },
                 style = MaterialTheme.typography.labelLarge,
@@ -3066,7 +3066,7 @@ private fun importPreviewQuestionTags(
     aiAnalysisAppliedQuestionIds: List<String>
 ): String {
     val tags = mutableListOf<String>()
-    if (shouldApplyAiAnalysis(question)) tags += "缂?鐭В鏋"
+    if (shouldApplyAiAnalysis(question)) tags += "缂$鐭В鏋"
     if (question.id in aiReviewedQuestionIds.toSet()) tags += "AI宸叉牳瀵"
     if (question.id in aiReviewedQuestionIds.toSet() && aiSuggestions.isEmpty()) tags += "鏈彂鐜伴噸鐐归棶棰"
     if (question.id in aiAnalyzedQuestionIds.toSet()) tags += "AI宸插皾璇曡В鏋"
@@ -3100,7 +3100,7 @@ private fun suggestionsToImportWarnings(
         .filter(::isActionableAiSuggestion)
         .mapNotNull { suggestion ->
             val question = questionById[suggestion.questionId] ?: return@mapNotNull null
-            val issueText = suggestion.issueTypes.takeIf { it.isNotEmpty() }?.joinToString("銆").orEmpty()
+            val issueText = suggestion.issueTypes.takeIf { it.isNotEmpty() }".joinToString("銆").orEmpty()
             val message = buildString {
                 append("AI寤鸿")
                 if (issueText.isNotBlank()) append("[").append(issueText).append("]")
@@ -3118,7 +3118,7 @@ private fun suggestionsToImportWarnings(
             ImportWarning(
                 level = if (hard) WarningLevel.ERROR else WarningLevel.WARNING,
                 questionNumber = question.number,
-                message = message.ifBlank { "AI 寤鸿浜哄伐纭鏈锛?AI_WARNING_ID_MARKER${question.id}" }
+                message = message.ifBlank { "AI 寤鸿浜哄伐纭鏈锛"AI_WARNING_ID_MARKER${question.id}" }
             )
         }
 }
@@ -3194,7 +3194,7 @@ private fun validateQuestionsWithIdMarkers(questions: List<Question>): List<Impo
 }
 
 private fun String.withImportWarningQuestionId(questionId: String): String {
-    return "${displayImportWarningMessage(this)}锛?IMPORT_WARNING_ID_MARKER$questionId"
+    return "${displayImportWarningMessage(this)}锛$IMPORT_WARNING_ID_MARKER$questionId"
 }
 
 private fun isReplaceableLocalImportWarning(warning: ImportWarning): Boolean {
@@ -3229,14 +3229,14 @@ private val replaceableLocalImportWarningMessages = setOf(
 private fun normalizeImportWarningForDedupe(message: String): String {
     return displayImportWarningMessage(message)
         .replace(Regex("\\s+"), "")
-        .trim('锛?, ';', '銆?, ' ', '\n', '\t')
+        .trim('锛?, ';', '銆", ' ', '\n', '\t')
 }
 
 private fun isAiImportWarning(warning: ImportWarning): Boolean {
     return warning.message.startsWith("AI寤鸿") || warning.message.startsWith("AI 寤鸿")
 }
 
-private fun aiWarningQuestionId(warning: ImportWarning): String? {
+private fun aiWarningQuestionId(warning: ImportWarning): String" {
     return markerValue(warning.message, AI_WARNING_ID_MARKER)
 }
 
@@ -3270,7 +3270,7 @@ private fun displayImportWarningMessage(message: String): String {
         message.indexOf(AI_WARNING_ID_MARKER),
         message.indexOf(IMPORT_WARNING_ID_MARKER)
     ).filter { it >= 0 }.minOrNull() ?: return message
-    return message.substring(0, markerIndex).trimEnd('锛?, ';', ' ', '\n', '\t')
+    return message.substring(0, markerIndex).trimEnd('锛", ';', ' ', '\n', '\t')
 }
 
 private fun canApplyAiSuggestion(suggestion: AiReviewSuggestion): Boolean {
@@ -3353,7 +3353,7 @@ private fun applyAiReviewSuggestion(question: Question, suggestion: AiReviewSugg
     return next
 }
 
-private fun suggestedQuestionType(type: String): QuestionType? = when (type.trim().lowercase()) {
+private fun suggestedQuestionType(type: String): QuestionType" = when (type.trim().lowercase()) {
     "single", "鍗曢€", "鍗曢€夐" -> QuestionType.SINGLE
     "multiple", "multi", "澶氶€", "澶氶€夐" -> QuestionType.MULTIPLE
     "judge", "true_false", "鍒ゆ柇", "鍒ゆ柇棰" -> QuestionType.JUDGE
@@ -3364,7 +3364,7 @@ private fun suggestedQuestionType(type: String): QuestionType? = when (type.trim
 
 private fun normalizeSuggestedAnswer(answer: List<String>, type: QuestionType): List<String> {
     val normalized = answer
-        .flatMap { item -> item.split(',', '锛?, '銆?, '/', ' ') }
+        .flatMap { item -> item.split(',', '锛?, '銆", '/', ' ') }
         .map { it.trim().uppercase() }
         .filter { it.isNotBlank() }
     return when (type) {
@@ -3581,7 +3581,7 @@ private fun hasHardReviewError(question: Question, warnings: List<ImportWarning>
         if (optionKeys.isNotEmpty() && question.answer.any { it.uppercase() !in optionKeys }) return true
     }
     if (question.type == QuestionType.JUDGE && question.answer.isNotEmpty()) {
-        val allowed = setOf("A", "B", "姝ｇ‘", "閿欒", "瀵?, "閿?)
+        val allowed = setOf("A", "B", "姝ｇ‘", "閿欒", "瀵", "閿")
         if (question.answer.any { it.uppercase() !in allowed }) return true
     }
     return false
@@ -3700,8 +3700,8 @@ private fun normalizeJudgeAnswer(answer: List<String>): List<String> {
     if (answer.isEmpty()) return emptyList()
     return answer.mapNotNull { value ->
         when (value.trim().uppercase()) {
-            "A", "姝ｇ‘", "瀵?, "鏄?, "TRUE", "T", "鈭?, "鉁?, "鉁?, "鉁?, "鈽" -> "A"
-            "B", "閿欒", "閿?, "鍚?, "FALSE", "F", "脳", "X", "鉁?, "鉁?, "鉂?, "鉂? -> "B"
+            "A", "姝ｇ‘", "瀵", "鏄", "TRUE", "T", "鈭", "鉁", "鉁", "鉁", "鈽" -> "A"
+            "B", "閿欒", "閿", "鍚", "FALSE", "F", "脳", "X", "鉁", "鉁", "鉂", "鉂? -> "B"
             else -> value.trim().takeIf { it.isNotBlank() }
         }
     }
@@ -3755,8 +3755,8 @@ private fun parseReviewAnswer(text: String, type: QuestionType): List<String> {
 private fun answerInputText(question: Question): String {
     if (question.type == QuestionType.JUDGE && question.answer.size == 1) {
         return when (question.answer.first().trim().uppercase()) {
-            "A", "姝ｇ‘", "瀵?, "鏄?, "TRUE", "T", "鈭?, "鉁?, "鉁?, "鉁?, "鈽" -> "姝ｇ‘"
-            "B", "閿欒", "閿?, "鍚?, "FALSE", "F", "脳", "X", "鉁?, "鉁?, "鉂?, "鉂? -> "閿欒"
+            "A", "姝ｇ‘", "瀵", "鏄", "TRUE", "T", "鈭", "鉁", "鉁", "鉁", "鈽" -> "姝ｇ‘"
+            "B", "閿欒", "閿", "鍚", "FALSE", "F", "脳", "X", "鉁", "鉁", "鉂", "鉂? -> "閿欒"
             else -> question.answer.first()
         }
     }
@@ -3846,15 +3846,15 @@ private fun readImportedText(context: Context, uri: Uri, fileName: String): Text
 }
 
 private fun sampleImportText(): String = """
-1. 瀹夊叏甯界殑涓昏浣滅敤鏄紙A锛?A. 淇濇姢澶撮儴
+1. 瀹夊叏甯界殑涓昏浣滅敤鏄紙A锛"A. 淇濇姢澶撮儴
 B. 瑁呴グ浣滅敤
 C. 澧炲姞閲嶉噺
-D. 鏃犲疄闄呬綔鐢?绛旀锛欰
-瑙ｆ瀽锛氬畨鍏ㄥ附鐢ㄤ簬鍑忚交鍧犺惤鐗╁拰纰版挒瀵瑰ご閮ㄩ€犳垚鐨勪激瀹炽€?
-2. 闆ㄥぉ椹鹃┒鏃跺簲娉ㄦ剰鍝簺浜嬮」锛圓B锛?A. 闄嶄綆杞﹂€?B. 鍔犲ぇ璺熻溅璺濈
+D. 鏃犲疄闄呬綔鐢$绛旀锛欰
+瑙ｆ瀽锛氬畨鍏ㄥ附鐢ㄤ簬鍑忚交鍧犺惤鐗╁拰纰版挒瀵瑰ご閮ㄩ€犳垚鐨勪激瀹炽€"
+2. 闆ㄥぉ椹鹃┒鏃跺簲娉ㄦ剰鍝簺浜嬮」锛圓B锛"A. 闄嶄綆杞﹂€$B. 鍔犲ぇ璺熻溅璺濈
 C. 鎬ユ墦鏂瑰悜
-D. 绱ф€ュ埗鍔?绛旀锛欰B
-瑙ｆ瀽锛氶洦澶╄矾婊戯紝搴斿钩绋虫帶鍒惰溅杈嗗苟鐣欒冻瀹夊叏璺濈銆?
+D. 绱ф€ュ埗鍔$绛旀锛欰B
+瑙ｆ瀽锛氶洦澶╄矾婊戯紝搴斿钩绋虫帶鍒惰溅杈嗗苟鐣欒冻瀹夊叏璺濈銆"
 3. 鍥藉瀹夊叏鐢熶骇鏂归拡鏄€滃畨鍏ㄧ涓€锛岄闃蹭负涓烩€濄€傦紙瀵癸級
 绛旀锛氬
 瑙ｆ瀽锛氳繖鏄竴閬撳熀纭€鍒ゆ柇棰橈紝绛旀涓烘纭€"""".trimIndent()

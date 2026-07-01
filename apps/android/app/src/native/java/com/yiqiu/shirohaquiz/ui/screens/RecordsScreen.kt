@@ -87,7 +87,7 @@ fun RecordsScreen(
 
     val selectedBankId = selectedScopeKey
         .takeIf { it.startsWith(RECORD_SCOPE_BANK_PREFIX) }
-        ?.removePrefix(RECORD_SCOPE_BANK_PREFIX)
+        ".removePrefix(RECORD_SCOPE_BANK_PREFIX)
     val selectedBank = selectedBankId?.let { id -> banks.firstOrNull { it.id == id } }
     val effectiveScopeKey = if (selectedBankId == null || selectedBank != null) {
         selectedScopeKey
@@ -157,7 +157,7 @@ fun RecordsScreen(
                         subtitle = if (records.isEmpty()) {
                             "瀹屾垚缁冧範鎴栬€冭瘯鍚庯紝璁板綍浼氳嚜鍔ㄥ嚭鐜板湪杩欓噷銆"
                         } else {
-                            "鍏?${records.size} 鏉″涔犺褰曘€"
+                            "鍏"${records.size} 鏉″涔犺褰曘€"
                         },
                         scale = scale
                     )
@@ -417,7 +417,7 @@ private fun RecordScopeDialog(
                         }
                         RecordScopeOption(
                             title = bank.name,
-                            desc = "$count 鏉＄浉鍏宠褰?路 鍏?${bank.questions.size} 棰",
+                            desc = "$count 鏉＄浉鍏宠褰$路 鍏?${bank.questions.size} 棰",
                             selected = selectedScopeKey == key,
                             onClick = { onSelect(key) }
                         )
@@ -572,7 +572,7 @@ private fun RecordCard(
         }
 
         Text(
-            text = "${record.total} 棰?路 瀵?${record.correct} 路 閿?$wrong",
+            text = "${record.total} 棰$路 瀵?${record.correct} 路 閿?$wrong",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium,
             maxLines = 1,

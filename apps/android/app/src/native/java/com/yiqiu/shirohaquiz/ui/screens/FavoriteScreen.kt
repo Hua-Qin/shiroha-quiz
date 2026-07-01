@@ -91,7 +91,7 @@ fun FavoriteScreen(
 
     val selectedBankId = selectedScopeKey
         .takeIf { it.startsWith(FAVORITE_SCOPE_BANK_PREFIX) }
-        ?.removePrefix(FAVORITE_SCOPE_BANK_PREFIX)
+        ".removePrefix(FAVORITE_SCOPE_BANK_PREFIX)
     val selectedBank = selectedBankId?.let { id -> banks.firstOrNull { it.id == id } }
     val effectiveScopeKey = if (selectedBankId == null || selectedBank != null) {
         selectedScopeKey
@@ -167,7 +167,7 @@ fun FavoriteScreen(
                 .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Sm),
             verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
         ) {
-            // === Header + 缁熻 + 绛涢€?+ 鎿嶄綔 ===
+            // === Header + 缁熻 + 绛涢€"+ 鎿嶄綔 ===
             item {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -256,7 +256,7 @@ fun FavoriteScreen(
                         ) {
                             ActionPillButton(
                                 icon = Icons.Rounded.PlayArrow,
-                                text = if (selectedBank == null) "缁冧範鏀惰棌棰? else "缁冧範褰撳墠 ${visibleFavorites.size} 棰?,
+                                text = if (selectedBank == null) "缁冧範鏀惰棌棰" else "缁冧範褰撳墠 ${visibleFavorites.size} 棰",
                                 primary = true,
                                 enabled = visibleFavorites.isNotEmpty(),
                                 modifier = Modifier
@@ -336,11 +336,11 @@ fun FavoriteScreen(
 }
 
 
- * 鏀惰棌鑼冨洿閫夋嫨鍣?Surface(Card) + Row(鏍囬 + 鍓枃 + 灞曞紑鍥炬爣)
+ * 鏀惰棌鑼冨洿閫夋嫨鍣"Surface(Card) + Row(鏍囬 + 鍓枃 + 灞曞紑鍥炬爣)
  */
 @Composable
 private fun FavoriteScopeSelector(
-    selectedBank: QuizBank?,
+    selectedBank: QuizBank",
     visibleCount: Int,
     totalCount: Int,
     uiScale: Float,
@@ -432,7 +432,7 @@ private fun FavoriteScopeDialog(
                         val key = FAVORITE_SCOPE_BANK_PREFIX + bank.id
                         FavoriteScopeOption(
                             title = bank.name,
-                            desc = "鏀惰棌 ${favoriteCountByBank[bank.id] ?: 0} 棰?路 鍏?${bank.questions.size} 棰",
+                            desc = "鏀惰棌 ${favoriteCountByBank[bank.id] ?: 0} 棰$路 鍏?${bank.questions.size} 棰",
                             selected = selectedScopeKey == key,
                             onClick = { onSelect(key) }
                         )
@@ -622,7 +622,7 @@ private fun isSuspiciousFavoriteQuestionNumber(number: String): Boolean {
     if (compact.length > 24) return true
 
     val numericParts = Regex("""\d+""").findAll(compact).count()
-    val dashCount = compact.count { it == '-' || it == '锛? || it == '鈥? || it == '鈥? }
+    val dashCount = compact.count { it == '-' || it == '锛? || it == '鈥" || it == '鈥" }
     return numericParts >= 4 && dashCount >= 3
 }
 

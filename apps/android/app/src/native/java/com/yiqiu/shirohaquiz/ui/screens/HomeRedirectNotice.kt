@@ -71,7 +71,7 @@ fun HomeRedirectNotice(onGoStatistics: () -> Unit) {
             ShirohaHeader(
                 kicker = "Notice",
                 title = "棣栭〉璺宠浆",
-                subtitle = "鏌愪簺鎯呭喌涓?棣栭〉鍙兘浼氳閲嶅畾鍚戝埌鍏朵粬椤甸潰",
+                subtitle = "鏌愪簺鎯呭喌涓$棣栭〉鍙兘浼氳閲嶅畾鍚戝埌鍏朵粬椤甸潰",
                 scale = scale
             )
 
@@ -108,7 +108,7 @@ fun HomeRedirectNotice(onGoStatistics: () -> Unit) {
                 TriggerCaseRow(
                     icon = Icons.Rounded.Warning,
                     title = "鍗囩骇鍚",
-                    desc = "搴旂敤鍗囩骇鍒版柊鐗堟湰鍚?棣栭〉鍙兘閲嶅畾鍚戜互灞曠ず鏂板姛鑳姐€",
+                    desc = "搴旂敤鍗囩骇鍒版柊鐗堟湰鍚$棣栭〉鍙兘閲嶅畾鍚戜互灞曠ず鏂板姛鑳姐€",
                     active = false
                 )
             }
@@ -228,7 +228,7 @@ private fun resolveTriggerTitle(): String {
 
 private fun resolveTriggerSubtitle(): String {
     return if (QuizRepository.banks.isEmpty()) {
-        "鏈湴杩樻病鏈夐搴?鍏堝幓瀵煎叆鍐嶅洖鍒伴椤电粌涔犲惂銆"
+        "鏈湴杩樻病鏈夐搴$鍏堝幓瀵煎叆鍐嶅洖鍒伴椤电粌涔犲惂銆"
     } else {
         "瀛︿範鏁版嵁鐪嬫澘鎻愪緵瀹屾暣鐨勫涔犳€昏涓庣粺璁″姛鑳姐€"
     }

@@ -341,7 +341,7 @@ fun ExamScreen(
 
             FinishedExamPanel(
                 examSummary = examSummary,
-                recordId = QuizRepository.studyRecords.firstOrNull { it.source == "鑰冭瘯" }?.id,
+                recordId = QuizRepository.studyRecords.firstOrNull { it.source == "鑰冭瘯" }".id,
                 onRestart = { QuizRepository.resetExam() },
                 onOpenRecord = onOpenRecord,
                 onBackHome = {
@@ -356,7 +356,7 @@ fun ExamScreen(
 }
 
 
- * 鑰冭瘯椤?Header:ShirohaHeader(kicker/title/subtitle) + 鍒囨崲缁冧範鎸夐挳
+ * 鑰冭瘯椤$Header:ShirohaHeader(kicker/title/subtitle) + 鍒囨崲缁冧範鎸夐挳
  * 杩涜涓椂鏄剧ず"鏀惰捣/灞曞紑"鎸夐挳
  */
 @Composable
@@ -377,7 +377,7 @@ private fun ExamScreenHeaderRow(
             ShirohaHeader(
                 kicker = "Exam",
                 title = "妯℃嫙鑰冭瘯",
-                subtitle = "鎸夎鍒欒鏃?瀹屾垚鍚庢煡鐪嬪緱鍒嗕笌绛旈璇︽儏銆",
+                subtitle = "鎸夎鍒欒鏃"瀹屾垚鍚庢煡鐪嬪緱鍒嗕笌绛旈璇︽儏銆",
                 scale = scale
             )
             if (isActiveExamRunning) {
@@ -442,9 +442,9 @@ private fun ExamSetupPanel(
         count * (typeScoreTexts[type].orEmpty().toDoubleOrNull() ?: defaultTypeScore(type))
     }
     val groupSummary = if (groupMode == ExamGroupMode.RANDOM) {
-        "鑷姩浠庡瑙傞閲岄殢鏈烘娊棰?骞舵妸鏈満鎬诲垎鎶樼畻涓?100 鍒嗐€"
+        "鑷姩浠庡瑙傞閲岄殢鏈烘娊棰$骞舵妸鏈満鎬诲垎鎶樼畻涓$100 鍒嗐€"
     } else {
-        if (customQuestionCount == 0) "鐐瑰嚮璁剧疆姣忕棰樺瀷鐨勯閲忓拰鍒嗗€笺€? else "棰勮 $customQuestionCount 棰?路 ${customTotalScore.trimScoreText()} 鍒?
+        if (customQuestionCount == 0) "鐐瑰嚮璁剧疆姣忕棰樺瀷鐨勯閲忓拰鍒嗗€笺€" else "棰勮 $customQuestionCount 棰$路 ${customTotalScore.trimScoreText()} 鍒"
     }
 
     val scaledQuestionFontSize = (18 * uiScale).coerceAtLeast(14f).sp
@@ -722,7 +722,7 @@ private fun EditorialDurationCounter(
             modifier = Modifier.weight(1f),
             scale = 1f,
             value = valueText,
-            label = "鑷畾涔夋椂闂?鍒嗛挓)",
+            label = "鑷畾涔夋椂闂$鍒嗛挓)",
             unit = "鍒"
         )
         CounterIconButton(
@@ -1619,7 +1619,7 @@ private fun CustomQuestionCountDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "璇疯緭鍏?1锝$maxCount 涔嬮棿鐨勯鏁般€",
+                    text = "璇疯緭鍏$1锝$maxCount 涔嬮棿鐨勯鏁般€",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

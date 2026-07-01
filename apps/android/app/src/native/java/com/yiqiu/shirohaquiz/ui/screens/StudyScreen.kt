@@ -150,7 +150,7 @@ fun StudyScreen(
                 Spacer(modifier = Modifier.height(ShirohaSpacing.Lg))
                 EmptyStateIllustration(
                     title = "杩樻病鏈夎绋",
-                    message = "璇峰鍏ヨ绋嬪寘 JSON锛堝寘鍚?course 鑺傜偣鍜$questions 鏁扮粍锛夈€俓n鐐瑰嚮涓婃柟銆屽鍏ヨ绋嬪寘銆嶆寜閽€夋嫨鏂囦欢銆"
+                    message = "璇峰鍏ヨ绋嬪寘 JSON锛堝寘鍚$course 鑺傜偣鍜$questions 鏁扮粍锛夈€俓n鐐瑰嚮涓婃柟銆屽鍏ヨ绋嬪寘銆嶆寜閽€夋嫨鏂囦欢銆"
                 )
             } else {
                 // 椤堕儴缁熻锛欵ditorialFigure 脳N锛堣‖绾垮ぇ鏁板瓧 + 灏忔爣绛?+ 鍙戜笣涓嬪垝绾匡級

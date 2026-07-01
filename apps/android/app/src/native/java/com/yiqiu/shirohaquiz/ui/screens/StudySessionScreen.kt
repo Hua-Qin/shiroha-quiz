@@ -717,8 +717,8 @@ private fun QuestionPracticeBlock(
                 QuestionType.SINGLE, QuestionType.MULTIPLE, QuestionType.JUDGE -> {
                     val optionsToShow = when (question.type) {
                         QuestionType.JUDGE -> listOf(
-                            Option("瀵?, "瀵?),
-                            Option("閿?, "閿?)
+                            Option("瀵", "瀵"),
+                            Option("閿", "閿")
                         )
                         else -> question.options
                     }
@@ -784,7 +784,7 @@ private fun QuestionPracticeBlock(
             if (submitted && question.analysis.isNotBlank()) {
                 Spacer(modifier = Modifier.height(ShirohaSpacing.Md))
                 NoticeCard(
-                    text = (if (isCorrect == true) "鉁?鍥炵瓟姝ｇ‘" else "鉁?鍥炵瓟閿欒") + "\n\n瑙ｆ瀽锛${question.analysis}",
+                    text = (if (isCorrect == true) "鉁$鍥炵瓟姝ｇ‘" else "鉁$鍥炵瓟閿欒") + "\n\n瑙ｆ瀽锛${question.analysis}",
                     warning = isCorrect != true
                 )
             }

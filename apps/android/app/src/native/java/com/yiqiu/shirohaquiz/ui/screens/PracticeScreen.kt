@@ -249,7 +249,7 @@ fun PracticeScreen(
         )
     }
     val sequentialRangeText = sequentialRangePreview?.let { (start, end) ->
-        if (start == end) "鏈鑼冨洿锛氱 ${start} 棰? else "鏈鑼冨洿锛氱 ${start} - ${end} 棰?
+        if (start == end) "鏈鑼冨洿锛氱 ${start} 棰" else "鏈鑼冨洿锛氱 ${start} - ${end} 棰"
     }
     val startPracticeWithSettings = {
         val safeTypes = selectedTypes.ifEmpty { QuizRepository.objectiveQuestionTypes() }
@@ -323,7 +323,7 @@ fun PracticeScreen(
                 ShirohaHeader(
                     kicker = "Practice",
                     title = "缁冧範妯″紡",
-                    subtitle = if (isPracticeRunning) "姝ｅ湪鎸夊綋鍓嶈缃户缁埛棰樸€? else "閫夋嫨鑼冨洿涓庤妭濂忥紝寮€濮嬩竴杞笓娉ㄧ殑缁冧範銆?,
+                    subtitle = if (isPracticeRunning) "姝ｅ湪鎸夊綋鍓嶈缃户缁埛棰樸€" else "閫夋嫨鑼冨洿涓庤妭濂忥紝寮€濮嬩竴杞笓娉ㄧ殑缁冧範銆",
                     scale = scale,
                     modifier = Modifier.weight(1f)
                 )
@@ -625,7 +625,7 @@ fun PracticeScreen(
         var isSingleQuestionAiLoading by remember(currentSessionKey) { mutableStateOf(false) }
         val runSingleQuestionAiAnalysis = {
             if (!QuizRepository.isAiConfigured()) {
-                singleQuestionAiError = "璇峰厛鍦?鎴戠殑 鈫?AI 璁剧疆 涓～鍐$API 鍦板潃銆丄PI Key 鍜屾ā鍨嬪悕绉般€"
+                singleQuestionAiError = "璇峰厛鍦$鎴戠殑 鈫$AI 璁剧疆 涓～鍐$API 鍦板潃銆丄PI Key 鍜屾ā鍨嬪悕绉般€"
                 singleQuestionAiAnalysis = null
             } else if (!isSingleQuestionAiLoading) {
                 isSingleQuestionAiLoading = true
@@ -736,7 +736,7 @@ fun PracticeScreen(
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     CompactPracticeChip(
-                        if (isBatchPractice) "绗?$batchGroupNumber 缁?路 ${QuizRepository.practiceIndex - batchGroupStart + 1} / $batchGroupTotal 棰? else "绗?${QuizRepository.practiceIndex + 1} / ${practiceQuestions.size} 棰?,
+                        if (isBatchPractice) "绗?$batchGroupNumber 缁$路 ${QuizRepository.practiceIndex - batchGroupStart + 1} / $batchGroupTotal 棰" else "绗?${QuizRepository.practiceIndex + 1} / ${practiceQuestions.size} 棰",
                         selected = true
                     )
                     CompactPracticeChip(typeLabel(question.type))
@@ -1050,7 +1050,7 @@ fun PracticeScreen(
                 Spacer(Modifier.height(4.dp))
                 Text(
                     text = question.analysis.takeIf { it.isNotBlank() }
-                        ?.let(::formatAnalysisForDisplay)
+                        ".let(::formatAnalysisForDisplay)
                         ?.let(LatexDisplayFormatter::format)
                         ?: "鏆傛棤瑙ｆ瀽",
                     style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp),
@@ -1158,7 +1158,7 @@ fun PracticeQuickEditScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                StatusChip("绗?${question.number.ifBlank { "-" }} 棰")
+                StatusChip("绗"${question.number.ifBlank { "-" }} 棰")
                 StatusChip(typeLabel(question.type))
                 StatusChip("淇濈暀棰樺瀷")
             }
@@ -1264,7 +1264,7 @@ fun PracticeQuickEditScreen(
                         answerText = it
                         savedNotice = ""
                     },
-                    label = { Text(if (isObjective) "绛旀锛屼緥濡$A 鎴?A/B" else "鍙傝€冪瓟妗") },
+                    label = { Text(if (isObjective) "绛旀锛屼緥濡$A 鎴$A/B" else "鍙傝€冪瓟妗") },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = if (isObjective) 1 else 2,
                     keyboardOptions = KeyboardOptions(
@@ -1397,7 +1397,7 @@ private fun PracticeEditorialFiguresRow(
         )
         EditorialFigure(
             value = "$practiceAccuracy",
-            label = if (isBatchPractice) "鏈粍姝ｇ‘鐜? else "姝ｇ‘鐜?,
+            label = if (isBatchPractice) "鏈粍姝ｇ‘鐜" else "姝ｇ‘鐜",
             unit = "% 路 ${practiceCorrectCount}/${practiceAutoScoredAnsweredCount}",
             scale = scale,
             modifier = Modifier.weight(1f)
@@ -1510,7 +1510,7 @@ private fun PracticeSetupPanel(
         }
         Spacer(Modifier.height(4.dp))
         Text(
-            text = if (practiceOrderMode == QuizRepository.PRACTICE_ORDER_RANDOM) "浠庡凡閫夐鍨嬩腑闅忔満鎶介銆? else "鎸夊綋鍓嶉搴撻『搴忎粠鎸囧畾璧风偣鍙栭銆?,
+            text = if (practiceOrderMode == QuizRepository.PRACTICE_ORDER_RANDOM) "浠庡凡閫夐鍨嬩腑闅忔満鎶介銆" else "鎸夊綋鍓嶉搴撻『搴忎粠鎸囧畾璧风偣鍙栭銆",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
@@ -1602,7 +1602,7 @@ private fun PracticeSetupPanel(
             }
             Spacer(Modifier.height(4.dp))
             Text(
-                text = if (selectedPracticeMode == QuizRepository.PRACTICE_MODE_BATCH) "鎸夋瘡缁勯鏁拌繛缁仛棰橈紝鎻愪氦鏈粍鍚庣粺涓€鐪嬭В鏋愩€? else "姣忛鎻愪氦鍚庣珛鍗虫煡鐪嬬粨鏋滃拰瑙ｆ瀽銆?,
+                text = if (selectedPracticeMode == QuizRepository.PRACTICE_MODE_BATCH) "鎸夋瘡缁勯鏁拌繛缁仛棰橈紝鎻愪氦鏈粍鍚庣粺涓€鐪嬭В鏋愩€" else "姣忛鎻愪氦鍚庣珛鍗虫煡鐪嬬粨鏋滃拰瑙ｆ瀽銆",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
@@ -2048,9 +2048,9 @@ private fun PracticeCompletionCard(
                 )
                 Text(
                     text = if (scoredAnswered == answered) {
-                        "鍏?$total 棰?路 宸叉彁浜?$answered 棰?路 姝ｇ‘ $correct 棰?路 姝ｇ‘鐜?$accuracy%"
+                        "鍏?$total 棰$路 宸叉彁浜?$answered 棰$路 姝ｇ‘ $correct 棰$路 姝ｇ‘鐜?$accuracy%"
                     } else {
-                        "鍏?$total 棰?路 宸叉彁浜?$answered 棰?路 鑷姩鍒ゅ垎 $scoredAnswered 棰?路 姝ｇ‘鐜?$accuracy%"
+                        "鍏?$total 棰$路 宸叉彁浜?$answered 棰$路 鑷姩鍒ゅ垎 $scoredAnswered 棰$路 姝ｇ‘鐜?$accuracy%"
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -2133,7 +2133,7 @@ private fun SubjectiveAnswerEditor(
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = if (isShortAnswer) 132.dp else 58.dp),
             label = { Text(if (isShortAnswer) "浣犵殑浣滅瓟" else "浣犵殑绛旀") },
-            placeholder = { Text(if (isShortAnswer) "鍐欎笅浣犵殑浣滅瓟锛屾彁浜ゅ悗瀵圭収鍙傝€冪瓟妗堛€? else "璇疯緭鍏ュ～绌哄唴瀹?) },
+            placeholder = { Text(if (isShortAnswer) "鍐欎笅浣犵殑浣滅瓟锛屾彁浜ゅ悗瀵圭収鍙傝€冪瓟妗堛€" else "璇疯緭鍏ュ～绌哄唴瀹") },
             singleLine = !isShortAnswer,
             minLines = if (isShortAnswer) 4 else 1,
             maxLines = if (isShortAnswer) 8 else 1,
@@ -2143,7 +2143,7 @@ private fun SubjectiveAnswerEditor(
             )
         )
         Text(
-            text = if (isShortAnswer) "绠€绛旈鎻愪氦鍚庡彧灞曠ず鍙傝€冪瓟妗堝拰瑙ｆ瀽锛屼笉鑷姩鍒ゅ垎銆? else "濉┖棰樻彁浜ゅ悗浼氫笌鍙傝€冪瓟妗堣嚜鍔ㄦ瘮瀵广€?,
+            text = if (isShortAnswer) "绠€绛旈鎻愪氦鍚庡彧灞曠ず鍙傝€冪瓟妗堝拰瑙ｆ瀽锛屼笉鑷姩鍒ゅ垎銆" else "濉┖棰樻彁浜ゅ悗浼氫笌鍙傝€冪瓟妗堣嚜鍔ㄦ瘮瀵广€",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -2236,8 +2236,8 @@ private fun PracticeProgressCard(
     expanded: Boolean,
     reciteMode: Boolean = false,
     reciteIndex: Int = 0,
-    onOpenAnswerSheet: (() -> Unit)?,
-    onToggleWrongOnly: (() -> Unit)?,
+    onOpenAnswerSheet: (() -> Unit)",
+    onToggleWrongOnly: (() -> Unit)",
     onToggle: () -> Unit
 ) {
     val accuracy = if (scoredAnswered == 0) 0 else correct * 100 / scoredAnswered
@@ -2258,7 +2258,7 @@ private fun PracticeProgressCard(
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        text = "娴忚 ${reciteIndex.coerceIn(1, total.coerceAtLeast(1))} / $total 棰?路 涓嶈鍏ユ纭巼",
+                        text = "娴忚 ${reciteIndex.coerceIn(1, total.coerceAtLeast(1))} / $total 棰$路 涓嶈鍏ユ纭巼",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -2279,7 +2279,7 @@ private fun PracticeProgressCard(
                     )
                 } else {
                     Text(
-                        text = if (batchBeforeSubmit) "鎵归噺鍋氶 路 绗?$batchGroupNumber / $batchGroupCount 缁? else "姝ｇ‘鐜?,
+                        text = if (batchBeforeSubmit) "鎵归噺鍋氶 路 绗?$batchGroupNumber / $batchGroupCount 缁" else "姝ｇ‘鐜",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -2287,9 +2287,9 @@ private fun PracticeProgressCard(
                         Spacer(Modifier.height(2.dp))
                         Text(
                             text = if (scoredAnswered == answered) {
-                                "宸叉彁浜?$answered / $total 棰?路 姝ｇ‘鐜?$accuracy%"
+                                "宸叉彁浜?$answered / $total 棰$路 姝ｇ‘鐜?$accuracy%"
                             } else {
-                                "宸叉彁浜?$answered / $total 棰?路 鑷姩鍒ゅ垎 $scoredAnswered 棰?路 姝ｇ‘鐜?$accuracy%"
+                                "宸叉彁浜?$answered / $total 棰$路 鑷姩鍒ゅ垎 $scoredAnswered 棰$路 姝ｇ‘鐜?$accuracy%"
                             },
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -2675,7 +2675,7 @@ private fun CustomQuestionCountDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "璇疯緭鍏?1锝$maxCount 涔嬮棿鐨勯鏁般€",
+                    text = "璇疯緭鍏$1锝$maxCount 涔嬮棿鐨勯鏁般€",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -2754,7 +2754,7 @@ private fun SingleQuestionAiAnalysisPanel(
         if (loading) {
             NoticeCard("AI 姝ｅ湪鍒嗘瀽褰撳墠棰樼洰锛岃绋嶅€欍€", warning = false)
         }
-        error?.takeIf { it.isNotBlank() }?.let { message ->
+        error?.takeIf { it.isNotBlank() }".let { message ->
             NoticeCard("AI 鍒嗘瀽澶辫触锛$message", warning = true)
         }
         analysis?.let { result ->
@@ -2831,15 +2831,15 @@ private fun SingleQuestionAiResultCard(result: AiSingleQuestionAnalysis) {
 
 private fun aiConfidenceLabel(confidence: String): String {
     return when (confidence.trim().uppercase()) {
-        "HIGH" -> "鍙俊搴?楂"
-        "LOW" -> "鍙俊搴?浣"
-        else -> "鍙俊搴?涓"
+        "HIGH" -> "鍙俊搴"楂"
+        "LOW" -> "鍙俊搴$浣"
+        else -> "鍙俊搴$涓"
     }
 }
 
 private fun formatAnalysisForDisplay(analysis: String): String {
     return analysis.trim()
-        .replace(Regex("\\s*(?=([A-G锛?锛)椤筟锛?锛?])"), "\n")
+        .replace(Regex("\\s*(?=([A-G锛$锛)椤筟锛$锛?])"), "\n")
         .replace(Regex("\n{3,}"), "\n\n")
         .trim()
 }
@@ -2934,7 +2934,7 @@ private fun minimumOptionCount(type: QuestionType): Int = when (type) {
 
 private fun nextQuickEditOptionKey(options: List<Option>): String? {
     val used = options.map { it.key.uppercase() }.toSet()
-    return ('A'..'Z').firstOrNull { it.toString() !in used }?.toString()
+    return ('A'..'Z').firstOrNull { it.toString() !in used }".toString()
 }
 
 private fun parseQuickEditAnswer(raw: String, type: QuestionType, options: List<Option>): List<String> {
@@ -2946,13 +2946,13 @@ private fun parseQuickEditAnswer(raw: String, type: QuestionType, options: List<
         QuestionType.JUDGE -> {
             val upper = trimmed.uppercase()
             val normalized = when (upper) {
-                "姝ｇ‘", "瀵?, "鏄?, "TRUE", "T", "鈭" -> "A"
-                "閿欒", "閿?, "鍚?, "FALSE", "F", "脳", "X" -> "B"
+                "姝ｇ‘", "瀵", "鏄", "TRUE", "T", "鈭" -> "A"
+                "閿欒", "閿", "鍚", "FALSE", "F", "脳", "X" -> "B"
                 else -> upper
             }
             val optionKeys = options.map { it.key.uppercase() }.toSet()
             val tokens = normalized
-                .split(Regex("""[\s,锛屻€?|;锛沒+"""))
+                .split(Regex("""[\s,锛屻€"|;锛沒+"""))
                 .flatMap { token ->
                     if (token.length > 1 && token.all { it in 'A'..'Z' }) {
                         token.map { it.toString() }

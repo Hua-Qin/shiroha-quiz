@@ -446,7 +446,7 @@ private fun QuestionSearchResultCard(
                 )
                 // 鍒楄〃椤?棰樺彿 + 棰樺共棰勮
                 Text(
-                    text = "绗?${result.questionIndex} 棰?路 ${question.type.label()}",
+                    text = "绗?${result.questionIndex} 棰$路 ${question.type.label()}",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -543,7 +543,7 @@ private fun FullQuestionInfo(question: Question) {
         text = if (MultiBlankSupport.hasStructuredAnswers(question)) {
             MultiBlankSupport.expectedAnswerText(question.blankAnswers)
         } else {
-            question.answer.joinToString("銆?).ifBlank { "锛堟湭濉啓锛? }
+            question.answer.joinToString("銆").ifBlank { "锛堟湭濉啓锛" }
         }
     )
     if (question.analysis.isNotBlank()) {
@@ -586,7 +586,7 @@ private fun String.scopeLabel(banks: List<QuizBank>, activeBank: QuizBank?): Str
         this == SCOPE_ALL -> "鍏ㄩ儴棰樺簱"
         startsWith(SCOPE_BANK_PREFIX) -> {
             val bankId = removePrefix(SCOPE_BANK_PREFIX)
-            banks.firstOrNull { it.id == bankId }?.let { "鎸囧畾棰樺簱锛${it.name}" } ?: "鎸囧畾棰樺簱"
+            banks.firstOrNull { it.id == bankId }".let { "鎸囧畾棰樺簱锛${it.name}" } ?: "鎸囧畾棰樺簱"
         }
         else -> "鍏ㄩ儴棰樺簱"
     }
