@@ -44,16 +44,16 @@ jobs:
             Write-Host "keystore.properties found, using existing config."
           }
 
-      - name: Build native release APK
+      - name: Build web release APK
         working-directory: apps/android
         shell: pwsh
-        run: .\gradlew.bat assembleNativeRelease --no-daemon --stacktrace
+        run: .\gradlew.bat assembleWebRelease --no-daemon --stacktrace
 
-      - name: Upload native APK
+      - name: Upload web APK
         uses: actions/upload-artifact@v4
         with:
-          name: apk-native-release
+          name: apk-web-release
           path: |
-            apps/android/app/build/outputs/apk/native/release/*.apk
-            apps/android/app/build/outputs/shiroha-quiz/Shiroha-Quiz-*native*.apk
+            apps/android/app/build/outputs/apk/web/release/*.apk
+            apps/android/app/build/outputs/shiroha-quiz/Shiroha-Quiz-*web*.apk
           if-no-files-found: error
