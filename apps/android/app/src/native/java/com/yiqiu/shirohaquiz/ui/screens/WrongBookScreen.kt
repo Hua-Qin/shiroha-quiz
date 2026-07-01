@@ -264,8 +264,8 @@ fun WrongBookScreen(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
                 ) {
-                    // 缂栬緫寮忔爣棰樼被 + 棰樺彿          ShirohaHeader(
-                        kicker = "Wrong Book",
+                    // 缂栬緫寮忔爣棰樼被 + 棰樺彿
+                    ShirohaHeader(
                         title = "閿欓鏈",
                         subtitle = "鎶婇敊棰樺彉鎴愭彁鍒嗛樁姊",
                         scale = scale
@@ -1107,7 +1107,7 @@ private fun WrongBookAnswerLine(
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = "$label锛",
+            text = "${label}锛",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -1486,7 +1486,7 @@ private fun WrongBookManualAddDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // 褰撳墠棰樺簱棰樼洰鍒楄〃锛堢簿绠€灞曠ず锛?                if (questionsInBank.isNotEmpty()) {
+                if (questionsInBank.isNotEmpty()) {
                     Text(
                         text = "棰樺簱棰樼洰锛堢偣鍑诲嵆閫変腑锛",
                         style = MaterialTheme.typography.labelLarge,

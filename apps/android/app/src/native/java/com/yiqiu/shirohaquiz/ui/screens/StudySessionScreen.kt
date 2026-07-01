@@ -285,7 +285,7 @@ fun StudySessionScreen(
                                         newCorrect.toFloat() / newTotal.coerceAtLeast(1).toFloat()
                                     ),
                                     practiceCount = cur.practiceCount + 1
-                                )
+                                    practiceCount = cur.practiceCount + 1
                                 QuizRepository.persist()
                             }
                             submitted = true
@@ -330,47 +330,46 @@ fun StudySessionScreen(
     }
 
     // 绛旈闃舵 鏌ョ湅鐭ヨ瘑鐐?鍗婂睆 Dialog 鍙璇诲紑骞抽棶?
-        AlertDialog(
-            onDismissRequest = { showKnowledgeDialog = false },
-            confirmButton = {
-                TextButton(onClick = { showKnowledgeDialog = false }) {
-                    Text("鍏抽棴")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showKnowledgeDialog = false }) {
-                    Text("缁х画绛旈")
-                }
-            },
-            title = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = section.sectionTitle.ifBlank { "鐭ヨ瘑鐐" },
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.weight(1f)
+    AlertDialog(
+        onDismissRequest = { showKnowledgeDialog = false },
+        confirmButton = {
+            TextButton(onClick = { showKnowledgeDialog = false }) {
+                Text("鍏抽棴")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { showKnowledgeDialog = false }) {
+                Text("缁х画绛旈")
+            }
+        },
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = section.sectionTitle.ifBlank { "鐭ヨ瘑鐐" },
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = { showKnowledgeDialog = false }) {
+                    Icon(
+                        imageVector = Icons.Rounded.Close,
+                        contentDescription = "鍏抽棴",
+                        tint = ShirohaColors.TextSecondary
                     )
-                    IconButton(onClick = { showKnowledgeDialog = false }) {
-                        Icon(
-                            imageVector = Icons.Rounded.Close,
-                            contentDescription = "鍏抽棴",
-                            tint = ShirohaColors.TextSecondary
-                        )
-                    }
-                }
-            },
-            text = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(420.dp)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    ArticleReader(section = section)
                 }
             }
-        )
-    }
+        },
+        text = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(420.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                ArticleReader(section = section)
+            }
+        }
+    )
 }
 
 /**
@@ -892,4 +891,5 @@ private fun currentEditorialScale(): Float {
     }
     return scale
 }
+
 

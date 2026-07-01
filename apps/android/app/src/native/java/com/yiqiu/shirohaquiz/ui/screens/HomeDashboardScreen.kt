@@ -911,6 +911,6 @@ private fun buildWrongQuestionsSummary(): String {
         .take(10)
     return recent.joinToString("\n") { entry ->
         val cat = entry.question.category?.ifBlank { "鏈垎绫" } ?: "鏈垎绫"
-        "鍒嗙被 ${cat}锛${entry.question.question.take(60)}"
+        "${cat}锛${entry.question.question.take(60)}"
     }
 }
