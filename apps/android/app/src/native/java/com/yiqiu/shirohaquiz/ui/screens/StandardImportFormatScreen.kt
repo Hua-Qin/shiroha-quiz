@@ -1,4 +1,4 @@
-﻿package com.yiqiu.shirohaquiz.ui.screens
+package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
