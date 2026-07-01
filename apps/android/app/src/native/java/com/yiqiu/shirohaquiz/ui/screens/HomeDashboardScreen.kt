@@ -64,6 +64,9 @@ import com.yiqiu.shirohaquiz.state.DailyTrendPoint
 import com.yiqiu.shirohaquiz.state.QuizRepository
 import com.yiqiu.shirohaquiz.state.StudyStatistics
 import com.yiqiu.shirohaquiz.ui.components.ActionPillButton
+import com.yiqiu.shirohaquiz.ui.components.EditorialFigure
+import com.yiqiu.shirohaquiz.ui.components.EditorialSection
+import com.yiqiu.shirohaquiz.ui.components.IllustrationHeroCard
 import com.yiqiu.shirohaquiz.ui.components.GlassCard
 import com.yiqiu.shirohaquiz.ui.components.NoticeCard
 import com.yiqiu.shirohaquiz.ui.components.ShirohaHeader
@@ -81,16 +84,16 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * 首页 / 学习看板。
+ * 首页 / 学习看板(暖色编辑杂志风重写)
  *
  * 布局自上而下：
- *  1. ShirohaHeader
- *  2. OverviewSection：6 个 MetricCell 卡片
- *  3. TodayLearningCard：今日练题、待复习、继续练习 / 模拟考试
- *  4. TrendChart：近 14 天自绘折线图
- *  5. WrongBookBarChart：错题分类横向柱状图
- *  6. ShortcutGrid（2x2）：错题本 / 收藏夹 / 边学边答 / 学习记录
- *  7. AiAdviceCard：AI 学习建议按钮
+ *  1. EditorialHero(Shiroha 模式带浮动插画)+ 暖色 kicker
+ *  2. EditorialFigure ×6 网格(衬线大数字 + 小标签 + 发丝下划线)
+ *  3. 今日学习 EditorialSection(大数字 + ActionPillButton)
+ *  4. 趋势图 EditorialSection
+ *  5. 错题分类 EditorialSection
+ *  6. 快捷入口 EditorialSection(2x2)
+ *  7. AI 建议 EditorialSection
  */
 @Composable
 fun HomeDashboardScreen(
@@ -139,18 +142,20 @@ fun HomeDashboardScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Sm),
-        verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
+            .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Lg),
+        verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xxl)
     ) {
-        ShirohaHeader(
-            kicker = "学习看板",
-            title = "首页",
-            subtitle = "总览你的学习进度"
+        // === Hero 区:Shiroha 模式时带浮动插画 ===
+        EditorialHeroSection(
+            onGoStudy = onGoStudy,
+            onGoExam = onGoExam
         )
 
-        OverviewSection(stats = stats)
+        // === 编辑式数据区:6 个 EditorialFigure ===
+        EditorialFiguresSection(stats = stats)
 
-        TodayLearningCard(
+        // === 今日学习 ===
+        TodayLearningSection(
             todayPracticeCount = todayPracticeCount,
             pendingReviewTitle = pendingReviewTitle,
             pendingReviewCount = pendingReviewCount,
@@ -158,86 +163,145 @@ fun HomeDashboardScreen(
             onGoExam = onGoExam
         )
 
-        TrendChartCard(stats = stats)
+        // === 趋势图 ===
+        EditorialSection(
+            kicker = "近 14 天",
+            title = "学习趋势"
+        ) {
+            DailyTrendChart(points = stats.dailyTrend)
+            DailyTrendLegend()
+        }
 
-        WrongBookBarChartCard(stats = stats)
+        // === 错题分类 ===
+        EditorialSection(
+            kicker = "错题",
+            title = "分类分布"
+        ) {
+            if (stats.wrongBookByCategory.isEmpty()) {
+                NoticeCard("当前没有错题数据，完成练习后会在这里统计。", warning = false)
+            } else {
+                com.yiqiu.shirohaquiz.ui.screens.CategoryBarChart(
+                    categories = stats.wrongBookByCategory.take(6)
+                )
+            }
+        }
 
-        ShortcutGrid(
-            wrongBookActiveCount = wrongBookActiveCount,
-            favoriteCount = favoriteQuestions.size,
-            knowledgeCoursesCount = knowledgeCourses.size,
-            studyRecordsCount = studyRecords.size,
-            onOpenWrongBook = onOpenWrongBook,
-            onOpenFavorites = onOpenFavorites,
-            onOpenStudy = onGoStudy,
-            onOpenRecords = onOpenRecords
-        )
+        // === 快捷入口 ===
+        EditorialSection(
+            kicker = "导航",
+            title = "快捷入口"
+        ) {
+            ShortcutGrid(
+                wrongBookActiveCount = wrongBookActiveCount,
+                favoriteCount = favoriteQuestions.size,
+                knowledgeCoursesCount = knowledgeCourses.size,
+                studyRecordsCount = studyRecords.size,
+                onOpenWrongBook = onOpenWrongBook,
+                onOpenFavorites = onOpenFavorites,
+                onOpenStudy = onGoStudy,
+                onOpenRecords = onOpenRecords
+            )
+        }
 
-        AiAdviceCard(
-            stats = stats,
-            isAiConfigured = QuizRepository.isAiConfigured(),
-            onOpenAiSettings = onOpenAiSettings
-        )
+        // === AI 建议 ===
+        EditorialSection(
+            kicker = "AI",
+            title = "学习建议"
+        ) {
+            AiAdviceCard(
+                stats = stats,
+                isAiConfigured = QuizRepository.isAiConfigured(),
+                onOpenAiSettings = onOpenAiSettings
+            )
+        }
 
         Spacer(Modifier.height(ShirohaSpacing.Sm))
     }
 }
 
+/**
+ * 首页 hero 区:衬线大标题 + 副文 + Shiroha 浮动插画(受 Shiroha 模式控制)
+ * Shiroha 模式关闭时,版心居中,无插画。
+ */
 @Composable
-private fun OverviewSection(stats: StudyStatistics) {
-    Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)) {
+private fun EditorialHeroSection(
+    onGoStudy: () -> Unit,
+    onGoExam: () -> Unit
+) {
+    IllustrationHeroCard(
+        title = "今日的练习,\n明天会感谢你。",
+        subtitle = "把每一次答题,都当作一次精进。",
+        imageRes = com.yiqiu.shirohaquiz.R.drawable.illus_home_welcome
+    ) {
+        Spacer(Modifier.height(ShirohaSpacing.Md))
+        Row(horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Sm)) {
+            ActionPillButton(
+                icon = Icons.Rounded.School,
+                text = "开始练习",
+                primary = true,
+                onClick = onGoStudy
+            )
+            ActionPillButton(
+                icon = Icons.Rounded.Timer,
+                text = "模拟考试",
+                primary = false,
+                onClick = onGoExam
+            )
+        }
+    }
+}
+
+/**
+ * 编辑式 6 大数据:衬线大数字 + 小标签 + 发丝下划线
+ * 2 列 × 3 行,呈现杂志封面级数据
+ */
+@Composable
+private fun EditorialFiguresSection(stats: StudyStatistics) {
+    Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)
+            horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)
         ) {
-            MetricCell(
+            EditorialFigure(
                 modifier = Modifier.weight(1f),
-                icon = Icons.Rounded.QuestionAnswer,
                 value = "${stats.totalQuestionsAnswered}",
                 label = "累计答题",
                 unit = "题"
             )
-            MetricCell(
+            EditorialFigure(
                 modifier = Modifier.weight(1f),
-                icon = Icons.Rounded.Schedule,
                 value = stats.totalStudyMinutesFormatted,
-                label = "累计学习",
-                unit = ""
+                label = "累计学习"
             )
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)
+            horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)
         ) {
-            MetricCell(
+            EditorialFigure(
                 modifier = Modifier.weight(1f),
-                icon = Icons.Rounded.QuestionMark,
                 value = "${(stats.overallAccuracy * 100).toInt()}",
                 label = "平均正确率",
                 unit = "%"
             )
-            MetricCell(
+            EditorialFigure(
                 modifier = Modifier.weight(1f),
-                icon = Icons.Rounded.School,
                 value = "${stats.knowledgePointsStudied} / ${stats.totalKnowledgePoints}",
-                label = "已学知识点",
-                unit = ""
+                label = "已学知识点"
             )
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)
+            horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)
         ) {
-            MetricCell(
+            EditorialFigure(
                 modifier = Modifier.weight(1f),
-                icon = Icons.Rounded.School,
                 value = "${stats.practiceCount}",
                 label = "练习次数",
                 unit = "次"
             )
-            MetricCell(
+            EditorialFigure(
                 modifier = Modifier.weight(1f),
-                icon = Icons.Rounded.School,
                 value = "${stats.examCount}",
                 label = "考试次数",
                 unit = "次"
@@ -246,206 +310,52 @@ private fun OverviewSection(stats: StudyStatistics) {
     }
 }
 
+/**
+ * 今日学习 EditorialSection:大数字今日练题数 + 待复习数 + ActionPillButton
+ */
 @Composable
-private fun MetricCell(
-    modifier: Modifier = Modifier,
-    icon: ImageVector,
-    value: String,
-    label: String,
-    unit: String
-) {
-    Surface(
-        modifier = modifier.heightIn(min = 96.dp),
-        shape = RoundedCornerShape(ShirohaRadius.Md),
-        color = ShirohaColors.CardWhite86,
-        border = BorderStroke(ShirohaDimens.Hairline, ShirohaColors.LineSoft)
-    ) {
-        Column(
-            modifier = Modifier.padding(ShirohaSpacing.Lg),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Surface(
-                    shape = CircleShape,
-                    color = ShirohaColors.BrandPrimarySoft,
-                    modifier = Modifier.size(26.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = ShirohaColors.TextSecondary,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            Row(
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                if (unit.isNotBlank()) {
-                    Text(
-                        text = unit,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = ShirohaColors.TextSecondary,
-                        modifier = Modifier.padding(bottom = 4.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun TodayLearningCard(
+private fun TodayLearningSection(
     todayPracticeCount: Int,
     pendingReviewTitle: String,
     pendingReviewCount: Int,
     onGoPractice: () -> Unit,
     onGoExam: () -> Unit
 ) {
-    GlassCard {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "今日学习",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            DashboardStatusChip("今日")
-        }
-        Spacer(Modifier.height(ShirohaSpacing.Sm))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)
-        ) {
-            MiniMetric(
-                modifier = Modifier.weight(1f),
-                title = "今日练题",
-                value = "${todayPracticeCount} 题"
-            )
-            MiniMetric(
-                modifier = Modifier.weight(1f),
-                title = pendingReviewTitle,
-                value = "${pendingReviewCount} 题"
-            )
-        }
-        Spacer(Modifier.height(ShirohaSpacing.Md))
-        ActionPillButton(
-            icon = Icons.Rounded.School,
-            text = "继续练习",
-            primary = true,
-            modifier = Modifier.fillMaxWidth(),
-            onClick = onGoPractice
-        )
-        Spacer(Modifier.height(ShirohaSpacing.Sm))
-        ActionPillButton(
-            icon = Icons.Rounded.Timer,
-            text = "模拟考试",
-            primary = false,
-            modifier = Modifier.fillMaxWidth(),
-            onClick = onGoExam
-        )
-    }
-}
-
-@Composable
-private fun MiniMetric(
-    modifier: Modifier = Modifier,
-    title: String,
-    value: String
-) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(ShirohaRadius.Md),
-        color = ShirohaColors.CardWhite78,
-        border = BorderStroke(ShirohaDimens.Hairline, ShirohaColors.LineSoft)
+    EditorialSection(
+        kicker = "今日",
+        title = "学习节奏"
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelLarge,
-                color = ShirohaColors.TextSecondary,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+            EditorialFigure(
+                modifier = Modifier.weight(1f),
+                value = "${todayPracticeCount}",
+                label = "今日练题",
+                unit = "题"
             )
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+            EditorialFigure(
+                modifier = Modifier.weight(1f),
+                value = "${pendingReviewCount}",
+                label = pendingReviewTitle,
+                unit = "题"
             )
         }
-    }
-}
-
-@Composable
-private fun TrendChartCard(stats: StudyStatistics) {
-    GlassCard {
-        Text(
-            text = "近 14 天学习趋势",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
         Spacer(Modifier.height(ShirohaSpacing.Sm))
-        Text(
-            text = "蓝线为每日答题量，紫线为每日正确率",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(Modifier.height(ShirohaSpacing.Md))
-        DailyTrendChart(points = stats.dailyTrend)
-        Spacer(Modifier.height(ShirohaSpacing.Md))
-        DailyTrendLegend()
-    }
-}
-
-@Composable
-private fun WrongBookBarChartCard(stats: StudyStatistics) {
-    GlassCard {
-        Text(
-            text = "错题分类分布",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-        Spacer(Modifier.height(ShirohaSpacing.Sm))
-        Text(
-            text = "展示错题数量最多的前 6 个分类",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(Modifier.height(ShirohaSpacing.Md))
-        if (stats.wrongBookByCategory.isEmpty()) {
-            NoticeCard("当前没有错题数据，完成练习后会在这里统计。", warning = false)
-        } else {
-            CategoryBarChart(categories = stats.wrongBookByCategory.take(6))
+        Row(horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Sm)) {
+            ActionPillButton(
+                icon = Icons.Rounded.School,
+                text = "继续练习",
+                primary = true,
+                onClick = onGoPractice
+            )
+            ActionPillButton(
+                icon = Icons.Rounded.Timer,
+                text = "模拟考试",
+                primary = false,
+                onClick = onGoExam
+            )
         }
     }
 }
@@ -461,115 +371,50 @@ private fun ShortcutGrid(
     onOpenStudy: () -> Unit,
     onOpenRecords: () -> Unit
 ) {
-    GlassCard {
-        Text(
-            text = "快捷入口",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-        Spacer(Modifier.height(ShirohaSpacing.Sm))
-        Text(
-            text = "点击卡片快速跳转学习数据",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(Modifier.height(ShirohaSpacing.Md))
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val isWide = maxWidth >= 480.dp
-            if (isWide) {
-                Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)
-                    ) {
-                        DashboardShortcutCard(
-                            modifier = Modifier.weight(1f),
-                            icon = Icons.Rounded.Warning,
-                            label = "错题本",
-                            value = "$wrongBookActiveCount",
-                            desc = "复习错题",
-                            onClick = onOpenWrongBook
-                        )
-                        DashboardShortcutCard(
-                            modifier = Modifier.weight(1f),
-                            icon = Icons.Rounded.Star,
-                            label = "收藏夹",
-                            value = "$favoriteCount",
-                            desc = "查看收藏",
-                            onClick = onOpenFavorites
-                        )
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)
-                    ) {
-                        DashboardShortcutCard(
-                            modifier = Modifier.weight(1f),
-                            icon = Icons.Rounded.AutoStories,
-                            label = "边学边答",
-                            value = "$knowledgeCoursesCount",
-                            desc = "课程学习",
-                            onClick = onOpenStudy
-                        )
-                        DashboardShortcutCard(
-                            modifier = Modifier.weight(1f),
-                            icon = Icons.Rounded.Timer,
-                            label = "学习记录",
-                            value = "$studyRecordsCount",
-                            desc = "查看记录",
-                            onClick = onOpenRecords
-                        )
-                    }
-                }
-            } else {
-                Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)
-                    ) {
-                        DashboardShortcutCard(
-                            modifier = Modifier.weight(1f),
-                            icon = Icons.Rounded.Warning,
-                            label = "错题本",
-                            value = "$wrongBookActiveCount",
-                            desc = "复习错题",
-                            onClick = onOpenWrongBook
-                        )
-                        DashboardShortcutCard(
-                            modifier = Modifier.weight(1f),
-                            icon = Icons.Rounded.Star,
-                            label = "收藏夹",
-                            value = "$favoriteCount",
-                            desc = "查看收藏",
-                            onClick = onOpenFavorites
-                        )
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)
-                    ) {
-                        DashboardShortcutCard(
-                            modifier = Modifier.weight(1f),
-                            icon = Icons.Rounded.AutoStories,
-                            label = "边学边答",
-                            value = "$knowledgeCoursesCount",
-                            desc = "课程学习",
-                            onClick = onOpenStudy
-                        )
-                        DashboardShortcutCard(
-                            modifier = Modifier.weight(1f),
-                            icon = Icons.Rounded.Timer,
-                            label = "学习记录",
-                            value = "$studyRecordsCount",
-                            desc = "查看记录",
-                            onClick = onOpenRecords
-                        )
-                    }
-                }
-            }
+    Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)
+        ) {
+            DashboardShortcutCard(
+                modifier = Modifier.weight(1f),
+                icon = Icons.Rounded.Warning,
+                label = "错题本",
+                value = "$wrongBookActiveCount",
+                desc = "复习错题",
+                onClick = onOpenWrongBook
+            )
+            DashboardShortcutCard(
+                modifier = Modifier.weight(1f),
+                icon = Icons.Rounded.Star,
+                label = "收藏夹",
+                value = "$favoriteCount",
+                desc = "查看收藏",
+                onClick = onOpenFavorites
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)
+        ) {
+            DashboardShortcutCard(
+                modifier = Modifier.weight(1f),
+                icon = Icons.Rounded.AutoStories,
+                label = "边学边答",
+                value = "$knowledgeCoursesCount",
+                desc = "课程学习",
+                onClick = onOpenStudy
+            )
+            DashboardShortcutCard(
+                modifier = Modifier.weight(1f),
+                icon = Icons.Rounded.Timer,
+                label = "学习记录",
+                value = "$studyRecordsCount",
+                desc = "查看记录",
+                onClick = onOpenRecords
+            )
         }
     }
-}
 
 @Composable
 private fun DashboardShortcutCard(
@@ -636,26 +481,12 @@ private fun AiAdviceCard(
     var adviceState by remember { mutableStateOf<AdviceUiState>(AdviceUiState.Idle) }
     val scope = rememberCoroutineScope()
 
-    GlassCard {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "AI 学习建议",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            DashboardStatusChip("AI")
-        }
-        Spacer(Modifier.height(ShirohaSpacing.Sm))
+    Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)) {
         Text(
             text = "基于你的答题数据生成专属学习建议。",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Spacer(Modifier.height(ShirohaSpacing.Md))
         when (val state = adviceState) {
             is AdviceUiState.Idle -> {
                 ActionPillButton(

@@ -33,9 +33,11 @@ private val DarkColors = darkColorScheme(
 @Composable
 fun ShirohaQuizTheme(
     darkTheme: Boolean = false,
+    warmTheme: Boolean = false,
     content: @Composable () -> Unit
 ) {
     ShirohaColors.isDarkMode = darkTheme
+    ShirohaColors.warmThemeEnabled = warmTheme
 
     MaterialTheme(
         colorScheme = if (darkTheme) DarkColors else LightColors,

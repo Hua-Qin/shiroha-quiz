@@ -1837,6 +1837,12 @@ object QuizRepository {
         persist()
     }
 
+    fun setWarmThemeEnabled(context: Context, enabled: Boolean) {
+        appContext = context.applicationContext
+        warmThemeEnabled = enabled
+        persist()
+    }
+
     fun setCardAnimationEnabled(context: Context, enabled: Boolean) {
         appContext = context.applicationContext
         cardAnimationEnabled = enabled

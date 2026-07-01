@@ -8,17 +8,18 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -64,9 +65,12 @@ import com.yiqiu.shirohaquiz.R
 import com.yiqiu.shirohaquiz.state.QuizRepository
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaColors
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaDimens
+import com.yiqiu.shirohaquiz.ui.theme.EditorialKickerStyle
+import com.yiqiu.shirohaquiz.ui.theme.ShirohaColors
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaMotion
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaRadius
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaSpacing
+import com.yiqiu.shirohaquiz.ui.theme.ShirohaTypography
 import com.yiqiu.shirohaquiz.ui.text.LatexDisplayFormatter
 
 
@@ -129,17 +133,16 @@ fun ShirohaHeader(
     ) {
         if (kicker.isNotBlank()) {
             Text(
-                text = kicker,
+                text = kicker.uppercase(),
                 color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.labelLarge
+                style = EditorialKickerStyle
             )
         }
         if (title.isNotBlank()) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.SemiBold
+                style = ShirohaTypography.displaySmall,
+                color = ShirohaColors.TextPrimary
             )
         }
         if (subtitle.isNotBlank()) {
@@ -149,6 +152,150 @@ fun ShirohaHeader(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+
+/* ====== 编辑式组件库(Warm Editorial Magazine) ====== */
+
+/**
+ * 编辑式大数字组件(杂志封面级数据呈现)
+ * 衬线粗体超大数字 + 小标签 + 发丝下划线
+ */
+@Composable
+fun EditorialFigure(
+    value: String,
+    label: String,
+    unit: String = "",
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = value,
+                style = EditorialFigureStyle,
+                color = ShirohaColors.TextPrimary
+            )
+            if (unit.isNotBlank()) {
+                Text(
+                    text = unit,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = ShirohaColors.TextSecondary,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+        }
+        Canvas(modifier = Modifier
+            .fillMaxWidth()
+            .height(1.dp)) {
+            drawLine(
+                color = ShirohaColors.LineStrong,
+                start = androidx.compose.ui.geometry.Offset(0f, 0f),
+                end = androidx.compose.ui.geometry.Offset(size.width, 0f),
+                strokeWidth = 1.dp.toPx()
+            )
+        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = ShirohaColors.TextSecondary
+        )
+    }
+}
+
+/**
+ * 编辑式分隔线(发丝线 + 可选居中标签)
+ */
+@Composable
+fun EditorialDivider(
+    label: String? = null,
+    modifier: Modifier = Modifier
+) {
+    if (label.isNullOrBlank()) {
+        Canvas(modifier = modifier
+            .fillMaxWidth()
+            .height(1.dp)) {
+            drawLine(
+                color = ShirohaColors.LineStrong,
+                start = androidx.compose.ui.geometry.Offset(0f, 0f),
+                end = androidx.compose.ui.geometry.Offset(size.width, 0f),
+                strokeWidth = 1.dp.toPx()
+            )
+        }
+    } else {
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Canvas(modifier = Modifier
+                .weight(1f)
+                .height(1.dp)) {
+                drawLine(
+                    color = ShirohaColors.LineStrong,
+                    start = androidx.compose.ui.geometry.Offset(0f, 0f),
+                    end = androidx.compose.ui.geometry.Offset(size.width, 0f),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
+            Text(
+                text = label.uppercase(),
+                style = EditorialKickerStyle,
+                color = ShirohaColors.TextSecondary
+            )
+            Canvas(modifier = Modifier
+                .weight(1f)
+                .height(1.dp)) {
+                drawLine(
+                    color = ShirohaColors.LineStrong,
+                    start = androidx.compose.ui.geometry.Offset(0f, 0f),
+                    end = androidx.compose.ui.geometry.Offset(size.width, 0f),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
+        }
+    }
+}
+
+/**
+ * 编辑式区块(发丝分隔线 + 可选 kicker/title + 内容)
+ * 替代重卡片容器堆叠,营造杂志式版面呼吸感
+ */
+@Composable
+fun EditorialSection(
+    title: String? = null,
+    kicker: String? = null,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
+    ) {
+        if (!kicker.isNullOrBlank() || !title.isNullOrBlank()) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (!kicker.isNullOrBlank()) {
+                    Text(
+                        text = kicker.uppercase(),
+                        style = EditorialKickerStyle,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                if (!title.isNullOrBlank()) {
+                    Text(
+                        text = title,
+                        style = ShirohaTypography.headlineSmall,
+                        color = ShirohaColors.TextPrimary
+                    )
+                }
+            }
+            EditorialDivider()
+        }
+        content()
     }
 }
 

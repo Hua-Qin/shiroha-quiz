@@ -59,13 +59,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         QuizRepository.init(applicationContext)
         LauncherIconSwitcher.applyShirohaMode(applicationContext, QuizRepository.shirohaModeEnabled)
-        applyStatusBarTheme(QuizRepository.darkThemeEnabled)
+        applyStatusBarTheme(QuizRepository.darkThemeEnabled, QuizRepository.warmThemeEnabled)
         setContent {
             val darkTheme = QuizRepository.darkThemeEnabled
+            val warmTheme = QuizRepository.warmThemeEnabled
             SideEffect {
-                applyStatusBarTheme(darkTheme)
+                applyStatusBarTheme(darkTheme, warmTheme)
             }
-            ShirohaQuizTheme(darkTheme = darkTheme) {
+            ShirohaQuizTheme(darkTheme = darkTheme, warmTheme = warmTheme) {
                 ShirohaStartupGate {
                     ShirohaAppShell()
                 }
@@ -73,13 +74,14 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun applyStatusBarTheme(darkTheme: Boolean) {
-        window.statusBarColor = if (darkTheme) {
-            Color(0xFF0E1627).toArgb()
-        } else {
-            Color(0xFFF7F9FF).toArgb()
+    private fun applyStatusBarTheme(darkTheme: Boolean, warmTheme: Boolean = false) {
+        window.statusBarColor = when {
+            warmTheme -> Color(0xFFFBF6EC).toArgb()
+            darkTheme -> Color(0xFF0E1627).toArgb()
+            else -> Color(0xFFF7F9FF).toArgb()
         }
-        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = !darkTheme
+        // 暖色与浅色用浅色背景,状态栏图标应为深色外观
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = warmTheme || !darkTheme
     }
 }
 
