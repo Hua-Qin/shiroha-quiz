@@ -356,8 +356,9 @@ fun ExamScreen(
 }
 
 
+ /**
  * 鑰冭瘯椤$Header:ShirohaHeader(kicker/title/subtitle) + 鍒囨崲缁冧範鎸夐挳
- * 杩涜涓椂鏄剧ず"鏀惰捣/灞曞紑?鎸夐挳
+ * 杩涜涓椂鏄剧ず"鏀氳捣/灞曞紑?鎸夐挳
  */
 @Composable
 private fun ExamScreenHeaderRow(

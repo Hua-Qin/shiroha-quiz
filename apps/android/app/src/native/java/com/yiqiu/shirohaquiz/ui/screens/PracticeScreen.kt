@@ -1264,7 +1264,7 @@ fun PracticeQuickEditScreen(
                         answerText = it
                         savedNotice = ""
                     },
-                    label = { Text(if (isObjective) "绛旀锛屼緥濡?A 鎴$A/B" else "鍙傝€冪瓟妗") },
+                    label = { Text(if (isObjective) "绛旀锛屼緥濡?A 鎴?A/B" else "鍙傝€冪瓟妗") },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = if (isObjective) 1 else 2,
                     keyboardOptions = KeyboardOptions(

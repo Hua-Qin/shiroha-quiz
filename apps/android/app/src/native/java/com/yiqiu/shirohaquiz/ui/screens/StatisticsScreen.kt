@@ -168,7 +168,8 @@ fun StatisticsScreen(
 }
 
 
- * 6 澶ф暟鎹?琛嚎澶ф暟瀛?+ 灏忔爣绛?+ 鍙戜笣涓嬪垝绾" * 2 鍒?脳 3 琛?鍛堢幇鏉傚織灏侀潰绾ф暟鎹" */
+ /**
+ * 6 澶ф暟鎹?琛嚎澶ф暟瀛?+ 灏忔爣绛?+ 鍙戜笣涓嬪垝绾" * 2 鍒?脳 3 琛?鍛堢幇鏉傚織灏侀潰绾ф暟鎹" */
 @Composable
 private fun EditorialFiguresSection(stats: StudyStatistics, scale: Float = 1f) {
     Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)) {

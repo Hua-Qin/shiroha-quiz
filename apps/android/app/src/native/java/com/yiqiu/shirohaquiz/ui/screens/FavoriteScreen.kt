@@ -336,11 +336,12 @@ fun FavoriteScreen(
 }
 
 
- * 鏀惰棌鑼冨洿閫夋嫨鍣"Surface(Card) + Row(鏍囬 + 鍓枃 + 灞曞紑鍥炬爣)
+ /**
+ * 鏀惰棌鑼冨洿閫夋嫨鍣"Surface(Card) + Row(鏍囬 + 鍓枃 + 灞曞紑鍥炬爣)
  */
 @Composable
 private fun FavoriteScopeSelector(
-    selectedBank: QuizBank",
+    selectedBank: QuizBank?,
     visibleCount: Int,
     totalCount: Int,
     uiScale: Float,

@@ -1,4 +1,4 @@
-package com.yiqiu.shirohaquiz.ui.screens
+﻿package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -109,7 +109,7 @@ D. 涓嶅仛澶嶇洏
 
                 FormatSection(
                     title = "浜屻€佸閫夐鏍煎紡",
-                    body = "澶氶€夐绛旀鍙互鍐欐垚 AB銆丄 B銆丄銆丅 鎴$A/B銆傚缓璁瓟妗堥泦涓啓鍦?绛旀锛欰CD"杩欎竴琛屻€",
+                    body = "澶氶€夐绛旀鍙互鍐欐垚 AB銆丄 B銆丄銆丅 鎴?A/B銆傚缓璁瓟妗堥泦涓啓鍦?绛旀锛欰CD"杩欎竴琛屻€",
                     sample = """
 2. 鏁寸悊棰樺簱鏃讹紝鍝簺鍋氭硶鏈夊姪浜庢彁楂樿瘑鍒ǔ瀹氭€э紵
 A. 淇濈暀娓呮櫚棰樺彿

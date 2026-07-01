@@ -605,7 +605,7 @@ fun BankReviewScreen(
                             )
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("绛旀锛氬崟閫夊～ A锛屽閫夊～ ABC 鎴$A,B,C锛屽垽鏂～ 姝ｇ‘/閿欒") },
+                        label = { Text("绛旀锛氬崟閫夊～ A锛屽閫夊～ ABC 鎴?A,B,C锛屽垽鏂～ 姝ｇ‘/閿欒") },
                         singleLine = true
                     )
                     if (question.type == QuestionType.BLANK && detectedBlankCount > 1) {
@@ -931,7 +931,7 @@ private fun parseReviewAnswer(text: String, type: QuestionType): List<String> {
         normalizeJudgeAnswer(listOf(clean)).takeIf { it.isNotEmpty() }?.let { return it }
     }
 
-    val compactLetters = clean.uppercase().replace(Regex("[\\s,锛屻€"锛?]+"), "")
+    val compactLetters = clean.uppercase().replace(Regex("[\\s,锛屮€?锛?]+"), "")
     if (compactLetters.matches(Regex("^[A-H]{1,8}$"))) {
         return compactLetters.map { it.toString() }.distinct()
     }
