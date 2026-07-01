@@ -1108,6 +1108,7 @@ fun PracticeScreen(
     }
     }
 }
+}
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
