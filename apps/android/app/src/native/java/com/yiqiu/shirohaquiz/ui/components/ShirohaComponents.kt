@@ -125,8 +125,33 @@ fun ShirohaHeader(
     kicker: String,
     title: String,
     subtitle: String,
+    scale: Float = 1f,
     modifier: Modifier = Modifier
 ) {
+    val kickerStyle = if (scale == 1f) {
+        EditorialKickerStyle
+    } else {
+        EditorialKickerStyle.copy(
+            fontSize = (EditorialKickerStyle.fontSize.value * scale).sp,
+            lineHeight = (EditorialKickerStyle.lineHeight.value * scale).sp
+        )
+    }
+    val titleStyle = if (scale == 1f) {
+        ShirohaTypography.displaySmall
+    } else {
+        ShirohaTypography.displaySmall.copy(
+            fontSize = (ShirohaTypography.displaySmall.fontSize.value * scale).sp,
+            lineHeight = (ShirohaTypography.displaySmall.lineHeight.value * scale).sp
+        )
+    }
+    val subtitleStyle = if (scale == 1f) {
+        MaterialTheme.typography.bodyLarge
+    } else {
+        MaterialTheme.typography.bodyLarge.copy(
+            fontSize = (MaterialTheme.typography.bodyLarge.fontSize.value * scale).sp,
+            lineHeight = (MaterialTheme.typography.bodyLarge.lineHeight.value * scale).sp
+        )
+    }
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Sm)
@@ -135,21 +160,21 @@ fun ShirohaHeader(
             Text(
                 text = kicker.uppercase(),
                 color = MaterialTheme.colorScheme.primary,
-                style = EditorialKickerStyle
+                style = kickerStyle
             )
         }
         if (title.isNotBlank()) {
             Text(
                 text = title,
-                style = ShirohaTypography.displaySmall,
+                style = titleStyle,
                 color = ShirohaColors.TextPrimary
             )
         }
         if (subtitle.isNotBlank()) {
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = subtitleStyle,
+                color = ShirohaColors.TextSecondary
             )
         }
     }
@@ -158,16 +183,31 @@ fun ShirohaHeader(
 /* ====== 编辑式组件库(Warm Editorial Magazine) ====== */
 
 /**
- * 编辑式大数字组件(杂志封面级数据呈现)
+ * 编辑式大数字组件(杂志封面级数据呈现,响应式字号)
  * 衬线粗体超大数字 + 小标签 + 发丝下划线
+ *
+ * @param scale 字号缩放因子,默认 1f。
+ *   - 移动端推荐 0.65f(通过 `editorialScaleFor(ScreenClass.COMPACT)` 取得)
+ *   - 中等屏 0.85f
+ *   - 桌面 1.0f
  */
 @Composable
 fun EditorialFigure(
     value: String,
     label: String,
     unit: String = "",
+    scale: Float = 1f,
     modifier: Modifier = Modifier
 ) {
+    val figureStyle = if (scale == 1f) {
+        EditorialFigureStyle
+    } else {
+        EditorialFigureStyle.copy(
+            fontSize = (EditorialFigureStyle.fontSize.value * scale).sp,
+            lineHeight = (EditorialFigureStyle.lineHeight.value * scale).sp
+        )
+    }
+    val unitStyle = MaterialTheme.typography.titleMedium
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -178,15 +218,15 @@ fun EditorialFigure(
         ) {
             Text(
                 text = value,
-                style = EditorialFigureStyle,
+                style = figureStyle,
                 color = ShirohaColors.TextPrimary
             )
             if (unit.isNotBlank()) {
                 Text(
                     text = unit,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = unitStyle,
                     color = ShirohaColors.TextSecondary,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = (8 * scale).coerceAtLeast(4f).dp)
                 )
             }
         }
@@ -270,8 +310,25 @@ fun EditorialDivider(
 fun EditorialSection(
     title: String? = null,
     kicker: String? = null,
+    scale: Float = 1f,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val kickerStyle = if (scale == 1f) {
+        EditorialKickerStyle
+    } else {
+        EditorialKickerStyle.copy(
+            fontSize = (EditorialKickerStyle.fontSize.value * scale).sp,
+            lineHeight = (EditorialKickerStyle.lineHeight.value * scale).sp
+        )
+    }
+    val titleStyle = if (scale == 1f) {
+        ShirohaTypography.headlineSmall
+    } else {
+        ShirohaTypography.headlineSmall.copy(
+            fontSize = (ShirohaTypography.headlineSmall.fontSize.value * scale).sp,
+            lineHeight = (ShirohaTypography.headlineSmall.lineHeight.value * scale).sp
+        )
+    }
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
@@ -281,14 +338,14 @@ fun EditorialSection(
                 if (!kicker.isNullOrBlank()) {
                     Text(
                         text = kicker.uppercase(),
-                        style = EditorialKickerStyle,
+                        style = kickerStyle,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
                 if (!title.isNullOrBlank()) {
                     Text(
                         text = title,
-                        style = ShirohaTypography.headlineSmall,
+                        style = titleStyle,
                         color = ShirohaColors.TextPrimary
                     )
                 }
@@ -687,9 +744,26 @@ fun IllustrationHeroCard(
     @DrawableRes imageRes: Int,
     modifier: Modifier = Modifier,
     imageSize: Dp = ShirohaDimens.HeroImageSize,
+    scale: Float = 1f,
     content: @Composable ColumnScope.() -> Unit = {}
 ) {
     val showIllustration = QuizRepository.shirohaModeEnabled
+    val heroTitleStyle = if (scale == 1f) {
+        ShirohaTypography.headlineSmall
+    } else {
+        ShirohaTypography.headlineSmall.copy(
+            fontSize = (ShirohaTypography.headlineSmall.fontSize.value * scale).sp,
+            lineHeight = (ShirohaTypography.headlineSmall.lineHeight.value * scale).sp
+        )
+    }
+    val heroSubtitleStyle = if (scale == 1f) {
+        MaterialTheme.typography.bodyLarge
+    } else {
+        MaterialTheme.typography.bodyLarge.copy(
+            fontSize = (MaterialTheme.typography.bodyLarge.fontSize.value * scale).sp,
+            lineHeight = (MaterialTheme.typography.bodyLarge.lineHeight.value * scale).sp
+        )
+    }
 
     GlassCard(modifier = modifier) {
         Row(
@@ -714,19 +788,19 @@ fun IllustrationHeroCard(
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = heroTitleStyle,
                     fontWeight = FontWeight.SemiBold,
                     textAlign = if (showIllustration) TextAlign.Start else TextAlign.Center,
-                    maxLines = 1,
+                    maxLines = if (showIllustration) 2 else 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 if (subtitle.isNotBlank()) {
                     Text(
                         text = subtitle,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = heroSubtitleStyle,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = if (showIllustration) TextAlign.Start else TextAlign.Center,
-                        maxLines = 1,
+                        maxLines = if (showIllustration) 2 else 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }

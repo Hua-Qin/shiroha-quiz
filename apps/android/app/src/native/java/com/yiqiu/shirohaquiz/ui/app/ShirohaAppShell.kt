@@ -127,6 +127,19 @@ private enum class MainTab(
     Statistics("学习看板", Icons.Rounded.QueryStats, showInBottomBar = true)
 }
 
+/**
+ * 移动端底部导航栏 5 项(从 MainTab 显式派生,与 showInBottomBar 解耦)
+ * 顺序:首页 / 练习 / 学习看板 / 错题本 / 我的
+ * 选中态:走 ShirohaBottomNavItem 渲染(暖色时 pill 背景 = 暖琥珀 12% 透明)
+ */
+private val BOTTOM_BAR_TABS: List<MainTab> = listOf(
+    MainTab.Home,
+    MainTab.Practice,
+    MainTab.Statistics,
+    MainTab.WrongBook,
+    MainTab.Me
+)
+
 private fun MainTab.fallbackBackTarget(): MainTab? = when (this) {
     MainTab.Home,
     MainTab.Import,
@@ -296,7 +309,7 @@ fun ShirohaAppShell() {
                             horizontalArrangement = Arrangement.spacedBy(ShirohaDimens.BottomNavItemGap),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            MainTab.entries.filter { it.showInBottomBar }.forEach { tab ->
+                            BOTTOM_BAR_TABS.forEach { tab ->
                                 ShirohaBottomNavItem(
                                     tab = tab,
                                     selected = selectedRootTab == tab,
@@ -557,13 +570,22 @@ private fun ShirohaBottomNavItem(
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+    val warm = ShirohaColors.warmThemeEnabled
+    // pill 选中背景:暖色时用暖琥珀 12% 透明,冷色时用主色 10% 透明
+    val pillBg = if (warm) {
+        Color(0x1FB45309) // 暖琥珀 ≈12% alpha
+    } else {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
+    }
     val backgroundColor by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.10f) else Color.Transparent,
+        targetValue = if (selected) pillBg else Color.Transparent,
         animationSpec = tween(durationMillis = ShirohaMotion.BottomNavMillis),
         label = "bottom_nav_bg"
     )
     val contentColor by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.primary else ShirohaColors.TextSecondary,
+        targetValue = if (selected) {
+            if (warm) Color(0xFFB45309) else MaterialTheme.colorScheme.primary
+        } else ShirohaColors.TextSecondary,
         animationSpec = tween(durationMillis = ShirohaMotion.BottomNavMillis),
         label = "bottom_nav_color"
     )
@@ -572,7 +594,17 @@ private fun ShirohaBottomNavItem(
         animationSpec = tween(durationMillis = ShirohaMotion.BottomNavMillis),
         label = "bottom_nav_icon_scale"
     )
-    val shape = RoundedCornerShape(ShirohaRadius.Md)
+    val iconOffsetY by animateFloatAsState(
+        targetValue = if (selected) -1.5f else 0f,
+        animationSpec = tween(durationMillis = ShirohaMotion.BottomNavMillis),
+        label = "bottom_nav_icon_offset"
+    )
+    // pill 圆角(选中时变 pill 形,未选中仍是普通圆角)
+    val shape = if (selected) {
+        RoundedCornerShape(ShirohaRadius.Pill)
+    } else {
+        RoundedCornerShape(ShirohaRadius.Lg)
+    }
 
     Surface(
         modifier = modifier
@@ -602,6 +634,7 @@ private fun ShirohaBottomNavItem(
                     .graphicsLayer {
                         scaleX = iconScale
                         scaleY = iconScale
+                        translationY = iconOffsetY
                     }
             )
             Text(

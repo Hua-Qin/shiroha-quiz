@@ -1,11 +1,16 @@
-package com.yiqiu.shirohaquiz.ui.screens
+﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+
+import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
 import com.yiqiu.shirohaquiz.ui.components.shirohaNoRippleClickable
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -34,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +51,9 @@ import com.yiqiu.shirohaquiz.state.QuizBank
 import com.yiqiu.shirohaquiz.state.QuizRepository
 import com.yiqiu.shirohaquiz.state.StudyRecord
 import com.yiqiu.shirohaquiz.ui.components.ActionPillButton
+import com.yiqiu.shirohaquiz.ui.components.EditorialDivider
+import com.yiqiu.shirohaquiz.ui.components.EditorialFigure
+import com.yiqiu.shirohaquiz.ui.components.EditorialSection
 import com.yiqiu.shirohaquiz.ui.components.EmptyStateIllustration
 import com.yiqiu.shirohaquiz.ui.components.GlassCard
 import com.yiqiu.shirohaquiz.ui.components.IllustrationHeroCard
@@ -55,6 +64,9 @@ import com.yiqiu.shirohaquiz.ui.components.StatusChip
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaColors
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaRadius
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaSpacing
+import com.yiqiu.shirohaquiz.ui.theme.editorialScaleFor
+import com.yiqiu.shirohaquiz.ui.theme.screenClassFor
+import com.yiqiu.shirohaquiz.ui.theme.uiScaleFor
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -108,9 +120,9 @@ fun RecordsScreen(
 
     pendingDeleteRecord?.let { targetRecord ->
         ShirohaDangerConfirmDialog(
-            title = "删除这条学习记录？",
-            message = "删除后无法恢复，但不会影响题库、错题本和收藏夹。",
-            confirmText = "删除",
+            title = "鍒犻櫎杩欐潯瀛︿範璁板綍锛?,
+            message = "鍒犻櫎鍚庢棤娉曟仮澶嶏紝浣嗕笉浼氬奖鍝嶉搴撱€侀敊棰樻湰鍜屾敹钘忓す銆?,
+            confirmText = "鍒犻櫎",
             onDismiss = { pendingDeleteRecord = null },
             onConfirm = {
                 QuizRepository.deleteStudyRecord(targetRecord.id)
@@ -119,126 +131,242 @@ fun RecordsScreen(
         )
     }
 
-    LazyColumn(
+    BoxWithConstraints(
         modifier = Modifier
-            .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Sm),
-        verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
+            .fillMaxSize()
+            .shirohaEditorialBackground()
     ) {
-        item {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
-            ) {
-        ShirohaHeader(
-            kicker = "Records",
-            title = "学习记录",
-            subtitle = ""
-        )
+        val screenClass = screenClassFor(maxWidth)
+        val scale = editorialScaleFor(screenClass)
+        val uiScale = uiScaleFor(screenClass)
 
-        if (records.isEmpty()) {
-            EmptyStateIllustration(
-                title = "这里还没有学习记录",
-                message = "完成练习或考试后，记录会自动出现在这里。",
-                imageRes = R.drawable.illus_rest_state_webp,
-                action = { Spacer(Modifier.height(12.dp)) }
-            )
-            GlassCard {
-                ActionPillButton(
-                    icon = Icons.AutoMirrored.Rounded.Undo,
-                    text = "返回",
-                    primary = false,
-                    onClick = onBack
-                )
-            }
-        }
-
-        if (records.isNotEmpty()) {
-            IllustrationHeroCard(
-            title = "学习记录会在这里慢慢积累",
-            subtitle = "练习和考试都会收录到这里。",
-            imageRes = R.drawable.illus_rest_state_webp,
-            imageSize = 88.dp
-        )
-
-        GlassCard {
-            Text(
-                text = "记录范围",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(Modifier.height(8.dp))
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shirohaNoRippleClickable { showScopeDialog = true },
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(ShirohaRadius.Md),
-                color = ShirohaColors.CardWhite86,
-                border = BorderStroke(1.dp, ShirohaColors.LineStrong)
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Sm),
+            verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xxl)
+        ) {
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = selectedBank?.name ?: "全部记录",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = selectedBank?.let { bank ->
-                                val groupName = bank.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }
-                                "$groupName · 显示 ${visibleRecords.size} / ${records.size} 条"
-                            } ?: "当前显示全部 ${records.size} 条学习记录",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                    Icon(
-                        imageVector = Icons.Rounded.ExpandMore,
-                        contentDescription = "选择记录范围",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(22.dp)
+                    ShirohaHeader(
+                        kicker = "History",
+                        title = "瀛︿範璁板綍",
+                        subtitle = if (records.isEmpty()) {
+                            "瀹屾垚缁冧範鎴栬€冭瘯鍚庯紝璁板綍浼氳嚜鍔ㄥ嚭鐜板湪杩欓噷銆?
+                        } else {
+                            "鍏?${records.size} 鏉″涔犺褰曘€?
+                        },
+                        scale = scale
                     )
                 }
             }
-            if (selectedBank != null) {
-                Spacer(Modifier.height(10.dp))
-                Text(
-                    text = "包括属于该题库的记录，以及跨题库练习中包含该题库题目的记录。",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+
+            if (records.isEmpty()) {
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
+                    ) {
+                        EmptyStateIllustration(
+                            title = "杩欓噷杩樻病鏈夊涔犺褰?,
+                            message = "瀹屾垚缁冧範鎴栬€冭瘯鍚庯紝璁板綍浼氳嚜鍔ㄥ嚭鐜板湪杩欓噷銆?,
+                            imageRes = R.drawable.illus_rest_state_webp,
+                            action = { Spacer(Modifier.height((12 * uiScale).dp)) }
+                        )
+                        GlassCard {
+                            ActionPillButton(
+                                icon = Icons.AutoMirrored.Rounded.Undo,
+                                text = "杩斿洖",
+                                primary = false,
+                                onClick = onBack
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (records.isNotEmpty()) {
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
+                    ) {
+                        IllustrationHeroCard(
+                            title = "瀛︿範璁板綍浼氬湪杩欓噷鎱㈡參绉疮",
+                            subtitle = "缁冧範鍜岃€冭瘯閮戒細鏀跺綍鍒拌繖閲屻€?,
+                            imageRes = R.drawable.illus_rest_state_webp,
+                            imageSize = 88.dp,
+                            scale = scale
+                        )
+
+                        EditorialSection(
+                            kicker = "Overview",
+                            title = "鏁版嵁姒傝",
+                            scale = scale
+                        ) {
+                            RecordsOverviewFigures(
+                                records = records,
+                                scale = scale
+                            )
+                        }
+
+                        EditorialSection(
+                            kicker = "Filter",
+                            title = "绛涢€?,
+                            scale = scale
+                        ) {
+                            RecordsFilterBlock(
+                                selectedBank = selectedBank,
+                                records = records,
+                                visibleRecords = visibleRecords,
+                                uiScale = uiScale,
+                                onPickBank = { showScopeDialog = true }
+                            )
+                        }
+
+                        EditorialSection(
+                            kicker = "Records",
+                            title = "璁板綍",
+                            scale = scale
+                        ) {
+                            if (visibleRecords.isEmpty()) {
+                                GlassCard {
+                                    NoticeCard("璇ラ搴撴殏鏃犲涔犺褰曘€傚彲浠ュ垏鎹㈠埌鍏朵粬棰樺簱鎴栧叏閮ㄨ褰曘€?)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (visibleRecords.isNotEmpty()) {
+                    items(
+                        items = visibleRecords,
+                        key = { record -> record.id }
+                    ) { record ->
+                        RecordCard(
+                            record = record,
+                            onClick = { onOpenRecord(record.id) },
+                            onDelete = { pendingDeleteRecord = record }
+                        )
+                        EditorialDivider()
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecordsOverviewFigures(
+    records: List<StudyRecord>,
+    scale: Float
+) {
+    val totalCount = records.size
+    val totalDurationSeconds = records.sumOf { it.durationSeconds ?: 0 }
+    val totalMinutes = totalDurationSeconds / 60
+    val totalQuestions = records.sumOf { it.total }
+    val totalCorrect = records.sumOf { it.correct }
+    val averageScore = if (totalQuestions == 0) 0 else totalCorrect * 100 / totalQuestions
+
+    Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
+        ) {
+            EditorialFigure(
+                modifier = Modifier.weight(1f),
+                scale = scale,
+                value = totalCount.toString(),
+                label = "鎬昏褰曟暟",
+                unit = "鏉?
+            )
+            EditorialFigure(
+                modifier = Modifier.weight(1f),
+                scale = scale,
+                value = if (totalMinutes >= 60) {
+                    "${totalMinutes / 60}h${(totalMinutes % 60).toString().padStart(2, '0')}"
+                } else {
+                    totalMinutes.toString()
+                },
+                label = "鎬荤敤鏃?,
+                unit = if (totalMinutes >= 60) "" else "鍒?
+            )
+        }
+        EditorialFigure(
+            modifier = Modifier.fillMaxWidth(),
+            scale = scale,
+            value = averageScore.toString(),
+            label = "骞冲潎姝ｇ‘鐜?,
+            unit = "%"
+        )
+    }
+}
+
+@Composable
+private fun RecordsFilterBlock(
+    selectedBank: QuizBank?,
+    records: List<StudyRecord>,
+    visibleRecords: List<StudyRecord>,
+    uiScale: Float,
+    onPickBank: () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)) {
+        Text(
+            text = "鏃ユ湡鑼冨洿 / 绫诲瀷 / 棰樺簱",
+            style = MaterialTheme.typography.bodyMedium,
+            color = ShirohaColors.TextSecondary
+        )
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shirohaNoRippleClickable { onPickBank() },
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(ShirohaRadius.Md),
+            color = ShirohaColors.CardWhite86,
+            border = BorderStroke(1.dp, ShirohaColors.LineStrong)
+        ) {
+            Row(
+                modifier = Modifier.padding(
+                    horizontal = (14 * uiScale).coerceAtLeast(10f).dp,
+                    vertical = (12 * uiScale).coerceAtLeast(8f).dp
+                ),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = selectedBank?.name ?: "鍏ㄩ儴璁板綍",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = selectedBank?.let { bank ->
+                            val groupName = bank.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }
+                            "$groupName 路 鏄剧ず ${visibleRecords.size} / ${records.size} 鏉?
+                        } ?: "褰撳墠鏄剧ず鍏ㄩ儴 ${records.size} 鏉″涔犺褰?,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Rounded.ExpandMore,
+                    contentDescription = "閫夋嫨璁板綍鑼冨洿",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(22.dp)
                 )
             }
         }
-
-            }
-            }
-        }
-
-        if (records.isNotEmpty()) {
-            if (visibleRecords.isEmpty()) {
-                item {
-                    GlassCard {
-                        NoticeCard("该题库暂无学习记录。可以切换到其他题库或全部记录。")
-                    }
-                }
-            } else {
-                items(
-                    items = visibleRecords,
-                    key = { record -> record.id }
-                ) { record ->
-                    RecordCard(
-                        record = record,
-                        onClick = { onOpenRecord(record.id) },
-                        onDelete = { pendingDeleteRecord = record }
-                    )
-                }
-            }
+        if (selectedBank != null) {
+            Text(
+                text = "鍖呮嫭灞炰簬璇ラ搴撶殑璁板綍锛屼互鍙婅法棰樺簱缁冧範涓寘鍚棰樺簱棰樼洰鐨勮褰曘€?,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -259,7 +387,7 @@ private fun RecordScopeDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("选择记录范围") },
+        title = { Text("閫夋嫨璁板綍鑼冨洿") },
         text = {
             Column(
                 modifier = Modifier
@@ -268,8 +396,8 @@ private fun RecordScopeDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 RecordScopeOption(
-                    title = "全部记录",
-                    desc = "共 ${records.size} 条学习记录",
+                    title = "鍏ㄩ儴璁板綍",
+                    desc = "鍏?${records.size} 鏉″涔犺褰?,
                     selected = selectedScopeKey == RECORD_SCOPE_ALL,
                     onClick = { onSelect(RECORD_SCOPE_ALL) }
                 )
@@ -289,7 +417,7 @@ private fun RecordScopeDialog(
                         }
                         RecordScopeOption(
                             title = bank.name,
-                            desc = "$count 条相关记录 · 共 ${bank.questions.size} 题",
+                            desc = "$count 鏉＄浉鍏宠褰?路 鍏?${bank.questions.size} 棰?,
                             selected = selectedScopeKey == key,
                             onClick = { onSelect(key) }
                         )
@@ -298,7 +426,7 @@ private fun RecordScopeDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("关闭") }
+            TextButton(onClick = onDismiss) { Text("鍏抽棴") }
         }
     )
 }
@@ -344,7 +472,7 @@ private fun RecordScopeOption(
             if (selected) {
                 Icon(
                     imageVector = Icons.Rounded.Done,
-                    contentDescription = "已选择",
+                    contentDescription = "宸查€夋嫨",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(18.dp)
                 )
@@ -380,7 +508,7 @@ private fun RecordCard(
     val wrong = (record.total - record.correct).coerceAtLeast(0)
     val accuracy = if (record.total == 0) 0 else record.correct * 100 / record.total
     val finishTime = record.timestamp
-    val isExam = record.source.contains("考试")
+    val isExam = record.source.contains("鑰冭瘯")
     val meaningfulTitle = meaningfulRecordTitle(record)
     val footerText = recordFooterText(record)
 
@@ -422,7 +550,7 @@ private fun RecordCard(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.DeleteOutline,
-                        contentDescription = "删除记录",
+                        contentDescription = "鍒犻櫎璁板綍",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -444,7 +572,7 @@ private fun RecordCard(
         }
 
         Text(
-            text = "${record.total} 题 · 对 ${record.correct} · 错 $wrong",
+            text = "${record.total} 棰?路 瀵?${record.correct} 路 閿?$wrong",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium,
             maxLines = 1,
@@ -468,9 +596,9 @@ private fun RecordCard(
             )
             Text(
                 text = if (isExam && record.totalScore != null && record.earnedScore != null) {
-                    "${record.earnedScore.trimScore()} / ${record.totalScore.trimScore()} 分"
+                    "${record.earnedScore.trimScore()} / ${record.totalScore.trimScore()} 鍒?
                 } else {
-                    "正确率 $accuracy%"
+                    "姝ｇ‘鐜?$accuracy%"
                 },
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
@@ -496,12 +624,12 @@ private fun meaningfulRecordTitle(record: StudyRecord): String? {
     if (title.isBlank()) return null
     val bankName = record.bankName.trim()
     val placeholders = setOf(
-        "当前题库",
-        "原生考试",
-        "练习记录",
-        "考试记录",
-        "当前练习",
-        "当前考试"
+        "褰撳墠棰樺簱",
+        "鍘熺敓鑰冭瘯",
+        "缁冧範璁板綍",
+        "鑰冭瘯璁板綍",
+        "褰撳墠缁冧範",
+        "褰撳墠鑰冭瘯"
     )
     if (title in placeholders) return null
     if (bankName.isNotBlank() && title == bankName) return null
@@ -509,11 +637,13 @@ private fun meaningfulRecordTitle(record: StudyRecord): String? {
 }
 
 private fun recordFooterText(record: StudyRecord): String {
-    val duration = record.durationSeconds?.let { "用时 ${formatDuration(it)}" }
-    val detail = if (record.questionResults.isNotEmpty()) "点击查看详情" else "仅保留摘要"
-    return listOfNotNull(duration, detail).joinToString(" · ")
+    val duration = record.durationSeconds?.let { "鐢ㄦ椂 ${formatDuration(it)}" }
+    val detail = if (record.questionResults.isNotEmpty()) "鐐瑰嚮鏌ョ湅璇︽儏" else "浠呬繚鐣欐憳瑕?
+    return listOfNotNull(duration, detail).joinToString(" 路 ")
 }
 
 internal fun Double.trimScore(): String {
     return if (this % 1.0 == 0.0) this.toInt().toString() else "%.1f".format(this)
 }
+
+

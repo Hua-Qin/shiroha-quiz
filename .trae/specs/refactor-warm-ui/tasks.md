@@ -12,15 +12,16 @@
 
 ## 阶段一:编辑式组件库
 
-- [ ] Task 1: 在 ShirohaComponents.kt 新增编辑式组件
-  - `EditorialFigure(value: String, label: String, unit: String)`:衬线超大数字(EditorialFigureStyle)+ 小标签 + 发丝下划线
-  - `EditorialSection(title: String?, kicker: String?, content)`:发丝分隔线区块(顶部发丝线 + 可选 kicker/title + 内容),替代部分 GlassCard
-  - `EditorialDivider(label: String? = null)`:发丝分隔线,可选居中标签
-  - 重构 `ShirohaHeader`:kicker 改用 EditorialKickerStyle,title 改 Serif
+- [x] Task 1: 在 ShirohaComponents.kt 新增编辑式组件
+  - `EditorialFigure(value, label, unit, scale=1f, modifier)` — 衬线超大数字 + 小标签 + 发丝下划线
+  - `EditorialSection(title?, kicker?, scale=1f, content)` — 发丝分隔线区块
+  - `EditorialDivider(label?)` — 发丝线 + 可选居中标签
+  - 重构 `ShirohaHeader(kicker, title, subtitle, scale=1f, modifier)` — kicker uppercase + EditorialKickerStyle + title Serif + subtitle 响应式
+  - 重构 `IllustrationHeroCard(..., scale=1f)` — hero title 改 Serif + 响应式
 
-## 阶段二:首页样板屏(优先)
+## 阶段二:首页样板 + 响应式优化 + 底部栏
 
-- [ ] Task 2: 全量重写 HomeDashboardScreen.kt 为暖色编辑杂志风
+- [x] Task 2: 全量重写 HomeDashboardScreen.kt 为暖色编辑杂志风
   - **hero 区**:启用 `IllustrationHeroCard`(Shiroha 模式时带浮动插画 `illus_home_welcome`),暖色 hero 标题用 Serif
   - **编辑式数据区**:6 个指标改为 `EditorialFigure` 呈现(2 列网格,衬线大数字 + 小标签 + 发丝下划线),替代 MetricCell
   - **今日学习区**:`EditorialSection` 包裹,大数字今日练题数 + 待复习数 + ActionPillButton(继续练习/模拟考试)
@@ -28,8 +29,22 @@
   - **错题分类区**:`EditorialSection` 包裹 CategoryBarChart
   - **快捷入口区**:2x2 `DashboardShortcutCard` 保留(错题本/收藏/边学边答/学习记录),视觉改暖色
   - **AI 建议区**:`EditorialSection` 包裹,保留 AI 获取/重新生成逻辑
-  - **保留全部函数签名与回调**(onGoStudy/onGoExam/onOpenWrongBook 等不变)
-  - **保留全部数据读取**(stats/todayPracticeCount/wrongBookActiveCount 等)
+
+- [x] Task 2A: 首页响应式字号(BoxWithConstraints + screenClassFor + editorialScaleFor)
+  - `editorialScaleFor` COMPACT 0.65 / MEDIUM 0.85 / EXPANDED 1.00
+  - 移动端 EditorialFigure 大数字 56→36sp(35% 缩)
+  - 中等屏 48sp
+  - 桌面端 56sp(基准)
+
+- [x] Task 2B: 首页背景色确认 + 暖色径向渐变
+  - 暖色启用时:`Brush.verticalGradient(#FEF3C7 → #FBF6EC → #FBF1DE)` 暖纸张径向
+  - 冷色 / 深色:`BgApp` 纯色(原逻辑)
+  - 反 AI slop:避开紫粉,采用 Stripe Press 暖纸质感
+
+- [x] Task 2C: 底部栏改造(ShirohaAppShell.kt)
+  - 新增 `BOTTOM_BAR_TABS = [Home, Practice, Statistics, WrongBook, Me]`
+  - ShirohaBottomNavItem 选中态 pill 圆角 + 暖琥珀 12% 透明背景 + 图标上移 1.5dp
+  - 冷色时维持主色 10% 透明(原色系不变)
 
 ## 阶段三:第一批剩余 4 屏
 
@@ -72,13 +87,21 @@
 - [ ] Task 14: 重构 AboutScreen.kt(关于)
 - [ ] Task 15: 重构 HomeRedirectNotice.kt(首页重定向提示)
 
-## 阶段七:验证
+## 阶段七:响应式扩展(后续)
 
-- [ ] Task 16: 全量功能完整性验证
+- [ ] Task 16: 扩展响应式支持到全部 21 屏
+  - 各屏主函数用 BoxWithConstraints + screenClassFor 计算 scale
+  - EditorialSection/Figure/IllustrationHeroCard/ShirohaHeader 调用时传 scale
+  - 默认值 1f,确保新屏未传也能编译运行
+
+## 阶段八:验证
+
+- [ ] Task 17: 全量功能完整性验证
   - 21 屏逐一验证功能未受影响
   - 暖色/冷蓝切换正常,Shiroha 模式兼容
+  - 移动端(< 600dp)/ 中等(600-839dp)/ 桌面(>= 840dp)三档字号正常
 
-- [ ] Task 17: huashu-design 5 维度专家评审
+- [ ] Task 18: huashu-design 5 维度专家评审
   - 哲学一致性 / 视觉层级 / 细节执行 / 功能性 / 创新性
   - 产出 Keep/Fix/Quick Wins 清单
 
@@ -87,4 +110,5 @@
 - Task 2(首页样板)依赖 Task 1,完成后作为其余屏的参照
 - Task 3-6(第一批剩余)依赖 Task 1,可与 Task 2 后并行
 - Task 7-15 依赖 Task 1,各屏之间相互独立可并行
-- Task 16-17 依赖全部前置完成
+- Task 16 依赖全部前置
+- Task 17-18 依赖全部前置完成

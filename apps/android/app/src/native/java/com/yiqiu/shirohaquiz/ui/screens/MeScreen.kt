@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import com.yiqiu.shirohaquiz.ui.components.shirohaNoRippleClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.AutoStories
 import androidx.compose.material.icons.rounded.Delete
@@ -58,11 +60,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.yiqiu.shirohaquiz.R
 import com.yiqiu.shirohaquiz.ai.ShirohaAiClient
 import com.yiqiu.shirohaquiz.state.QuizBank
 import com.yiqiu.shirohaquiz.state.QuizRepository
 import com.yiqiu.shirohaquiz.ui.components.ActionPillButton
+import com.yiqiu.shirohaquiz.ui.components.EditorialDivider
+import com.yiqiu.shirohaquiz.ui.components.EditorialFigure
+import com.yiqiu.shirohaquiz.ui.components.EditorialSection
 import com.yiqiu.shirohaquiz.ui.components.GlassCard
 import com.yiqiu.shirohaquiz.ui.components.IllustrationHeroCard
 import com.yiqiu.shirohaquiz.ui.components.NoticeCard
@@ -72,6 +78,10 @@ import com.yiqiu.shirohaquiz.ui.theme.ShirohaColors
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaDimens
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaRadius
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaSpacing
+import com.yiqiu.shirohaquiz.ui.theme.ScreenClass
+import com.yiqiu.shirohaquiz.ui.theme.editorialScaleFor
+import com.yiqiu.shirohaquiz.ui.theme.screenClassFor
+import com.yiqiu.shirohaquiz.ui.theme.uiScaleFor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -92,113 +102,227 @@ fun MeScreen(
 ) {
     val context = LocalContext.current
 
-    Column(
-        modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Sm),
-        verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = "Me",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1
+    BoxWithConstraints {
+        val screenClass: ScreenClass = screenClassFor(maxWidth)
+        val scale: Float = editorialScaleFor(screenClass)
+        val uiScale: Float = uiScaleFor(screenClass)
+        val bankCount = QuizRepository.banks.size
+        val totalQuestions = QuizRepository.banks.sumOf { it.questions.size }
+
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Sm),
+            verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
+        ) {
+            ShirohaHeader(
+                kicker = "Profile",
+                title = "我的",
+                subtitle = "管理偏好、资料与 Shiroha Quiz 的细节。",
+                scale = scale
             )
-            Spacer(Modifier.height(ShirohaSpacing.Sm))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+
+            IllustrationHeroCard(
+                title = "我是 Shiroha",
+                subtitle = "欢迎关注，喜欢的话请给我 ⭐️",
+                imageRes = R.drawable.illus_me_settings,
+                modifier = Modifier.height(ShirohaDimens.HeroCardHeight),
+                imageSize = ShirohaDimens.HeroImageSize,
+                scale = scale
+            )
+
+            EditorialSection(
+                kicker = "Stats",
+                title = "学习概况",
+                scale = scale
             ) {
-                Text(
-                    text = "设置与资料",
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-                IconButton(
-                    onClick = { QuizRepository.setDarkThemeEnabled(context, !QuizRepository.darkThemeEnabled) }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)
                 ) {
-                    Icon(
-                        imageVector = if (QuizRepository.darkThemeEnabled) Icons.Rounded.LightMode else Icons.Rounded.DarkMode,
-                        contentDescription = if (QuizRepository.darkThemeEnabled) "切换浅色模式" else "切换暗夜模式",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
+                    EditorialFigure(
+                        value = bankCount.toString(),
+                        label = "本地题库",
+                        unit = "套",
+                        scale = scale,
+                        modifier = Modifier.weight(1f)
+                    )
+                    EditorialFigure(
+                        value = totalQuestions.toString(),
+                        label = "题目总数",
+                        unit = "题",
+                        scale = scale,
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
-        }
-        IllustrationHeroCard(
-            title = "我是Shiroha",
-            subtitle = "欢迎关注，喜欢的话请给我⭐️⭐️",
-            imageRes = R.drawable.illus_me_settings,
-            modifier = Modifier.height(ShirohaDimens.HeroCardHeight),
-            imageSize = ShirohaDimens.HeroImageSize
-        )
 
-        GlassCard {
+            EditorialSection(
+                kicker = "Preferences",
+                title = "设置入口",
+                scale = scale
+            ) {
+                MePreferenceRow(
+                    icon = Icons.Rounded.DarkMode,
+                    title = "外观偏好",
+                    desc = "主题、卡片动画、Shiroha 模式、开屏图和应用图标。",
+                    onClick = onOpenAppearancePreference
+                )
+                EditorialDivider()
+                MePreferenceRow(
+                    icon = Icons.Rounded.Tune,
+                    title = "刷题偏好",
+                    desc = "默认答题方式、每组题数和切题习惯。",
+                    onClick = onOpenPracticePreference
+                )
+                EditorialDivider()
+                MePreferenceRow(
+                    icon = Icons.Rounded.FactCheck,
+                    title = "错题本",
+                    desc = "错题收录、掌握判定与智能复习。",
+                    onClick = onOpenWrongBookPreference
+                )
+                EditorialDivider()
+                MePreferenceRow(
+                    icon = Icons.Rounded.AutoAwesome,
+                    title = "AI 设置",
+                    desc = "接口、AI 重构、AI 核对、AI 解析和处理限制。",
+                    onClick = onOpenAiSettings
+                )
+                EditorialDivider()
+                MePreferenceRow(
+                    icon = Icons.Rounded.Save,
+                    title = "数据管理",
+                    desc = "导入、导出、备份和清除本地数据。",
+                    onClick = onOpenDataManagement
+                )
+                EditorialDivider()
+                MePreferenceRow(
+                    icon = Icons.Rounded.Article,
+                    title = "标准导入格式",
+                    desc = "查看题库文本、答案和解析的推荐写法。",
+                    onClick = onOpenStandardFormat
+                )
+                EditorialDivider()
+                MePreferenceRow(
+                    icon = Icons.Rounded.Description,
+                    title = "关于 Shiroha Quiz",
+                    desc = "项目地址、版本说明和开源信息。",
+                    onClick = onOpenAbout
+                )
+            }
+
+            EditorialSection(
+                kicker = "Theme",
+                title = "快速切换",
+                scale = scale
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Sm)
+                ) {
+                    ThemeQuickTile(
+                        label = if (QuizRepository.darkThemeEnabled) "切换浅色" else "切换暗夜",
+                        icon = if (QuizRepository.darkThemeEnabled) Icons.Rounded.LightMode else Icons.Rounded.DarkMode,
+                        primary = false,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp),
+                        onClick = { QuizRepository.setDarkThemeEnabled(context, !QuizRepository.darkThemeEnabled) }
+                    )
+                    ThemeQuickTile(
+                        label = if (QuizRepository.warmThemeEnabled) "关闭暖色" else "开启暖色",
+                        icon = Icons.Rounded.AutoAwesome,
+                        primary = QuizRepository.warmThemeEnabled,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp),
+                        onClick = { QuizRepository.setWarmThemeEnabled(context, !QuizRepository.warmThemeEnabled) }
+                    )
+                }
+            }
+
+            EditorialSection(
+                kicker = "About",
+                title = "Shiroha Quiz",
+                scale = scale
+            ) {
+                Text(
+                    text = "本应用由 Shiroha 维护,采用编辑杂志风设计语言。所有数据均保存在本地,你可以随时导出备份或清除。",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = (MaterialTheme.typography.bodyMedium.fontSize.value * uiScale).sp
+                    ),
+                    color = ShirohaColors.TextSecondary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MePreferenceRow(
+    icon: ImageVector,
+    title: String,
+    desc: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shirohaNoRippleClickable(onClick = onClick)
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = title,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(Modifier.width(ShirohaSpacing.Md))
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "功能与档案",
-                style = MaterialTheme.typography.titleLarge,
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(Modifier.height(12.dp))
-            FeaturePlanStrip(
-                icon = Icons.Rounded.DarkMode,
-                title = "外观偏好",
-                desc = "主题、卡片动画、Shiroha 模式、开屏图和应用图标。",
-                onClick = onOpenAppearancePreference
-            )
-            Spacer(Modifier.height(10.dp))
-            FeaturePlanStrip(
-                icon = Icons.Rounded.Tune,
-                title = "刷题偏好",
-                desc = "默认答题方式、每组题数和切题习惯。",
-                onClick = onOpenPracticePreference
-            )
-            Spacer(Modifier.height(10.dp))
-            FeaturePlanStrip(
-                icon = Icons.Rounded.FactCheck,
-                title = "错题本",
-                desc = "错题收录、掌握判定与智能复习。",
-                onClick = onOpenWrongBookPreference
-            )
-            Spacer(Modifier.height(10.dp))
-            FeaturePlanStrip(
-                icon = Icons.Rounded.AutoAwesome,
-                title = "AI 设置",
-                desc = "接口、AI重构、AI核对、AI解析和处理限制。",
-                onClick = onOpenAiSettings
-            )
-            Spacer(Modifier.height(10.dp))
-            FeaturePlanStrip(
-                icon = Icons.Rounded.Save,
-                title = "数据管理",
-                desc = "导入、导出、备份和清除本地数据。",
-                onClick = onOpenDataManagement
-            )
-            Spacer(Modifier.height(10.dp))
-            FeaturePlanStrip(
-                icon = Icons.Rounded.Article,
-                title = "标准导入格式",
-                desc = "查看题库文本、答案和解析的推荐写法。",
-                onClick = onOpenStandardFormat
-            )
-            Spacer(Modifier.height(10.dp))
-            FeaturePlanStrip(
-                icon = Icons.Rounded.Description,
-                title = "关于 Shiroha Quiz",
-                desc = "项目地址、版本说明和开源信息。",
-                onClick = onOpenAbout
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = desc,
+                style = MaterialTheme.typography.bodySmall,
+                color = ShirohaColors.TextSecondary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
         }
+        Spacer(Modifier.width(ShirohaSpacing.Sm))
+        Icon(
+            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            contentDescription = null,
+            tint = ShirohaColors.TextTertiary,
+            modifier = Modifier.size(22.dp)
+        )
     }
+}
+
+@Composable
+private fun ThemeQuickTile(
+    label: String,
+    icon: ImageVector,
+    primary: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    ActionPillButton(
+        icon = icon,
+        text = label,
+        primary = primary,
+        modifier = modifier,
+        fillWidthContent = true,
+        onClick = onClick
+    )
 }
 
 
@@ -482,104 +606,239 @@ fun AppearancePreferenceScreen(
 ) {
     val context = LocalContext.current
 
-    Column(
-        modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Sm),
-        verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
-    ) {
-        ShirohaHeader(
-            kicker = "Appearance",
-            title = "外观偏好",
-            subtitle = "管理主题、卡片动画、Shiroha 模式、开屏图和应用图标。"
-        )
+    BoxWithConstraints {
+        val screenClass: ScreenClass = screenClassFor(maxWidth)
+        val scale: Float = editorialScaleFor(screenClass)
+        val uiScale: Float = uiScaleFor(screenClass)
 
-        GlassCard {
-            Text(
-                text = "外观设置",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Sm),
+            verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
+        ) {
+            ShirohaHeader(
+                kicker = "Appearance",
+                title = "外观偏好",
+                subtitle = "为 Shiroha 选择最舒服的样子。",
+                scale = scale
             )
-            Spacer(Modifier.height(12.dp))
-            ThemeChoiceRow(
-                darkThemeEnabled = QuizRepository.darkThemeEnabled,
-                onThemeChange = { enabled -> QuizRepository.setDarkThemeEnabled(context, enabled) }
-            )
-            Spacer(Modifier.height(12.dp))
-            PreferenceSwitchRow(
-                title = "卡片动画",
-                desc = "显示卡片轻微淡入上移动画；如果设备性能较弱或遇到页面卡顿，可尝试关闭。",
-                checked = QuizRepository.cardAnimationEnabled,
-                onCheckedChange = { enabled -> QuizRepository.setCardAnimationEnabled(context, enabled) }
-            )
-            Spacer(Modifier.height(12.dp))
-            PreferenceSwitchRow(
-                title = "Shiroha 模式",
-                desc = "显示开屏图、页面插画并切换 Shiroha 图标。",
-                checked = QuizRepository.shirohaModeEnabled,
-                onCheckedChange = { enabled -> QuizRepository.setShirohaModeEnabled(context, enabled) }
-            )
-            if (QuizRepository.shirohaModeEnabled) {
-                Spacer(Modifier.height(12.dp))
-                PreferenceSwitchRow(
-                    title = "保留开屏启动图片",
-                    desc = "开启后下次启动显示学习主题开屏图。",
-                    checked = QuizRepository.startupSplashEnabled,
-                    onCheckedChange = { enabled -> QuizRepository.setStartupSplashEnabled(context, enabled) }
+
+            EditorialSection(
+                kicker = "Theme",
+                title = "配色",
+                scale = scale
+            ) {
+                Text(
+                    text = "选择明暗与暖色风格。暖色主题在所有主题色上叠加米黄色调,适合长时间阅读。",
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = (MaterialTheme.typography.bodySmall.fontSize.value * uiScale).sp
+                    ),
+                    color = ShirohaColors.TextSecondary
+                )
+                EditorialDivider()
+                WarmThemeRow(
+                    checked = QuizRepository.warmThemeEnabled,
+                    onCheckedChange = { enabled -> QuizRepository.setWarmThemeEnabled(context, enabled) }
+                )
+                EditorialDivider()
+                DarkThemeRow(
+                    darkEnabled = QuizRepository.darkThemeEnabled,
+                    onChange = { enabled -> QuizRepository.setDarkThemeEnabled(context, enabled) }
                 )
             }
-            Spacer(Modifier.height(12.dp))
-            PreferenceSwitchRow(
-                title = "平板侧边导航",
-                desc = "开启后可在较宽屏幕上将底部导航移到左侧。",
-                checked = QuizRepository.tabletSideNavigationEnabled,
-                onCheckedChange = { enabled -> QuizRepository.setTabletSideNavigationEnabled(context, enabled) }
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "提示：部分桌面可能会缓存应用图标，切换后可能需要稍等片刻才刷新。",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+
+            EditorialSection(
+                kicker = "Details",
+                title = "交互",
+                scale = scale
+            ) {
+                PreferenceSwitchRow(
+                    title = "卡片动画",
+                    desc = "显示卡片轻微淡入上移动画;如果设备性能较弱或遇到页面卡顿,可尝试关闭。",
+                    checked = QuizRepository.cardAnimationEnabled,
+                    onCheckedChange = { enabled -> QuizRepository.setCardAnimationEnabled(context, enabled) }
+                )
+                EditorialDivider()
+                PreferenceSwitchRow(
+                    title = "Shiroha 模式",
+                    desc = "显示开屏图、页面插画并切换 Shiroha 图标。",
+                    checked = QuizRepository.shirohaModeEnabled,
+                    onCheckedChange = { enabled -> QuizRepository.setShirohaModeEnabled(context, enabled) }
+                )
+                if (QuizRepository.shirohaModeEnabled) {
+                    EditorialDivider()
+                    PreferenceSwitchRow(
+                        title = "保留开屏启动图片",
+                        desc = "开启后下次启动显示学习主题开屏图。",
+                        checked = QuizRepository.startupSplashEnabled,
+                        onCheckedChange = { enabled -> QuizRepository.setStartupSplashEnabled(context, enabled) }
+                    )
+                }
+                EditorialDivider()
+                PreferenceSwitchRow(
+                    title = "平板侧边导航",
+                    desc = "开启后可在较宽屏幕上将底部导航移到左侧。",
+                    checked = QuizRepository.tabletSideNavigationEnabled,
+                    onCheckedChange = { enabled -> QuizRepository.setTabletSideNavigationEnabled(context, enabled) }
+                )
+                Spacer(Modifier.height(ShirohaSpacing.Sm))
+                Text(
+                    text = "提示:部分桌面可能会缓存应用图标,切换后可能需要稍等片刻才刷新。",
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = (MaterialTheme.typography.bodySmall.fontSize.value * uiScale).sp
+                    ),
+                    color = ShirohaColors.TextSecondary
+                )
+            }
+
+            EditorialSection(
+                kicker = "Reading",
+                title = "阅读显示",
+                scale = scale
+            ) {
+                ReadingSizeChoiceRow(
+                    title = "题干字号",
+                    desc = "调整练习和考试中的题干阅读大小。",
+                    currentMode = QuizRepository.questionFontSizeMode,
+                    onSelect = { mode -> QuizRepository.setQuestionFontSizeMode(context, mode) }
+                )
+                EditorialDivider()
+                ReadingSizeChoiceRow(
+                    title = "选项字号",
+                    desc = "调整练习和考试中的选项文字大小。",
+                    currentMode = QuizRepository.optionFontSizeMode,
+                    onSelect = { mode -> QuizRepository.setOptionFontSizeMode(context, mode) }
+                )
+                EditorialDivider()
+                PreferenceSwitchRow(
+                    title = "紧凑选项模式",
+                    desc = "减少选项卡片背景和间距,适合长题快速阅读。",
+                    checked = QuizRepository.compactOptionsEnabled,
+                    onCheckedChange = { enabled -> QuizRepository.setCompactOptionsEnabled(context, enabled) }
+                )
+            }
+
+            EditorialSection(
+                kicker = "Preview",
+                title = "主题预览",
+                scale = scale
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)
+                ) {
+                    EditorialFigure(
+                        value = if (QuizRepository.warmThemeEnabled) "暖" else if (QuizRepository.darkThemeEnabled) "暗" else "亮",
+                        label = "当前主题",
+                        scale = scale,
+                        modifier = Modifier.weight(1f)
+                    )
+                    EditorialFigure(
+                        value = QuizRepository.shirohaModeEnabled.let { if (it) "ON" else "OFF" },
+                        label = "Shiroha 模式",
+                        scale = scale,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                EditorialDivider(label = "Specimen")
+                Text(
+                    text = "正文文本样式示例。不同主题下,这一段落的颜色、字距、底色都会随 ShirohaColors 自动切换。",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = (MaterialTheme.typography.bodyMedium.fontSize.value * uiScale).sp
+                    ),
+                    color = ShirohaColors.TextPrimary
+                )
+            }
+
+            BackToSettingsButton(onBack = onBack)
         }
+    }
+}
 
-
-
-
-        GlassCard {
+@Composable
+private fun WarmThemeRow(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shirohaNoRippleClickable { onCheckedChange(!checked) }
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.AutoAwesome,
+            contentDescription = "暖色主题",
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(26.dp)
+        )
+        Spacer(Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "阅读显示",
-                style = MaterialTheme.typography.titleLarge,
+                text = "暖色主题",
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(Modifier.height(12.dp))
-            ReadingSizeChoiceRow(
-                title = "题干字号",
-                desc = "调整练习和考试中的题干阅读大小。",
-                currentMode = QuizRepository.questionFontSizeMode,
-                onSelect = { mode -> QuizRepository.setQuestionFontSizeMode(context, mode) }
-            )
-            Spacer(Modifier.height(14.dp))
-            ReadingSizeChoiceRow(
-                title = "选项字号",
-                desc = "调整练习和考试中的选项文字大小。",
-                currentMode = QuizRepository.optionFontSizeMode,
-                onSelect = { mode -> QuizRepository.setOptionFontSizeMode(context, mode) }
-            )
-            Spacer(Modifier.height(14.dp))
-            PreferenceSwitchRow(
-                title = "紧凑选项模式",
-                desc = "减少选项卡片背景和间距，适合长题快速阅读。",
-                checked = QuizRepository.compactOptionsEnabled,
-                onCheckedChange = { enabled -> QuizRepository.setCompactOptionsEnabled(context, enabled) }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = "米黄底色配衬线大数字的杂志风主题,长时间阅读更柔和。",
+                style = MaterialTheme.typography.bodyMedium,
+                color = ShirohaColors.TextSecondary
             )
         }
+        Spacer(Modifier.width(10.dp))
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
+    }
+}
 
-        BackToSettingsButton(onBack = onBack)
+@Composable
+private fun DarkThemeRow(
+    darkEnabled: Boolean,
+    onChange: (Boolean) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Sm)) {
+        Text(
+            text = "明暗模式",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "深色背景适合夜晚练习,浅色背景适合白天使用。",
+            style = MaterialTheme.typography.bodySmall,
+            color = ShirohaColors.TextSecondary
+        )
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Sm)
+        ) {
+            ThemeChoiceTile(
+                icon = Icons.Rounded.LightMode,
+                title = "浅色",
+                selected = !darkEnabled,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(44.dp),
+                onClick = { onChange(false) }
+            )
+            ThemeChoiceTile(
+                icon = Icons.Rounded.DarkMode,
+                title = "暗夜",
+                selected = darkEnabled,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(44.dp),
+                onClick = { onChange(true) }
+            )
+        }
     }
 }
 

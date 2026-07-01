@@ -1,33 +1,27 @@
-package com.yiqiu.shirohaquiz.ui.screens
+﻿﻿﻿﻿package com.yiqiu.shirohaquiz.ui.screens
 
-import androidx.compose.foundation.BorderStroke
+import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
-import androidx.compose.material.icons.rounded.QuestionAnswer
-import androidx.compose.material.icons.rounded.QuestionMark
-import androidx.compose.material.icons.rounded.School
-import androidx.compose.material.icons.rounded.Schedule
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,7 +39,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,13 +51,14 @@ import com.yiqiu.shirohaquiz.state.DailyTrendPoint
 import com.yiqiu.shirohaquiz.state.QuizRepository
 import com.yiqiu.shirohaquiz.state.StudyStatistics
 import com.yiqiu.shirohaquiz.ui.components.ActionPillButton
-import com.yiqiu.shirohaquiz.ui.components.GlassCard
+import com.yiqiu.shirohaquiz.ui.components.EditorialFigure
+import com.yiqiu.shirohaquiz.ui.components.EditorialSection
 import com.yiqiu.shirohaquiz.ui.components.NoticeCard
 import com.yiqiu.shirohaquiz.ui.components.ShirohaHeader
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaColors
-import com.yiqiu.shirohaquiz.ui.theme.ShirohaDimens
-import com.yiqiu.shirohaquiz.ui.theme.ShirohaRadius
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaSpacing
+import com.yiqiu.shirohaquiz.ui.theme.editorialScaleFor
+import com.yiqiu.shirohaquiz.ui.theme.screenClassFor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -72,6 +66,14 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * 瀛︿範缁熻(鏆栬壊缂栬緫鏉傚織椋庨噸鍐?
+ *
+ * 甯冨眬鑷笂鑰屼笅:
+ *  1. ShirohaHeader(kicker/title/subtitle) 鈥?椤堕儴甯?Serif 澶ф爣棰? *  2. EditorialFiguresSection 鈥?6 涓?EditorialFigure 琛嚎澶ф暟瀛楃綉鏍? *  3. 瓒嬪娍鍥?EditorialSection(DailyTrendChart + Legend)
+ *  4. 閿欓鍒嗙被 EditorialSection(CategoryBarChart)
+ *  5. AI 寤鸿 EditorialSection(AdviceContentBlock + ActionPillButton)
+ */
 @Composable
 fun StatisticsScreen(
     onBack: () -> Unit,
@@ -96,310 +98,235 @@ fun StatisticsScreen(
     var adviceState by remember { mutableStateOf<StatisticsAdviceUiState>(StatisticsAdviceUiState.Idle) }
     val scope = rememberCoroutineScope()
 
-    Column(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Sm),
-        verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
+            .shirohaEditorialBackground()
     ) {
-        ShirohaHeader(
-            kicker = "学习数据",
-            title = "学习数据看板",
-            subtitle = "总览你的学习进度"
-        )
+        val screenClass = screenClassFor(maxWidth)
+        val scale = editorialScaleFor(screenClass)
 
-        OverviewRow(stats = data)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Sm),
+            verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xxl)
+        ) {
+            ShirohaHeader(
+                kicker = "鏁版嵁",
+                title = "瀛︿範缁熻",
+                subtitle = "鎬昏浣犵殑瀛︿範杩涘害",
+                scale = scale
+            )
 
-        GlassCard {
-            Text(
-                text = "近 14 天学习趋势",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(Modifier.height(ShirohaSpacing.Sm))
-            Text(
-                text = "蓝线为每日答题量，紫线为每日正确率",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.height(ShirohaSpacing.Md))
-            DailyTrendChart(points = data.dailyTrend)
-            Spacer(Modifier.height(ShirohaSpacing.Md))
-            DailyTrendLegend()
-        }
+            // === 6 涓?EditorialFigure 琛嚎澶ф暟瀛楃綉鏍?===
+            EditorialFiguresSection(stats = data, scale = scale)
 
-        GlassCard {
-            Text(
-                text = "错题分类分布",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(Modifier.height(ShirohaSpacing.Sm))
-            Text(
-                text = "展示错题数量最多的前 6 个分类",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.height(ShirohaSpacing.Md))
-            if (data.wrongBookByCategory.isEmpty()) {
-                NoticeCard("当前没有错题数据，完成练习后会在这里统计。", warning = false)
-            } else {
-                CategoryBarChart(categories = data.wrongBookByCategory.take(6))
-            }
-        }
-
-        GlassCard {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            // === 瓒嬪娍鍥?===
+            EditorialSection(
+                kicker = "杩?14 澶?,
+                title = "瀛︿範瓒嬪娍",
+                scale = scale
             ) {
-                Text(
-                    text = "学习建议",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                StatisticsStatusChip("AI")
+                DailyTrendChart(points = data.dailyTrend)
+                Spacer(Modifier.height(ShirohaSpacing.Sm))
+                DailyTrendLegend()
             }
+
+            // === 閿欓鍒嗙被 ===
+            EditorialSection(
+                kicker = "閿欓",
+                title = "鍒嗙被鍒嗗竷",
+                scale = scale
+            ) {
+                if (data.wrongBookByCategory.isEmpty()) {
+                    NoticeCard("褰撳墠娌℃湁閿欓鏁版嵁锛屽畬鎴愮粌涔犲悗浼氬湪杩欓噷缁熻銆?, warning = false)
+                } else {
+                    CategoryBarChart(categories = data.wrongBookByCategory.take(6))
+                }
+            }
+
+            // === AI 寤鸿 ===
+            EditorialSection(
+                kicker = "AI",
+                title = "瀛︿範寤鸿",
+                scale = scale
+            ) {
+                AiAdviceCard(
+                    data = data,
+                    adviceState = adviceState,
+                    onAdviceStateChange = { adviceState = it },
+                    onBack = onBack,
+                    scope = scope
+                )
+            }
+
             Spacer(Modifier.height(ShirohaSpacing.Sm))
-            Text(
-                text = "基于你的答题数据生成专属学习建议。",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+        }
+    }
+}
+
+
+ * 6 澶ф暟鎹?琛嚎澶ф暟瀛?+ 灏忔爣绛?+ 鍙戜笣涓嬪垝绾? * 2 鍒?脳 3 琛?鍛堢幇鏉傚織灏侀潰绾ф暟鎹? */
+@Composable
+private fun EditorialFiguresSection(stats: StudyStatistics, scale: Float = 1f) {
+    Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)
+        ) {
+            EditorialFigure(
+                modifier = Modifier.weight(1f),
+                scale = scale,
+                value = "${stats.totalQuestionsAnswered}",
+                label = "绱绛旈",
+                unit = "棰?
             )
-            Spacer(Modifier.height(ShirohaSpacing.Md))
-            when (val state = adviceState) {
-                is StatisticsAdviceUiState.Idle -> {
-                    val isAiConfigured = QuizRepository.isAiConfigured()
-                    ActionPillButton(
-                        icon = Icons.Rounded.AutoAwesome,
-                        text = if (isAiConfigured) "获取学习建议" else "请先在 AI 设置中配置",
-                        primary = true,
-                        onClick = {
-                            if (!isAiConfigured) {
-                                onBack()
-                                return@ActionPillButton
-                            }
-                            adviceState = StatisticsAdviceUiState.Loading
-                            scope.launch {
-                                val result = withContext(Dispatchers.IO) {
-                                    ShirohaAiClient.generatePersonalizedAdvice(
-                                        apiBaseUrl = QuizRepository.aiApiBaseUrl,
-                                        apiKey = QuizRepository.aiApiKey,
-                                        modelName = QuizRepository.aiModelName,
-                                        recordsSummary = buildStatisticsRecordsSummary(data),
-                                        wrongQuestionsSummary = buildStatisticsWrongSummary()
-                                    )
-                                }
-                                adviceState = result.fold(
-                                    onSuccess = { StatisticsAdviceUiState.Loaded(it) },
-                                    onFailure = {
-                                        StatisticsAdviceUiState.Failed(it.message ?: "未知错误")
-                                    }
+            EditorialFigure(
+                modifier = Modifier.weight(1f),
+                scale = scale,
+                value = stats.totalStudyMinutesFormatted,
+                label = "绱瀛︿範"
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)
+        ) {
+            EditorialFigure(
+                modifier = Modifier.weight(1f),
+                scale = scale,
+                value = "${(stats.overallAccuracy * 100).toInt()}",
+                label = "骞冲潎姝ｇ‘鐜?,
+                unit = "%"
+            )
+            EditorialFigure(
+                modifier = Modifier.weight(1f),
+                scale = scale,
+                value = "${stats.knowledgePointsStudied} / ${stats.totalKnowledgePoints}",
+                label = "宸插鐭ヨ瘑鐐?
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)
+        ) {
+            EditorialFigure(
+                modifier = Modifier.weight(1f),
+                scale = scale,
+                value = "${stats.practiceCount}",
+                label = "缁冧範娆℃暟",
+                unit = "娆?
+            )
+            EditorialFigure(
+                modifier = Modifier.weight(1f),
+                scale = scale,
+                value = "${stats.examCount}",
+                label = "鑰冭瘯娆℃暟",
+                unit = "娆?
+            )
+        }
+    }
+}
+
+/**
+ * AI 寤鸿鍗＄墖:鍦?EditorialSection 鍐呬娇鐢?娓叉煋寤鸿鍐呭 + ActionPillButton
+ * 鎶藉嚭璇ュ瓙缁勪欢浠ヤ繚鎸佷富鍑芥暟缁撴瀯娓呮櫚,骞堕伩鍏?adviceState 鎻愬崌鍒拌繃澶氬眰绾с€? */
+@Composable
+private fun AiAdviceCard(
+    data: StudyStatistics,
+    adviceState: StatisticsAdviceUiState,
+    onAdviceStateChange: (StatisticsAdviceUiState) -> Unit,
+    onBack: () -> Unit,
+    scope: kotlinx.coroutines.CoroutineScope
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)) {
+        Text(
+            text = "鍩轰簬浣犵殑绛旈鏁版嵁鐢熸垚涓撳睘瀛︿範寤鸿銆?,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        when (val state = adviceState) {
+            is StatisticsAdviceUiState.Idle -> {
+                val isAiConfigured = QuizRepository.isAiConfigured()
+                ActionPillButton(
+                    icon = Icons.Rounded.AutoAwesome,
+                    text = if (isAiConfigured) "鑾峰彇瀛︿範寤鸿" else "璇峰厛鍦?AI 璁剧疆涓厤缃?,
+                    primary = true,
+                    onClick = {
+                        if (!isAiConfigured) {
+                            onBack()
+                            return@ActionPillButton
+                        }
+                        onAdviceStateChange(StatisticsAdviceUiState.Loading)
+                        scope.launch {
+                            val result = withContext(Dispatchers.IO) {
+                                ShirohaAiClient.generatePersonalizedAdvice(
+                                    apiBaseUrl = QuizRepository.aiApiBaseUrl,
+                                    apiKey = QuizRepository.aiApiKey,
+                                    modelName = QuizRepository.aiModelName,
+                                    recordsSummary = buildStatisticsRecordsSummary(data),
+                                    wrongQuestionsSummary = buildStatisticsWrongSummary()
                                 )
                             }
+                            onAdviceStateChange(
+                                result.fold(
+                                    onSuccess = { StatisticsAdviceUiState.Loaded(it) },
+                                    onFailure = {
+                                        StatisticsAdviceUiState.Failed(it.message ?: "鏈煡閿欒")
+                                    }
+                                )
+                            )
                         }
-                    )
-                }
-                is StatisticsAdviceUiState.Loading -> {
-                    ActionPillButton(
-                        icon = Icons.Rounded.AutoAwesome,
-                        text = "生成中…",
-                        primary = true,
-                        enabled = false,
-                        onClick = {}
-                    )
-                }
-                is StatisticsAdviceUiState.Loaded -> {
-                    StatisticsAdviceBlock(advice = state.advice)
-                    Spacer(Modifier.height(ShirohaSpacing.Sm))
-                    ActionPillButton(
-                        icon = Icons.Rounded.AutoAwesome,
-                        text = "重新生成",
-                        primary = false,
-                        onClick = { adviceState = StatisticsAdviceUiState.Idle }
-                    )
-                }
-                is StatisticsAdviceUiState.Failed -> {
-                    NoticeCard("生成失败：${state.message}", warning = true)
-                    Spacer(Modifier.height(ShirohaSpacing.Sm))
-                    ActionPillButton(
-                        icon = Icons.Rounded.AutoAwesome,
-                        text = "重试",
-                        primary = true,
-                        onClick = { adviceState = StatisticsAdviceUiState.Idle }
-                    )
-                }
-            }
-            Spacer(Modifier.height(ShirohaSpacing.Md))
-            ActionPillButton(
-                icon = Icons.Rounded.AutoAwesome,
-                text = "返回首页",
-                primary = false,
-                onClick = onBack
-            )
-        }
-
-        Spacer(Modifier.height(ShirohaSpacing.Sm))
-    }
-}
-
-@Composable
-private fun OverviewRow(stats: StudyStatistics) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)
-    ) {
-        MetricCell(
-            modifier = Modifier.weight(1f),
-            icon = Icons.Rounded.QuestionAnswer,
-            value = "${stats.totalQuestionsAnswered}",
-            label = "累计答题",
-            unit = "题"
-        )
-        MetricCell(
-            modifier = Modifier.weight(1f),
-            icon = Icons.Rounded.Schedule,
-            value = stats.totalStudyMinutesFormatted,
-            label = "累计学习",
-            unit = ""
-        )
-    }
-    Spacer(Modifier.height(ShirohaSpacing.Md))
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)
-    ) {
-        MetricCell(
-            modifier = Modifier.weight(1f),
-            icon = Icons.Rounded.QuestionMark,
-            value = "${(stats.overallAccuracy * 100).toInt()}",
-            label = "平均正确率",
-            unit = "%"
-        )
-        MetricCell(
-            modifier = Modifier.weight(1f),
-            icon = Icons.Rounded.School,
-            value = "${stats.knowledgePointsStudied} / ${stats.totalKnowledgePoints}",
-            label = "已学知识点",
-            unit = ""
-        )
-    }
-    Spacer(Modifier.height(ShirohaSpacing.Md))
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)
-    ) {
-        MetricCell(
-            modifier = Modifier.weight(1f),
-            icon = Icons.Rounded.School,
-            value = "${stats.practiceCount}",
-            label = "练习次数",
-            unit = "次"
-        )
-        MetricCell(
-            modifier = Modifier.weight(1f),
-            icon = Icons.Rounded.School,
-            value = "${stats.examCount}",
-            label = "考试次数",
-            unit = "次"
-        )
-    }
-}
-
-@Composable
-private fun MetricCell(
-    modifier: Modifier = Modifier,
-    icon: ImageVector,
-    value: String,
-    label: String,
-    unit: String
-) {
-    Surface(
-        modifier = modifier.heightIn(min = 96.dp),
-        shape = RoundedCornerShape(ShirohaRadius.Md),
-        color = ShirohaColors.CardWhite86,
-        border = BorderStroke(ShirohaDimens.Hairline, ShirohaColors.LineSoft)
-    ) {
-        Column(
-            modifier = Modifier.padding(ShirohaSpacing.Lg),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Surface(
-                    shape = CircleShape,
-                    color = ShirohaColors.BrandPrimarySoft,
-                    modifier = Modifier.size(26.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(16.dp)
-                        )
                     }
-                }
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = ShirohaColors.TextSecondary,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
                 )
             }
-            Row(
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+            is StatisticsAdviceUiState.Loading -> {
+                ActionPillButton(
+                    icon = Icons.Rounded.AutoAwesome,
+                    text = "鐢熸垚涓€?,
+                    primary = true,
+                    enabled = false,
+                    onClick = {}
                 )
-                if (unit.isNotBlank()) {
-                    Text(
-                        text = unit,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = ShirohaColors.TextSecondary,
-                        modifier = Modifier.padding(bottom = 4.dp)
-                    )
-                }
+            }
+            is StatisticsAdviceUiState.Loaded -> {
+                StatisticsAdviceBlock(advice = state.advice)
+                Spacer(Modifier.height(ShirohaSpacing.Sm))
+                ActionPillButton(
+                    icon = Icons.Rounded.AutoAwesome,
+                    text = "閲嶆柊鐢熸垚",
+                    primary = false,
+                    onClick = { onAdviceStateChange(StatisticsAdviceUiState.Idle) }
+                )
+            }
+            is StatisticsAdviceUiState.Failed -> {
+                NoticeCard("鐢熸垚澶辫触:${state.message}", warning = true)
+                Spacer(Modifier.height(ShirohaSpacing.Sm))
+                ActionPillButton(
+                    icon = Icons.Rounded.AutoAwesome,
+                    text = "閲嶈瘯",
+                    primary = true,
+                    onClick = { onAdviceStateChange(StatisticsAdviceUiState.Idle) }
+                )
             }
         }
-    }
-}
-
-@Composable
-private fun StatisticsStatusChip(text: String) {
-    Surface(
-        shape = RoundedCornerShape(ShirohaRadius.Pill),
-        color = ShirohaColors.BrandPrimarySoft,
-        border = BorderStroke(ShirohaDimens.Hairline, ShirohaColors.LineSelected)
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.SemiBold
+        Spacer(Modifier.height(ShirohaSpacing.Sm))
+        ActionPillButton(
+            icon = Icons.Rounded.AutoAwesome,
+            text = "杩斿洖棣栭〉",
+            primary = false,
+            onClick = onBack
         )
     }
 }
 
 /**
- * 近 14 天学习趋势自绘图表：
- * - 浅色网格线 + X 轴底线
- * - 蓝线：每日答题量（实线 + 数据点）
- * - 紫线：每日正确率（虚线 + 数据点）
- * - X 轴日期标签（按密度间隔采样）
+ * 杩?14 澶╁涔犺秼鍔胯嚜缁樺浘琛?
+ * - 娴呰壊缃戞牸绾?+ X 杞村簳绾? * - 钃濈嚎:姣忔棩绛旈閲?瀹炵嚎 + 鏁版嵁鐐?
+ * - 绱嚎:姣忔棩姝ｇ‘鐜?铏氱嚎 + 鏁版嵁鐐?
+ * - X 杞存棩鏈熸爣绛?鎸夊瘑搴﹂棿闅旈噰鏍?
  */
 @Composable
 private fun DailyTrendChart(
@@ -430,7 +357,7 @@ private fun DailyTrendChart(
         val originX = padding + leftAxisWidth
         val originY = padding + h
 
-        // 网格线（4 条）
+        // 缃戞牸绾?4 鏉?
         for (i in 0..3) {
             val y = originY - h * i / 3f
             drawLine(
@@ -441,8 +368,7 @@ private fun DailyTrendChart(
             )
         }
 
-        // X 轴底线
-        drawLine(
+        // X 杞村簳绾?        drawLine(
             color = axisColor,
             start = Offset(originX, originY),
             end = Offset(originX + w, originY),
@@ -453,8 +379,7 @@ private fun DailyTrendChart(
         val stepX = if (points.size > 1) w / (points.size - 1f) else 0f
         val pointRadius = with(density) { 3.dp.toPx() }
 
-        // 每日答题量折线
-        val totalPath = Path()
+        // 姣忔棩绛旈閲忔姌绾?        val totalPath = Path()
         val totalPoints = points.mapIndexed { i, p ->
             val x = originX + stepX * i
             val y = originY - h * (p.total.toFloat() / maxTotal)
@@ -479,7 +404,7 @@ private fun DailyTrendChart(
             }
         }
 
-        // 每日正确率折线（0-1 映射到 0-h）
+        // 姣忔棩姝ｇ‘鐜囨姌绾?0-1 鏄犲皠鍒?0-h)
         val accuracyPath = Path()
         val accuracyPoints = points.mapIndexed { i, p ->
             val x = originX + stepX * i
@@ -508,7 +433,7 @@ private fun DailyTrendChart(
             }
         }
 
-        // 日期标签
+        // 鏃ユ湡鏍囩
         val labelStep = if (points.size > 7) (points.size + 6) / 7 else 1
         val textPaint = android.graphics.Paint().apply {
             color = android.graphics.Color.argb(
@@ -538,8 +463,8 @@ private fun DailyTrendLegend() {
         horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        LegendDot(color = ShirohaColors.BrandPrimary, label = "答题量")
-        LegendDot(color = ShirohaColors.BrandSecondary, label = "正确率")
+        LegendDot(color = ShirohaColors.BrandPrimary, label = "绛旈閲?)
+        LegendDot(color = ShirohaColors.BrandSecondary, label = "姝ｇ‘鐜?)
     }
 }
 
@@ -561,8 +486,7 @@ private fun LegendDot(color: Color, label: String) {
 }
 
 /**
- * 错题分类横向柱状图
- * 每行：分类名 + 长度条 + 数字
+ * 閿欓鍒嗙被妯悜鏌辩姸鍥? * 姣忚:鍒嗙被鍚?+ 闀垮害鏉?+ 鏁板瓧
  */
 @Composable
 fun CategoryBarChart(
@@ -574,7 +498,7 @@ fun CategoryBarChart(
     val trackColor = ShirohaColors.LineSoft
 
     if (categories.isEmpty()) {
-        NoticeCard("没有可显示的错题分类。", warning = false)
+        NoticeCard("娌℃湁鍙樉绀虹殑閿欓鍒嗙被銆?, warning = false)
         return
     }
     val maxCount = categories.maxOf { it.count }.coerceAtLeast(1)
@@ -599,7 +523,7 @@ fun CategoryBarChart(
                         modifier = Modifier.weight(1f)
                     )
                     Text(
-                        text = "${entry.count} 题",
+                        text = "${entry.count} 棰?,
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold
@@ -612,14 +536,13 @@ fun CategoryBarChart(
                 ) {
                     val cornerRadius = with(density) { 6.dp.toPx() }
                     val trackHeight = size.height
-                    // 背景轨道
+                    // 鑳屾櫙杞ㄩ亾
                     drawRoundRect(
                         color = trackColor,
                         size = Size(size.width, trackHeight),
                         cornerRadius = CornerRadius(cornerRadius, cornerRadius)
                     )
-                    // 进度条
-                    val progress = entry.count.toFloat() / maxCount.toFloat()
+                    // 杩涘害鏉?                    val progress = entry.count.toFloat() / maxCount.toFloat()
                     val barWidth = size.width * progress
                     if (barWidth > 0f) {
                         drawRoundRect(
@@ -652,7 +575,7 @@ private fun drawEmptyHint(
             isAntiAlias = true
         }
         drawText(
-            "暂无趋势数据",
+            "鏆傛棤瓒嬪娍鏁版嵁",
             scope.size.width / 2f,
             scope.size.height / 2f,
             paint
@@ -672,14 +595,14 @@ private fun StatisticsAdviceBlock(advice: PersonalizedAdvice) {
     }
     if (advice.weakPoints.isNotEmpty()) {
         Text(
-            text = "薄弱点",
+            text = "钖勫急鐐?,
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold
         )
         Spacer(Modifier.height(4.dp))
         advice.weakPoints.forEach { point ->
             Text(
-                text = "· $point",
+                text = "路 $point",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -688,7 +611,7 @@ private fun StatisticsAdviceBlock(advice: PersonalizedAdvice) {
     }
     if (advice.suggestions.isNotEmpty()) {
         Text(
-            text = "提升建议",
+            text = "鎻愬崌寤鸿",
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold
         )
@@ -696,7 +619,7 @@ private fun StatisticsAdviceBlock(advice: PersonalizedAdvice) {
         advice.suggestions.forEach { item ->
             Column(modifier = Modifier.padding(top = 4.dp)) {
                 Text(
-                    text = "【${item.priority}】${item.title}",
+                    text = "銆?{item.priority}銆?{item.title}",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -737,14 +660,14 @@ private fun buildStatisticsRecordsSummary(stats: StudyStatistics): String {
             val accuracy = if (record.total > 0) {
                 (record.correct * 100.0 / record.total).toInt()
             } else 0
-            "$date ${record.source} 《${record.bankName.ifBlank { record.title }}》 " +
-                "${record.correct}/${record.total} 正确率 $accuracy%"
+            "$date ${record.source} 銆?{record.bankName.ifBlank { record.title }}銆?" +
+                "${record.correct}/${record.total} 姝ｇ‘鐜?$accuracy%"
         }
     return buildString {
-        append("累计答题 ${stats.totalQuestionsAnswered} 题，累计正确 ${stats.totalCorrect} 题，")
-        append("平均正确率 ${(stats.overallAccuracy * 100).toInt()}%。")
+        append("绱绛旈 ${stats.totalQuestionsAnswered} 棰?绱姝ｇ‘ ${stats.totalCorrect} 棰?")
+        append("骞冲潎姝ｇ‘鐜?${(stats.overallAccuracy * 100).toInt()}%銆?)
         if (recent.isNotEmpty()) {
-            append("\n最近记录：\n")
+            append("\n鏈€杩戣褰?\n")
             append(recent)
         }
     }
@@ -752,12 +675,12 @@ private fun buildStatisticsRecordsSummary(stats: StudyStatistics): String {
 
 private fun buildStatisticsWrongSummary(): String {
     val wrongBook = QuizRepository.wrongBook
-    if (wrongBook.isEmpty()) return "暂无错题数据。"
+    if (wrongBook.isEmpty()) return "鏆傛棤閿欓鏁版嵁銆?
     return wrongBook
         .sortedByDescending { it.updatedAt.takeIf { updated -> updated > 0 } ?: it.timestamp }
         .take(10)
         .joinToString("\n") { entry ->
-            val cat = entry.question.category?.ifBlank { "未分类" } ?: "未分类"
-            "分类 $cat：${entry.question.question.take(60)}"
+            val cat = entry.question.category?.ifBlank { "鏈垎绫? } ?: "鏈垎绫?
+            "鍒嗙被 $cat:${entry.question.question.take(60)}"
         }
 }

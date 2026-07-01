@@ -1,12 +1,16 @@
-package com.yiqiu.shirohaquiz.ui.screens
+﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+
+import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import com.yiqiu.shirohaquiz.ui.components.shirohaNoRippleClickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -30,6 +34,8 @@ import androidx.compose.material.icons.automirrored.rounded.ExitToApp
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.automirrored.rounded.ListAlt
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Remove
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.Timer
 import androidx.compose.material3.AlertDialog
@@ -53,18 +59,22 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.yiqiu.shirohaquiz.R
 import com.yiqiu.shirohaquiz.importer.model.MultiBlankSupport
 import com.yiqiu.shirohaquiz.importer.model.Question
 import com.yiqiu.shirohaquiz.importer.model.QuestionType
 import com.yiqiu.shirohaquiz.state.ExamSummary
 import com.yiqiu.shirohaquiz.state.QuizRepository
 import com.yiqiu.shirohaquiz.ui.components.ActionPillButton
+import com.yiqiu.shirohaquiz.ui.components.EditorialFigure
+import com.yiqiu.shirohaquiz.ui.components.EditorialSection
 import com.yiqiu.shirohaquiz.ui.components.EmptyStateIllustration
 import com.yiqiu.shirohaquiz.ui.components.GlassCard
 import com.yiqiu.shirohaquiz.ui.components.MetricGlassCard
@@ -72,11 +82,16 @@ import com.yiqiu.shirohaquiz.ui.components.MultiBlankAnswerInputs
 import com.yiqiu.shirohaquiz.ui.components.NoticeCard
 import com.yiqiu.shirohaquiz.ui.components.QuizOptionCard
 import com.yiqiu.shirohaquiz.ui.components.QuestionImagesBlock
+import com.yiqiu.shirohaquiz.ui.components.ShirohaHeader
 import com.yiqiu.shirohaquiz.ui.components.StatusChip
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaColors
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaDimens
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaRadius
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaSpacing
+import com.yiqiu.shirohaquiz.ui.theme.ShirohaTypography
+import com.yiqiu.shirohaquiz.ui.theme.editorialScaleFor
+import com.yiqiu.shirohaquiz.ui.theme.screenClassFor
+import com.yiqiu.shirohaquiz.ui.theme.uiScaleFor
 import com.yiqiu.shirohaquiz.ui.text.LatexDisplayFormatter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -181,169 +196,207 @@ fun ExamScreen(
     }
 
     val isActiveExamRunning = QuizRepository.examQuestions.isNotEmpty() && !QuizRepository.examFinished && examQuestion != null
-    var examStatusExpanded by rememberSaveable(QuizRepository.examQuestions.size) { mutableStateOf(true) }
+    var examStatusExpanded by rememberSaveable { mutableStateOf(true) }
 
-    Column(
+    BoxWithConstraints(
         modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Sm),
-        verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
+            .fillMaxSize()
+            .shirohaEditorialBackground()
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Sm)) {
-            Text(
-                text = "Exam",
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.labelLarge
-            )
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "考试模式",
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.align(Alignment.CenterStart)
-                )
-                if (isActiveExamRunning && examStatusExpanded) {
-                    ExamCollapseTextPill(
-                        text = "收起",
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .width(64.dp)
-                            .height(28.dp),
-                        onClick = { examStatusExpanded = false }
-                    )
-                }
-                ActionPillButton(
-                    icon = Icons.Rounded.PlayArrow,
-                    text = "切换练习",
-                    primary = false,
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .height(44.dp),
-                    onClick = onGoPractice
-                )
-            }
-        }
+        val screenClass = screenClassFor(maxWidth)
+        val scale = editorialScaleFor(screenClass)
+        val uiScale = uiScaleFor(screenClass)
 
-        if (activeBank == null || activeBank.questions.isEmpty() || availableExamCount == 0) {
-            EmptyStateIllustration(
-                title = "还没有可用于考试的客观题",
-                message = "当前考试先支持单选题、多选题和判断题。",
-                action = { Spacer(Modifier.height(14.dp)) }
-            )
-            GlassCard {
-                ActionPillButton(
-                    icon = Icons.Rounded.PlayArrow,
-                    text = "返回首页",
-                    primary = true,
-                    onClick = onBackHome
-                )
-            }
-            return
-        }
-
-        if (QuizRepository.examQuestions.isEmpty() && !QuizRepository.examFinished) {
-            ExamSetupPanel(
-                bankName = activeBank.name,
-                totalQuestions = activeBank.questions.size,
-                availableExamCount = availableExamCount,
-                typeAvailableCounts = typeAvailableCounts,
-                selectedQuestionCount = selectedQuestionCount.coerceAtMost(availableExamCount),
-                selectedQuestionCountMode = selectedQuestionCountMode,
-                onSelectQuestionCount = { count, mode ->
-                    selectedQuestionCount = count
-                    selectedQuestionCountMode = mode
-                    QuizRepository.rememberExamSettings(
-                        context = context,
-                        questionCountMode = mode,
-                        customQuestionCount = if (mode == "custom") count else selectedQuestionCount
-                    )
-                },
-                selectedDurationMinutes = selectedDurationMinutes,
-                onSelectDuration = { minutes ->
-                    selectedDurationMinutes = minutes
-                    QuizRepository.rememberExamSettings(context = context, durationMinutes = minutes)
-                },
-                groupMode = groupMode,
-                onSelectGroupMode = { mode ->
-                    groupMode = mode
-                    QuizRepository.rememberExamSettings(context = context, groupMode = mode.preferenceKey())
-                },
-                typeCountTexts = typeCountTexts,
-                typeScoreTexts = typeScoreTexts,
-                showGroupSettings = showGroupSettings,
-                onOpenGroupSettings = { showGroupSettings = true },
-                onCloseGroupSettings = { showGroupSettings = false },
-                onUpdateTypeCount = { type, value ->
-                    val max = typeAvailableCounts[type] ?: 0
-                    val clean = value.filter { it.isDigit() }.take(4)
-                    val bounded = clean.toIntOrNull()?.coerceIn(0, max)?.toString() ?: clean
-                    val updated = typeCountTexts + (type to bounded)
-                    typeCountTexts = updated
-                    QuizRepository.rememberExamSettings(context = context, typeCountTexts = updated)
-                },
-                onUpdateTypeScore = { type, value ->
-                    val updated = typeScoreTexts + (type to value.filter { it.isDigit() || it == '.' }.take(4))
-                    typeScoreTexts = updated
-                    QuizRepository.rememberExamSettings(context = context, typeScoreTexts = updated)
-                },
-                onStartExam = {
-                    QuizRepository.rememberExamSettings(
-                        context = context,
-                        questionCountMode = selectedQuestionCountMode,
-                        customQuestionCount = selectedQuestionCount,
-                        durationMinutes = selectedDurationMinutes,
-                        groupMode = groupMode.preferenceKey(),
-                        typeCountTexts = typeCountTexts,
-                        typeScoreTexts = typeScoreTexts
-                    )
-                    if (groupMode == ExamGroupMode.RANDOM) {
-                        val finalCount = selectedQuestionCount.coerceIn(1, availableExamCount)
-                        val autoScore = 100.0 / finalCount
-                        val scoreMap = examTypeOrder.associateWith { autoScore }
-                        QuizRepository.startExam(
-                            questionCount = finalCount,
-                            durationMinutes = selectedDurationMinutes,
-                            allowedTypes = availableExamTypes,
-                            typeScores = scoreMap,
-                            randomize = true
-                        )
-                    } else {
-                        val typeCounts = examTypeOrder.associateWith { type ->
-                            val max = typeAvailableCounts[type] ?: 0
-                            typeCountTexts[type].orEmpty().toIntOrNull()?.coerceIn(0, max) ?: 0
-                        }.filterValues { it > 0 }
-                        val scoreMap = examTypeOrder.associateWith { type ->
-                            typeScoreTexts[type].orEmpty().toDoubleOrNull()?.coerceAtLeast(0.0) ?: defaultTypeScore(type)
-                        }
-                        QuizRepository.startExamByTypeCounts(
-                            typeCounts = typeCounts,
-                            durationMinutes = selectedDurationMinutes,
-                            typeScores = scoreMap
-                        )
-                    }
-                }
-            )
-            return
-        }
-
-        if (!QuizRepository.examFinished && examQuestion != null) {
-            ActiveExamPanel(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Sm),
+            verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
+        ) {
+            // === Header:Shiroha 椋庢牸 kicker + 琛嚎澶ф爣棰?===
+            ExamScreenHeaderRow(
+                scale = scale,
+                uiScale = uiScale,
+                isActiveExamRunning = isActiveExamRunning,
                 examStatusExpanded = examStatusExpanded,
-                onExamStatusExpandedChange = { examStatusExpanded = it }
+                onToggleExamStatus = { examStatusExpanded = it },
+                onGoPractice = onGoPractice
             )
-            return
-        }
 
-        FinishedExamPanel(
-            examSummary = examSummary,
-            recordId = QuizRepository.studyRecords.firstOrNull { it.source == "考试" }?.id,
-            onRestart = { QuizRepository.resetExam() },
-            onOpenRecord = onOpenRecord,
-            onBackHome = {
-                QuizRepository.resetExam()
-                onBackHome()
+            if (activeBank == null || activeBank.questions.isEmpty() || availableExamCount == 0) {
+                EmptyStateIllustration(
+                    title = "杩樻病鏈夊彲鐢ㄤ簬鑰冭瘯鐨勫瑙傞",
+                    message = "褰撳墠鑰冭瘯鍏堟敮鎸佸崟閫夐銆佸閫夐鍜屽垽鏂銆?,
+                    imageRes = R.drawable.illus_rest_state_webp,
+                    action = { Spacer(Modifier.height(14.dp)) }
+                )
+                GlassCard {
+                    ActionPillButton(
+                        icon = Icons.Rounded.PlayArrow,
+                        text = "杩斿洖棣栭〉",
+                        primary = true,
+                        onClick = onBackHome
+                    )
+                }
+                return@Column
             }
+
+            if (QuizRepository.examQuestions.isEmpty() && !QuizRepository.examFinished) {
+                ExamSetupPanel(
+                    bankName = activeBank.name,
+                    totalQuestions = activeBank.questions.size,
+                    availableExamCount = availableExamCount,
+                    typeAvailableCounts = typeAvailableCounts,
+                    selectedQuestionCount = selectedQuestionCount.coerceAtMost(availableExamCount),
+                    selectedQuestionCountMode = selectedQuestionCountMode,
+                    onSelectQuestionCount = { count, mode ->
+                        selectedQuestionCount = count
+                        selectedQuestionCountMode = mode
+                        QuizRepository.rememberExamSettings(
+                            context = context,
+                            questionCountMode = mode,
+                            customQuestionCount = if (mode == "custom") count else selectedQuestionCount
+                        )
+                    },
+                    selectedDurationMinutes = selectedDurationMinutes,
+                    onSelectDuration = { minutes ->
+                        selectedDurationMinutes = minutes
+                        QuizRepository.rememberExamSettings(context = context, durationMinutes = minutes)
+                    },
+                    groupMode = groupMode,
+                    onSelectGroupMode = { mode ->
+                        groupMode = mode
+                        QuizRepository.rememberExamSettings(context = context, groupMode = mode.preferenceKey())
+                    },
+                    typeCountTexts = typeCountTexts,
+                    typeScoreTexts = typeScoreTexts,
+                    showGroupSettings = showGroupSettings,
+                    onOpenGroupSettings = { showGroupSettings = true },
+                    onCloseGroupSettings = { showGroupSettings = false },
+                    onUpdateTypeCount = { type, value ->
+                        val max = typeAvailableCounts[type] ?: 0
+                        val clean = value.filter { it.isDigit() }.take(4)
+                        val bounded = clean.toIntOrNull()?.coerceIn(0, max)?.toString() ?: clean
+                        val updated = typeCountTexts + (type to bounded)
+                        typeCountTexts = updated
+                        QuizRepository.rememberExamSettings(context = context, typeCountTexts = updated)
+                    },
+                    onUpdateTypeScore = { type, value ->
+                        val updated = typeScoreTexts + (type to value.filter { it.isDigit() || it == '.' }.take(4))
+                        typeScoreTexts = updated
+                        QuizRepository.rememberExamSettings(context = context, typeScoreTexts = updated)
+                    },
+                    onStartExam = {
+                        QuizRepository.rememberExamSettings(
+                            context = context,
+                            questionCountMode = selectedQuestionCountMode,
+                            customQuestionCount = selectedQuestionCount,
+                            durationMinutes = selectedDurationMinutes,
+                            groupMode = groupMode.preferenceKey(),
+                            typeCountTexts = typeCountTexts,
+                            typeScoreTexts = typeScoreTexts
+                        )
+                        if (groupMode == ExamGroupMode.RANDOM) {
+                            val finalCount = selectedQuestionCount.coerceIn(1, availableExamCount)
+                            val autoScore = 100.0 / finalCount
+                            val scoreMap = examTypeOrder.associateWith { autoScore }
+                            QuizRepository.startExam(
+                                questionCount = finalCount,
+                                durationMinutes = selectedDurationMinutes,
+                                allowedTypes = availableExamTypes,
+                                typeScores = scoreMap,
+                                randomize = true
+                            )
+                        } else {
+                            val typeCounts = examTypeOrder.associateWith { type ->
+                                val max = typeAvailableCounts[type] ?: 0
+                                typeCountTexts[type].orEmpty().toIntOrNull()?.coerceIn(0, max) ?: 0
+                            }.filterValues { it > 0 }
+                            val scoreMap = examTypeOrder.associateWith { type ->
+                                typeScoreTexts[type].orEmpty().toDoubleOrNull()?.coerceAtLeast(0.0) ?: defaultTypeScore(type)
+                            }
+                            QuizRepository.startExamByTypeCounts(
+                                typeCounts = typeCounts,
+                                durationMinutes = selectedDurationMinutes,
+                                typeScores = scoreMap
+                            )
+                        }
+                    },
+                    scale = scale,
+                    uiScale = uiScale
+                )
+                return@Column
+            }
+
+            if (!QuizRepository.examFinished && examQuestion != null) {
+                ActiveExamPanel(
+                    examStatusExpanded = examStatusExpanded,
+                    onExamStatusExpandedChange = { examStatusExpanded = it },
+                    scale = scale,
+                    uiScale = uiScale
+                )
+                return@Column
+            }
+
+            FinishedExamPanel(
+                examSummary = examSummary,
+                recordId = QuizRepository.studyRecords.firstOrNull { it.source == "鑰冭瘯" }?.id,
+                onRestart = { QuizRepository.resetExam() },
+                onOpenRecord = onOpenRecord,
+                onBackHome = {
+                    QuizRepository.resetExam()
+                    onBackHome()
+                },
+                scale = scale,
+                uiScale = uiScale
+            )
+        }
+    }
+}
+
+
+ * 鑰冭瘯椤?Header:ShirohaHeader(kicker/title/subtitle) + 鍒囨崲缁冧範鎸夐挳
+ * 杩涜涓椂鏄剧ず"鏀惰捣/灞曞紑"鎸夐挳
+ */
+@Composable
+private fun ExamScreenHeaderRow(
+    scale: Float,
+    uiScale: Float,
+    isActiveExamRunning: Boolean,
+    examStatusExpanded: Boolean,
+    onToggleExamStatus: (Boolean) -> Unit,
+    onGoPractice: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Top
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            ShirohaHeader(
+                kicker = "Exam",
+                title = "妯℃嫙鑰冭瘯",
+                subtitle = "鎸夎鍒欒鏃?瀹屾垚鍚庢煡鐪嬪緱鍒嗕笌绛旈璇︽儏銆?,
+                scale = scale
+            )
+            if (isActiveExamRunning) {
+                Spacer(Modifier.height(ShirohaSpacing.Sm))
+                ExamCollapseTextPill(
+                    text = if (examStatusExpanded) "鏀惰捣鐘舵€佹爮" else "灞曞紑鐘舵€佹爮",
+                    modifier = Modifier
+                        .width((120 * uiScale).coerceAtLeast(96f).dp)
+                        .height(28.dp),
+                    onClick = { onToggleExamStatus(!examStatusExpanded) }
+                )
+            }
+        }
+        ActionPillButton(
+            icon = Icons.Rounded.PlayArrow,
+            text = "鍒囨崲缁冧範",
+            primary = false,
+            modifier = Modifier.height(44.dp),
+            onClick = onGoPractice
         )
     }
 }
@@ -369,7 +422,9 @@ private fun ExamSetupPanel(
     onCloseGroupSettings: () -> Unit,
     onUpdateTypeCount: (QuestionType, String) -> Unit,
     onUpdateTypeScore: (QuestionType, String) -> Unit,
-    onStartExam: () -> Unit
+    onStartExam: () -> Unit,
+    scale: Float,
+    uiScale: Float
 ) {
     var customDurationText by remember(selectedDurationMinutes) {
         mutableStateOf(selectedDurationMinutes.toString())
@@ -377,11 +432,6 @@ private fun ExamSetupPanel(
     var showCustomCountDialog by remember { mutableStateOf(false) }
     var customQuestionCountText by remember(availableExamCount) {
         mutableStateOf(selectedQuestionCount.coerceIn(1, availableExamCount.coerceAtLeast(1)).toString())
-    }
-    val bankNameSize = when {
-        bankName.length > 24 -> 14.sp
-        bankName.length > 16 -> 16.sp
-        else -> 18.sp
     }
     val customCounts = examTypeOrder.associateWith { type ->
         val max = typeAvailableCounts[type] ?: 0
@@ -392,167 +442,184 @@ private fun ExamSetupPanel(
         count * (typeScoreTexts[type].orEmpty().toDoubleOrNull() ?: defaultTypeScore(type))
     }
     val groupSummary = if (groupMode == ExamGroupMode.RANDOM) {
-        "自动从客观题里随机抽题，并把本场总分折算为 100 分。"
+        "鑷姩浠庡瑙傞閲岄殢鏈烘娊棰?骞舵妸鏈満鎬诲垎鎶樼畻涓?100 鍒嗐€?
     } else {
-        if (customQuestionCount == 0) "点击设置每种题型的题量和分值。" else "预计 $customQuestionCount 题 · ${customTotalScore.trimScoreText()} 分"
+        if (customQuestionCount == 0) "鐐瑰嚮璁剧疆姣忕棰樺瀷鐨勯閲忓拰鍒嗗€笺€? else "棰勮 $customQuestionCount 棰?路 ${customTotalScore.trimScoreText()} 鍒?
     }
 
-    GlassCard {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.Top
+    val scaledQuestionFontSize = (18 * uiScale).coerceAtLeast(14f).sp
+    val scaledBodyFontSize = (15 * uiScale).coerceAtLeast(13f).sp
+
+    Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)) {
+        // === 棰樺簱涓庡紑濮?===
+        EditorialSection(
+            kicker = "棰樺簱",
+            title = bankName,
+            scale = scale
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "考试设置",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.SemiBold
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)
+            ) {
+                EditorialFigure(
+                    modifier = Modifier.weight(1f),
+                    scale = scale,
+                    value = "$totalQuestions",
+                    label = "棰樺簱鎬婚鏁?,
+                    unit = "棰?
                 )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = bankName,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = bankNameSize),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = "共 $totalQuestions 题 · 可考试 $availableExamCount 题",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                EditorialFigure(
+                    modifier = Modifier.weight(1f),
+                    scale = scale,
+                    value = "$availableExamCount",
+                    label = "鍙€冭瘯棰樻暟",
+                    unit = "棰?
                 )
             }
+            Spacer(Modifier.height(ShirohaSpacing.Sm))
             ActionPillButton(
                 icon = Icons.Rounded.PlayArrow,
-                text = "开始考试",
+                text = "寮€濮嬭€冭瘯",
                 primary = true,
-                modifier = Modifier.height(46.dp),
                 onClick = onStartExam
             )
         }
 
-        Spacer(Modifier.height(18.dp))
-        Text("题量", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(8.dp))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            val safeAvailable = availableExamCount.coerceAtLeast(1)
-            ActionPillButton(
-                icon = Icons.Rounded.PlayArrow,
-                text = "自定义",
-                primary = selectedQuestionCountMode == "custom",
-                onClick = {
-                    customQuestionCountText = selectedQuestionCount.coerceIn(1, safeAvailable).toString()
-                    showCustomCountDialog = true
-                }
-            )
-            buildList {
-                if (safeAvailable >= 50) add(Triple(50, "50 题", "50"))
-                if (safeAvailable >= 100) add(Triple(100, "100 题", "100"))
-                add(Triple(safeAvailable, "全部 $safeAvailable 题", "all"))
-            }
-                .distinctBy { it.first }
-                .forEach { (count, label, mode) ->
-                    ActionPillButton(
-                        icon = Icons.Rounded.PlayArrow,
-                        text = label,
-                        primary = selectedQuestionCountMode == mode,
-                        onClick = { onSelectQuestionCount(count, mode) }
-                    )
-                }
-        }
-
-        Spacer(Modifier.height(18.dp))
-        Text("时长", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(8.dp))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(30, 60, 120).forEach { minutes ->
+        // === 棰橀噺 ===
+        EditorialSection(
+            kicker = "棰橀噺",
+            title = "鎶藉彇鏁伴噺",
+            scale = scale
+        ) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val safeAvailable = availableExamCount.coerceAtLeast(1)
                 ActionPillButton(
-                    icon = Icons.Rounded.Timer,
-                    text = "$minutes 分钟",
-                    primary = selectedDurationMinutes == minutes,
+                    icon = Icons.Rounded.PlayArrow,
+                    text = "鑷畾涔?,
+                    primary = selectedQuestionCountMode == "custom",
                     onClick = {
-                        customDurationText = minutes.toString()
-                        onSelectDuration(minutes)
+                        customQuestionCountText = selectedQuestionCount.coerceIn(1, safeAvailable).toString()
+                        showCustomCountDialog = true
                     }
                 )
+                buildList {
+                    if (safeAvailable >= 50) add(Triple(50, "50 棰?, "50"))
+                    if (safeAvailable >= 100) add(Triple(100, "100 棰?, "100"))
+                    add(Triple(safeAvailable, "鍏ㄩ儴 $safeAvailable 棰?, "all"))
+                }
+                    .distinctBy { it.first }
+                    .forEach { (count, label, mode) ->
+                        ActionPillButton(
+                            icon = Icons.Rounded.PlayArrow,
+                            text = label,
+                            primary = selectedQuestionCountMode == mode,
+                            onClick = { onSelectQuestionCount(count, mode) }
+                        )
+                    }
             }
         }
-        Spacer(Modifier.height(10.dp))
-        OutlinedTextField(
-            value = customDurationText,
-            onValueChange = { value ->
-                val cleanValue = value.filter { it.isDigit() }.take(3)
-                customDurationText = cleanValue
-                cleanValue.toIntOrNull()?.coerceIn(1, 999)?.let(onSelectDuration)
-            },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            label = { Text("自定义时间（分钟）") },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Done
-            )
-        )
 
-        Spacer(Modifier.height(18.dp))
-        Text("组题方式", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(8.dp))
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            ActionPillButton(
-                icon = Icons.Rounded.RestartAlt,
-                text = "随机组题",
-                primary = groupMode == ExamGroupMode.RANDOM,
-                modifier = Modifier.weight(1f).height(46.dp),
-                fillWidthContent = true,
-                onClick = { onSelectGroupMode(ExamGroupMode.RANDOM) }
-            )
-            ActionPillButton(
-                icon = Icons.Rounded.CheckCircle,
-                text = "自定义组题",
-                primary = groupMode == ExamGroupMode.CUSTOM,
-                modifier = Modifier.weight(1f).height(46.dp),
-                fillWidthContent = true,
-                onClick = { onSelectGroupMode(ExamGroupMode.CUSTOM) }
+        // === 鏃堕暱 ===
+        EditorialSection(
+            kicker = "鏃堕暱",
+            title = "鑰冭瘯鍒嗛挓鏁?,
+            scale = scale
+        ) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(30, 60, 120).forEach { minutes ->
+                    ActionPillButton(
+                        icon = Icons.Rounded.Timer,
+                        text = "$minutes 鍒嗛挓",
+                        primary = selectedDurationMinutes == minutes,
+                        onClick = {
+                            customDurationText = minutes.toString()
+                            onSelectDuration(minutes)
+                        }
+                    )
+                }
+            }
+            Spacer(Modifier.height(ShirohaSpacing.Sm))
+            EditorialDurationCounter(
+                valueText = customDurationText,
+                onValueChange = { value ->
+                    val cleanValue = value.filter { it.isDigit() }.take(3)
+                    customDurationText = cleanValue
+                    cleanValue.toIntOrNull()?.coerceIn(1, 999)?.let(onSelectDuration)
+                },
+                labelStyle = scaledBodyFontSize
             )
         }
-        Spacer(Modifier.height(10.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically
+
+        // === 缁勯鏂瑰紡 ===
+        EditorialSection(
+            kicker = "缁勯鏂瑰紡",
+            title = "鍑洪绛栫暐",
+            scale = scale
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = if (groupMode == ExamGroupMode.RANDOM) "自动组题" else "自定义组题",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                ActionPillButton(
+                    icon = Icons.Rounded.RestartAlt,
+                    text = "闅忔満缁勯",
+                    primary = groupMode == ExamGroupMode.RANDOM,
+                    modifier = Modifier.weight(1f).height(46.dp),
+                    fillWidthContent = true,
+                    onClick = { onSelectGroupMode(ExamGroupMode.RANDOM) }
                 )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = groupSummary,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            if (groupMode == ExamGroupMode.CUSTOM) {
                 ActionPillButton(
                     icon = Icons.Rounded.CheckCircle,
-                    text = "设置",
-                    primary = false,
-                    modifier = Modifier.height(44.dp),
-                    onClick = onOpenGroupSettings
+                    text = "鑷畾涔夌粍棰?,
+                    primary = groupMode == ExamGroupMode.CUSTOM,
+                    modifier = Modifier.weight(1f).height(46.dp),
+                    fillWidthContent = true,
+                    onClick = { onSelectGroupMode(ExamGroupMode.CUSTOM) }
                 )
+            }
+            Spacer(Modifier.height(ShirohaSpacing.Sm))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = if (groupMode == ExamGroupMode.RANDOM) "鑷姩缁勯" else "鑷畾涔夌粍棰?,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = scaledQuestionFontSize),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = groupSummary,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = scaledBodyFontSize),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                if (groupMode == ExamGroupMode.CUSTOM) {
+                    ActionPillButton(
+                        icon = Icons.Rounded.CheckCircle,
+                        text = "璁剧疆",
+                        primary = false,
+                        modifier = Modifier.height(44.dp),
+                        onClick = onOpenGroupSettings
+                    )
+                }
             }
         }
     }
 
     if (showCustomCountDialog) {
         CustomQuestionCountDialog(
-            title = "自定义考试题量",
+            title = "鑷畾涔夎€冭瘯棰橀噺",
             value = customQuestionCountText,
             maxCount = availableExamCount.coerceAtLeast(1),
             onValueChange = { customQuestionCountText = it },
@@ -567,14 +634,14 @@ private fun ExamSetupPanel(
     if (showGroupSettings) {
         AlertDialog(
             onDismissRequest = onCloseGroupSettings,
-            title = { Text("自定义组题") },
+            title = { Text("鑷畾涔夌粍棰?) },
             text = {
                 Column(
                     modifier = Modifier.heightIn(max = 460.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Text(
-                        text = "按题型设置抽取数量和每题分值。数量为 0 表示不考该题型。",
+                        text = "鎸夐鍨嬭缃娊鍙栨暟閲忓拰姣忛鍒嗗€笺€傛暟閲忎负 0 琛ㄧず涓嶈€冭棰樺瀷銆?,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -591,14 +658,14 @@ private fun ExamSetupPanel(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(typeLabel(type), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
-                                    Text("可用 $available 题", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text("鍙敤 $available 棰?, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                                 OutlinedTextField(
                                     value = typeCountTexts[type].orEmpty(),
                                     onValueChange = { onUpdateTypeCount(type, it) },
                                     modifier = Modifier.width(76.dp),
                                     singleLine = true,
-                                    label = { Text("题") },
+                                    label = { Text("棰?) },
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
                                 )
                                 OutlinedTextField(
@@ -606,7 +673,7 @@ private fun ExamSetupPanel(
                                     onValueChange = { onUpdateTypeScore(type, it) },
                                     modifier = Modifier.width(76.dp),
                                     singleLine = true,
-                                    label = { Text("分") },
+                                    label = { Text("鍒?) },
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done)
                                 )
                             }
@@ -614,31 +681,81 @@ private fun ExamSetupPanel(
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = onCloseGroupSettings) { Text("完成") } },
+            confirmButton = { TextButton(onClick = onCloseGroupSettings) { Text("瀹屾垚") } },
             dismissButton = {
                 TextButton(onClick = {
                     examTypeOrder.forEach { type ->
                         val available = typeAvailableCounts[type] ?: 0
                         onUpdateTypeCount(type, available.toString())
                     }
-                }) { Text("填满") }
+                }) { Text("濉弧") }
+            }
+        )
+    }
+}
+
+/**
+ * 缂栬緫鏉傚織椋庢椂闀胯鏁板櫒:Row(IconButton - 鏁板瓧 - IconButton + label)
+ * 鏇夸唬鍘?OutlinedTextField,瑙嗚涓婃洿"缂栬緫椋?
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun EditorialDurationCounter(
+    valueText: String,
+    onValueChange: (String) -> Unit,
+    labelStyle: androidx.compose.ui.unit.TextUnit
+) {
+    val current = valueText.toIntOrNull()?.coerceIn(1, 999) ?: 1
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Sm),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CounterIconButton(
+            icon = Icons.Rounded.Remove,
+            onClick = {
+                val newValue = (current - 5).coerceAtLeast(1)
+                onValueChange(newValue.toString())
+            }
+        )
+        EditorialFigure(
+            modifier = Modifier.weight(1f),
+            scale = 1f,
+            value = valueText,
+            label = "鑷畾涔夋椂闂?鍒嗛挓)",
+            unit = "鍒?
+        )
+        CounterIconButton(
+            icon = Icons.Rounded.Add,
+            onClick = {
+                val newValue = (current + 5).coerceAtMost(999)
+                onValueChange(newValue.toString())
             }
         )
     }
 }
 
 @Composable
-private fun ExamMetricCard(
-    title: String,
-    value: String,
-    content: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier
+private fun CounterIconButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit
 ) {
-    GlassCard(modifier = modifier) {
-        Text(value, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(6.dp))
-        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        content?.invoke()
+    Surface(
+        shape = CircleShape,
+        color = ShirohaColors.CardWhite86,
+        border = BorderStroke(ShirohaDimens.Hairline, ShirohaColors.LineStrong),
+        modifier = Modifier
+            .size(40.dp)
+            .shirohaNoRippleClickable(onClick = onClick)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
+        }
     }
 }
 
@@ -717,7 +834,9 @@ private fun ExamCollapsedStatusPill(
 @Composable
 private fun ActiveExamPanel(
     examStatusExpanded: Boolean,
-    onExamStatusExpandedChange: (Boolean) -> Unit
+    onExamStatusExpandedChange: (Boolean) -> Unit,
+    scale: Float,
+    uiScale: Float
 ) {
     val examQuestion = QuizRepository.currentExamQuestion() ?: return
     val questionType = examQuestion.type
@@ -726,6 +845,9 @@ private fun ActiveExamPanel(
     var showExitConfirm by remember { mutableStateOf(false) }
     val answeredCount = QuizRepository.examAnsweredCount()
     val unansweredCount = QuizRepository.examQuestions.size - answeredCount
+    val totalQuestions = QuizRepository.examQuestions.size
+    val currentIndex = QuizRepository.examIndex
+    val usedSeconds = (QuizRepository.examDurationSeconds - QuizRepository.examRemainingSeconds).coerceAtLeast(0)
     val displayOptions = remember(
         examQuestion.id,
         examQuestion.options,
@@ -739,239 +861,264 @@ private fun ActiveExamPanel(
         )
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(if (examStatusExpanded) 8.dp else 6.dp)) {
-    if (examStatusExpanded) {
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                GlassCard(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(128.dp)
-                ) {
-                    Text(
-                        formatExamSeconds(QuizRepository.examRemainingSeconds),
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    Text("剩余时间", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                }
-                GlassCard(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(128.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        Text("已答题", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                        Text(answeredCount.toString(), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    ActionPillButton(
-                        icon = Icons.AutoMirrored.Rounded.ListAlt,
-                        text = "答题卡",
-                        primary = false,
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .width(108.dp)
-                            .height(38.dp),
-                        fillWidthContent = true,
-                        onClick = { showAnswerCard = true }
-                    )
-                }
-            }
-        }
+    val stemStyle = if (scale == 1f) {
+        ShirohaTypography.headlineSmall
     } else {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ExamCollapsedStatusPill(
-                icon = Icons.Rounded.Timer,
-                text = formatExamSeconds(QuizRepository.examRemainingSeconds),
-                modifier = Modifier
-                    .weight(1f)
-                    .height(42.dp),
-                onClick = { onExamStatusExpandedChange(true) }
-            )
-            ExamCollapsedStatusPill(
-                icon = Icons.AutoMirrored.Rounded.ListAlt,
-                text = "答题卡 $answeredCount/${QuizRepository.examQuestions.size}",
-                modifier = Modifier
-                    .weight(1f)
-                    .height(42.dp),
-                onClick = { showAnswerCard = true }
-            )
-        }
-    }
-
-    val questionCardModifier = if (QuizRepository.swipeNavigationEnabled) {
-        Modifier.questionSwipeNavigation(
-            onSwipeLeft = { QuizRepository.nextExamQuestion() },
-            onSwipeRight = { QuizRepository.previousExamQuestion() }
+        ShirohaTypography.headlineSmall.copy(
+            fontSize = (ShirohaTypography.headlineSmall.fontSize.value * scale).sp,
+            lineHeight = (ShirohaTypography.headlineSmall.lineHeight.value * scale).sp
         )
-    } else {
-        Modifier
     }
 
-    GlassCard(modifier = questionCardModifier) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+    Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)) {
+        // === 杩涘害淇℃伅:EditorialFigure 脳4 ===
+        EditorialSection(
+            kicker = "Progress",
+            title = "鑰冭瘯杩涜涓?,
+            scale = scale
         ) {
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.CenterStart
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)
             ) {
-                StatusChip(
-                    "${QuizRepository.examIndex + 1}/${QuizRepository.examQuestions.size}",
-                    selected = true
+                EditorialFigure(
+                    modifier = Modifier.weight(1f),
+                    scale = scale,
+                    value = "${currentIndex + 1}",
+                    label = "褰撳墠棰樺彿",
+                    unit = "棰?
+                )
+                EditorialFigure(
+                    modifier = Modifier.weight(1f),
+                    scale = scale,
+                    value = "$totalQuestions",
+                    label = "鎬婚鏁?,
+                    unit = "棰?
                 )
             }
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)
             ) {
-                StatusChip(typeLabel(questionType))
-            }
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                StatusChip(formatExamSeconds(QuizRepository.examRemainingSeconds))
+                EditorialFigure(
+                    modifier = Modifier.weight(1f),
+                    scale = scale,
+                    value = formatExamSeconds(usedSeconds),
+                    label = "宸茬敤鏃堕棿"
+                )
+                EditorialFigure(
+                    modifier = Modifier.weight(1f),
+                    scale = scale,
+                    value = formatExamSeconds(QuizRepository.examRemainingSeconds),
+                    label = "鍓╀綑鏃堕棿"
+                )
             }
         }
-        Spacer(Modifier.height(18.dp))
-        Text(
-            text = LatexDisplayFormatter.format(examQuestion.question),
-            style = MaterialTheme.typography.titleLarge.copy(
-                fontSize = QuizRepository.questionFontSizeSp().sp,
-                lineHeight = QuizRepository.questionLineHeightSp().sp
-            ),
-            fontWeight = FontWeight.SemiBold
-        )
-        if (examQuestion.images.isNotEmpty()) {
-            Spacer(Modifier.height(14.dp))
-            QuestionImagesBlock(examQuestion.images, maxPreviewHeight = 360.dp, showMeta = true)
-        }
-        Spacer(Modifier.height(22.dp))
 
-        when (examQuestion.type) {
-            QuestionType.SINGLE,
-            QuestionType.MULTIPLE,
-            QuestionType.JUDGE -> {
-                val currentAnswer = QuizRepository.examAnswers[examQuestion.id].orEmpty()
-                displayOptions.forEach { option ->
-                    QuizOptionCard(
-                        label = option.displayKey,
-                        text = option.text,
-                        selected = currentAnswer.any { answer ->
-                            answer.trim().equals(option.originalKey, ignoreCase = true)
-                        },
-                        onClick = {
-                            QuizRepository.toggleExamAnswer(
-                                key = option.originalKey,
-                                multiple = examQuestion.type == QuestionType.MULTIPLE
-                            )
-                        }
+        if (examStatusExpanded) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ExamCollapsedStatusPill(
+                    icon = Icons.Rounded.Timer,
+                    text = formatExamSeconds(QuizRepository.examRemainingSeconds),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(42.dp),
+                    onClick = { onExamStatusExpandedChange(false) }
+                )
+                ExamCollapsedStatusPill(
+                    icon = Icons.AutoMirrored.Rounded.ListAlt,
+                    text = "绛旈鍗?$answeredCount/${QuizRepository.examQuestions.size}",
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(42.dp),
+                    onClick = { showAnswerCard = true }
+                )
+            }
+        } else {
+            GlassCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(72.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "宸插睍寮€鑰冭瘯鐘舵€併€傜偣鍑汇€屾敹璧风姸鎬佹爮銆嶅洖鍒扮簿绠€妯″紡銆?,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f)
                     )
-                    Spacer(Modifier.height(if (QuizRepository.compactOptionsEnabled) 8.dp else 10.dp))
                 }
             }
+        }
 
-            QuestionType.BLANK -> {
-                val currentAnswer = QuizRepository.examAnswers[examQuestion.id].orEmpty()
-                if (MultiBlankSupport.hasStructuredAnswers(examQuestion)) {
-                    MultiBlankAnswerInputs(
-                        blankCount = examQuestion.blankAnswers.size,
-                        values = currentAnswer,
-                        enabled = true,
-                        onValueChange = QuizRepository::updateExamBlankAnswer
+        val questionCardModifier = if (QuizRepository.swipeNavigationEnabled) {
+            Modifier.questionSwipeNavigation(
+                onSwipeLeft = { QuizRepository.nextExamQuestion() },
+                onSwipeRight = { QuizRepository.previousExamQuestion() }
+            )
+        } else {
+            Modifier
+        }
+
+        GlassCard(modifier = questionCardModifier) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    StatusChip(
+                        "${currentIndex + 1}/$totalQuestions",
+                        selected = true
                     )
-                } else {
-                    OutlinedTextField(
-                        value = currentAnswer.firstOrNull().orEmpty(),
-                        onValueChange = QuizRepository::updateExamTextAnswer,
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("你的答案") },
-                        placeholder = { Text("请输入填空内容") },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Done
+                }
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    StatusChip(typeLabel(questionType))
+                }
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    StatusChip(formatExamSeconds(QuizRepository.examRemainingSeconds))
+                }
+            }
+            Spacer(Modifier.height(18.dp))
+            // 棰樺共:Serif 澶ф爣棰?headlineSmall 脳 scale)
+            Text(
+                text = LatexDisplayFormatter.format(examQuestion.question),
+                style = stemStyle,
+                fontWeight = FontWeight.SemiBold
+            )
+            if (examQuestion.images.isNotEmpty()) {
+                Spacer(Modifier.height(14.dp))
+                QuestionImagesBlock(examQuestion.images, maxPreviewHeight = 360.dp, showMeta = true)
+            }
+            Spacer(Modifier.height(22.dp))
+
+            when (examQuestion.type) {
+                QuestionType.SINGLE,
+                QuestionType.MULTIPLE,
+                QuestionType.JUDGE -> {
+                    val currentAnswer = QuizRepository.examAnswers[examQuestion.id].orEmpty()
+                    displayOptions.forEach { option ->
+                        QuizOptionCard(
+                            label = option.displayKey,
+                            text = option.text,
+                            selected = currentAnswer.any { answer ->
+                                answer.trim().equals(option.originalKey, ignoreCase = true)
+                            },
+                            onClick = {
+                                QuizRepository.toggleExamAnswer(
+                                    key = option.originalKey,
+                                    multiple = examQuestion.type == QuestionType.MULTIPLE
+                                )
+                            }
                         )
-                    )
-                }
-            }
-
-            QuestionType.SHORT -> {
-                NoticeCard("这道题属于简答题。当前考试模式暂不自动判分。")
-            }
-        }
-
-        Spacer(Modifier.height(14.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            ActionPillButton(
-                Icons.AutoMirrored.Rounded.ArrowBack,
-                "上一题",
-                primary = false,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(50.dp),
-                fillWidthContent = true,
-                onClick = { QuizRepository.previousExamQuestion() }
-            )
-            ActionPillButton(
-                Icons.AutoMirrored.Rounded.ArrowForward,
-                "下一题",
-                primary = false,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(50.dp),
-                fillWidthContent = true,
-                onClick = { QuizRepository.nextExamQuestion() }
-            )
-        }
-        Spacer(Modifier.height(10.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            ActionPillButton(
-                Icons.AutoMirrored.Rounded.ExitToApp,
-                "结束本场",
-                primary = false,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(50.dp),
-                fillWidthContent = true,
-                onClick = { showExitConfirm = true }
-            )
-            ActionPillButton(
-                Icons.Rounded.CheckCircle,
-                "立即交卷",
-                primary = true,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(50.dp),
-                fillWidthContent = true,
-                onClick = {
-                    if (unansweredCount > 0) {
-                        showSubmitConfirm = true
-                    } else {
-                        QuizRepository.submitExam()
+                        Spacer(Modifier.height(if (QuizRepository.compactOptionsEnabled) 8.dp else 10.dp))
                     }
                 }
-            )
+
+                QuestionType.BLANK -> {
+                    val currentAnswer = QuizRepository.examAnswers[examQuestion.id].orEmpty()
+                    if (MultiBlankSupport.hasStructuredAnswers(examQuestion)) {
+                        MultiBlankAnswerInputs(
+                            blankCount = examQuestion.blankAnswers.size,
+                            values = currentAnswer,
+                            enabled = true,
+                            onValueChange = QuizRepository::updateExamBlankAnswer
+                        )
+                    } else {
+                        OutlinedTextField(
+                            value = currentAnswer.firstOrNull().orEmpty(),
+                            onValueChange = QuizRepository::updateExamTextAnswer,
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("浣犵殑绛旀") },
+                            placeholder = { Text("璇疯緭鍏ュ～绌哄唴瀹?) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Text,
+                                imeAction = ImeAction.Done
+                            )
+                        )
+                    }
+                }
+
+                QuestionType.SHORT -> {
+                    NoticeCard("杩欓亾棰樺睘浜庣畝绛旈銆傚綋鍓嶈€冭瘯妯″紡鏆備笉鑷姩鍒ゅ垎銆?)
+                }
+            }
+
+            Spacer(Modifier.height(14.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                ActionPillButton(
+                    Icons.AutoMirrored.Rounded.ArrowBack,
+                    "涓婁竴棰?,
+                    primary = false,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    fillWidthContent = true,
+                    onClick = { QuizRepository.previousExamQuestion() }
+                )
+                ActionPillButton(
+                    Icons.AutoMirrored.Rounded.ArrowForward,
+                    "涓嬩竴棰?,
+                    primary = false,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    fillWidthContent = true,
+                    onClick = { QuizRepository.nextExamQuestion() }
+                )
+            }
+            Spacer(Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                ActionPillButton(
+                    Icons.AutoMirrored.Rounded.ExitToApp,
+                    "缁撴潫鏈満",
+                    primary = false,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    fillWidthContent = true,
+                    onClick = { showExitConfirm = true }
+                )
+                ActionPillButton(
+                    Icons.Rounded.CheckCircle,
+                    "绔嬪嵆浜ゅ嵎",
+                    primary = true,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    fillWidthContent = true,
+                    onClick = {
+                        if (unansweredCount > 0) {
+                            showSubmitConfirm = true
+                        } else {
+                            QuizRepository.submitExam()
+                        }
+                    }
+                )
+            }
         }
-    }
     }
 
     if (showExitConfirm) {
@@ -1017,7 +1164,6 @@ private fun ActiveExamPanel(
         )
     }
 }
-
 
 private data class ExamDisplayOption(
     val displayKey: String,
@@ -1111,7 +1257,7 @@ private fun ExamAnswerCardDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("答题卡") },
+        title = { Text("绛旈鍗?) },
         text = {
             Column(
                 modifier = Modifier.heightIn(max = 460.dp),
@@ -1121,17 +1267,17 @@ private fun ExamAnswerCardDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    MetricGlassCard("已答", answered.toString(), "", Modifier.weight(1f))
-                    MetricGlassCard("未答", unanswered.toString(), "", Modifier.weight(1f))
+                    MetricGlassCard("宸茬瓟", answered.toString(), "", Modifier.weight(1f))
+                    MetricGlassCard("鏈瓟", unanswered.toString(), "", Modifier.weight(1f))
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    StatusChip("当前", selected = true)
-                    StatusChip("已答")
-                    StatusChip("未答")
+                    StatusChip("褰撳墠", selected = true)
+                    StatusChip("宸茬瓟")
+                    StatusChip("鏈瓟")
                 }
                 Column(
                     modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -1166,10 +1312,10 @@ private fun ExamAnswerCardDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onSubmit) { Text("交卷") }
+            TextButton(onClick = onSubmit) { Text("浜ゅ嵎") }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("继续答题") }
+            TextButton(onClick = onDismiss) { Text("缁х画绛旈") }
         }
     )
 }
@@ -1181,19 +1327,19 @@ private fun ConfirmExitExamDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("确定要退出吗？") },
+        title = { Text("纭畾瑕侀€€鍑哄悧锛?) },
         text = {
             Text(
-                text = "结束本场后，本场考试进度和已选答案将不会保留。",
+                text = "缁撴潫鏈満鍚庯紝鏈満鑰冭瘯杩涘害鍜屽凡閫夌瓟妗堝皢涓嶄細淇濈暀銆?,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
         confirmButton = {
-            TextButton(onClick = onConfirmExit) { Text("确定退出") }
+            TextButton(onClick = onConfirmExit) { Text("纭畾閫€鍑?) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("继续考试") }
+            TextButton(onClick = onDismiss) { Text("缁х画鑰冭瘯") }
         }
     )
 }
@@ -1207,21 +1353,21 @@ private fun ConfirmSubmitExamDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("还有未答题") },
+        title = { Text("杩樻湁鏈瓟棰?) },
         text = {
             Text(
-                text = "当前还有 $unansweredCount 道题未作答。确认交卷后，未答题会按错误处理。",
+                text = "褰撳墠杩樻湁 $unansweredCount 閬撻鏈綔绛斻€傜‘璁や氦鍗峰悗锛屾湭绛旈浼氭寜閿欒澶勭悊銆?,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
         confirmButton = {
-            TextButton(onClick = onConfirmSubmit) { Text("仍然交卷") }
+            TextButton(onClick = onConfirmSubmit) { Text("浠嶇劧浜ゅ嵎") }
         },
         dismissButton = {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(onClick = onGoAnswerCard) { Text("查看答题卡") }
-                TextButton(onClick = onDismiss) { Text("继续答题") }
+                TextButton(onClick = onGoAnswerCard) { Text("鏌ョ湅绛旈鍗?) }
+                TextButton(onClick = onDismiss) { Text("缁х画绛旈") }
             }
         }
     )
@@ -1234,45 +1380,175 @@ private fun FinishedExamPanel(
     recordId: String?,
     onRestart: () -> Unit,
     onOpenRecord: (String) -> Unit,
-    onBackHome: () -> Unit
+    onBackHome: () -> Unit,
+    scale: Float,
+    uiScale: Float
 ) {
-    GlassCard {
-        Text("考试结果", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
-        Spacer(Modifier.height(12.dp))
+    val wrongCount = (examSummary.answered - examSummary.correct).coerceAtLeast(0)
+    val totalDuration = examSummary.durationSeconds.coerceAtLeast(0)
+
+    Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)) {
         if (examSummary.autoSubmitted) {
-            NoticeCard("本场考试因为倒计时结束而自动交卷。", warning = false)
-            Spacer(Modifier.height(12.dp))
+            NoticeCard("鏈満鑰冭瘯鍥犱负鍊掕鏃剁粨鏉熻€岃嚜鍔ㄤ氦鍗枫€?, warning = false)
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            MetricGlassCard("总题数", examSummary.total.toString(), "", Modifier.weight(1f))
-            MetricGlassCard("答题数", examSummary.answered.toString(), "", Modifier.weight(1f))
+
+        // === 4 涓?EditorialFigure:鎬诲垎 / 绛斿 / 绛旈敊 / 鐢ㄦ椂 ===
+        EditorialSection(
+            kicker = "Results",
+            title = "绛旈璇︽儏",
+            scale = scale
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)
+            ) {
+                EditorialFigure(
+                    modifier = Modifier.weight(1f),
+                    scale = scale,
+                    value = "${examSummary.total}",
+                    label = "鎬婚鏁?,
+                    unit = "棰?
+                )
+                EditorialFigure(
+                    modifier = Modifier.weight(1f),
+                    scale = scale,
+                    value = "${examSummary.correct}",
+                    label = "绛斿",
+                    unit = "棰?
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)
+            ) {
+                EditorialFigure(
+                    modifier = Modifier.weight(1f),
+                    scale = scale,
+                    value = "$wrongCount",
+                    label = "绛旈敊",
+                    unit = "棰?
+                )
+                EditorialFigure(
+                    modifier = Modifier.weight(1f),
+                    scale = scale,
+                    value = formatExamSeconds(totalDuration),
+                    label = "鐢ㄦ椂"
+                )
+            }
+            if (examSummary.totalScore > 0.0) {
+                Spacer(Modifier.height(ShirohaSpacing.Sm))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)
+                ) {
+                    EditorialFigure(
+                        modifier = Modifier.weight(1f),
+                        scale = scale,
+                        value = "${examAccuracy(examSummary)}",
+                        label = "姝ｇ‘鐜?,
+                        unit = "%"
+                    )
+                    EditorialFigure(
+                        modifier = Modifier.weight(1f),
+                        scale = scale,
+                        value = "${examSummary.earnedScore.trimScoreText()}",
+                        label = "寰楀垎(鎬诲垎 ${examSummary.totalScore.trimScoreText()})",
+                        unit = "鍒?
+                    )
+                }
+            }
         }
-        Spacer(Modifier.height(12.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            MetricGlassCard("正确数", examSummary.correct.toString(), "", Modifier.weight(1f))
-            MetricGlassCard("正确率", "${examAccuracy(examSummary)}%", "", Modifier.weight(1f))
+
+        // === 閿欓鍒楄〃(鍙偣鍑昏繘鍏ラ敊棰樻湰) ===
+        EditorialSection(
+            kicker = "Results",
+            title = "绛旈璇︽儏",
+            scale = scale
+        ) {
+            if (wrongCount > 0) {
+                Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Sm)) {
+                    val wrongEntries = QuizRepository.examQuestions
+                        .mapIndexedNotNull { index, question ->
+                            val userAnswer = QuizRepository.examAnswers[question.id].orEmpty()
+                            val isCorrect = isAnswerCorrect(question, userAnswer)
+                            if (isCorrect || userAnswer.isEmpty()) null else index to question
+                        }
+                    wrongEntries.forEach { (index, _) ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .shirohaNoRippleClickable {
+                                    recordId?.let(onOpenRecord)
+                                },
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "绗?${index + 1} 棰?,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            StatusChip("鏌ョ湅璇︽儏", selected = true)
+                        }
+                        com.yiqiu.shirohaquiz.ui.components.EditorialDivider()
+                    }
+                    Spacer(Modifier.height(ShirohaSpacing.Sm))
+                    NoticeCard("鐐瑰嚮浠讳竴閿欓锛屽彲杩涘叆绛旈璁板綍鏌ョ湅瀹屾暣閿欓鍐呭銆?, warning = false)
+                }
+            } else {
+                NoticeCard("鏈満娌℃湁閿欓锛岃〃鐜颁笉閿欍€?, warning = false)
+            }
         }
-        if (examSummary.totalScore > 0.0) {
-            Spacer(Modifier.height(12.dp))
-            MetricGlassCard(
-                label = "得分",
-                value = "${examSummary.earnedScore.trimScoreText()} / ${examSummary.totalScore.trimScoreText()}",
-                desc = "按题型分值设置计算",
-                modifier = Modifier.fillMaxWidth()
+
+        // === 鎿嶄綔鎸夐挳 ===
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            ActionPillButton(
+                Icons.Rounded.RestartAlt,
+                "鍐嶆潵涓€鍦?,
+                primary = true,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(50.dp),
+                fillWidthContent = true,
+                onClick = onRestart
             )
-        }
-        Spacer(Modifier.height(18.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            ActionPillButton(Icons.Rounded.RestartAlt, "再来一场", primary = true, onClick = onRestart)
             ActionPillButton(
                 Icons.AutoMirrored.Rounded.ListAlt,
-                "查看详情",
+                "鏌ョ湅璇︽儏",
                 primary = false,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(50.dp),
+                fillWidthContent = true,
                 onClick = { recordId?.let(onOpenRecord) }
             )
-            ActionPillButton(Icons.Rounded.Timer, "返回首页", primary = false, onClick = onBackHome)
+            ActionPillButton(
+                Icons.Rounded.Timer,
+                "杩斿洖棣栭〉",
+                primary = false,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(50.dp),
+                fillWidthContent = true,
+                onClick = onBackHome
+            )
         }
     }
+}
+
+/**
+ * 绠€鍗曞垽瀹氬閿?涓?QuizRepository 鍐呯疆鍒ゅ垎淇濇寔涓€鑷?瀹屽叏 equal 蹇界暐澶у皬鍐?
+ */
+private fun isAnswerCorrect(question: Question, userAnswer: List<String>): Boolean {
+    if (userAnswer.isEmpty()) return false
+    val correct = question.answer.map { it.trim() }.toSet()
+    val user = userAnswer.map { it.trim() }.toSet()
+    if (correct.isEmpty()) return false
+    return correct == user
 }
 
 @Composable
@@ -1343,7 +1619,7 @@ private fun CustomQuestionCountDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "请输入 1～$maxCount 之间的题数。",
+                    text = "璇疯緭鍏?1锝?maxCount 涔嬮棿鐨勯鏁般€?,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1351,7 +1627,7 @@ private fun CustomQuestionCountDialog(
                     value = value,
                     onValueChange = { onValueChange(it.filter { ch -> ch.isDigit() }.take(4)) },
                     singleLine = true,
-                    label = { Text("题量") },
+                    label = { Text("棰橀噺") },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Done
@@ -1365,9 +1641,9 @@ private fun CustomQuestionCountDialog(
                     val count = value.toIntOrNull()?.coerceIn(1, maxCount) ?: 1
                     onConfirm(count)
                 }
-            ) { Text("确定") }
+            ) { Text("纭畾") }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text("鍙栨秷") } }
     )
 }
 
@@ -1438,9 +1714,9 @@ private fun examAccuracy(summary: ExamSummary): Int {
 }
 
 private fun typeLabel(type: QuestionType): String = when (type) {
-    QuestionType.SINGLE -> "单选题"
-    QuestionType.MULTIPLE -> "多选题"
-    QuestionType.JUDGE -> "判断题"
-    QuestionType.BLANK -> "填空题"
-    QuestionType.SHORT -> "简答题"
+    QuestionType.SINGLE -> "鍗曢€夐"
+    QuestionType.MULTIPLE -> "澶氶€夐"
+    QuestionType.JUDGE -> "鍒ゆ柇棰?
+    QuestionType.BLANK -> "濉┖棰?
+    QuestionType.SHORT -> "绠€绛旈"
 }

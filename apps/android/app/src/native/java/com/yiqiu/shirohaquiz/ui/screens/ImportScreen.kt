@@ -1,4 +1,6 @@
-package com.yiqiu.shirohaquiz.ui.screens
+﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+
+import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -16,6 +18,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -100,6 +103,9 @@ import com.yiqiu.shirohaquiz.state.QuizRepository
 import com.yiqiu.shirohaquiz.ui.components.ActionPillButton
 import com.yiqiu.shirohaquiz.ui.components.AiAnalysisFillPanel
 import com.yiqiu.shirohaquiz.R
+import com.yiqiu.shirohaquiz.ui.components.EditorialFigure
+import com.yiqiu.shirohaquiz.ui.components.EditorialSection
+import com.yiqiu.shirohaquiz.ui.components.IllustrationHeroCard
 import com.yiqiu.shirohaquiz.ui.components.GlassCard
 import com.yiqiu.shirohaquiz.ui.components.LoadingIllustration
 import com.yiqiu.shirohaquiz.ui.components.MultiBlankAnswerEditor
@@ -114,6 +120,9 @@ import com.yiqiu.shirohaquiz.ui.theme.ShirohaDimens
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaMotion
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaRadius
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaSpacing
+import com.yiqiu.shirohaquiz.ui.theme.editorialScaleFor
+import com.yiqiu.shirohaquiz.ui.theme.screenClassFor
+import com.yiqiu.shirohaquiz.ui.theme.uiScaleFor
 import com.yiqiu.shirohaquiz.ui.util.bankDisplayPath
 import androidx.compose.ui.res.painterResource
 import kotlinx.coroutines.Dispatchers
@@ -134,8 +143,8 @@ fun ImportScreen(
     var rawText by remember { mutableStateOf("") }
     var answerText by remember { mutableStateOf("") }
     var importedImages by remember { mutableStateOf<List<QuestionImportAssetExtractor.ExtractedImportImage>>(emptyList()) }
-    var selectedFileName by rememberSaveable { mutableStateOf("未选择文件") }
-    var selectedAnswerFileName by rememberSaveable { mutableStateOf("未选择答案文件") }
+    var selectedFileName by rememberSaveable { mutableStateOf("鏈€夋嫨鏂囦欢") }
+    var selectedAnswerFileName by rememberSaveable { mutableStateOf("鏈€夋嫨绛旀鏂囦欢") }
     var importResult by remember { mutableStateOf<ImportResult?>(null) }
     var editableQuestions by remember { mutableStateOf<List<Question>>(emptyList()) }
     var reviewMode by rememberSaveable { mutableStateOf(false) }
@@ -145,7 +154,7 @@ fun ImportScreen(
     var reviewFilterListFocusTick by rememberSaveable { mutableStateOf(0) }
     var reviewFilterName by rememberSaveable { mutableStateOf(ReviewFilter.ALL.name) }
     var statusText by rememberSaveable {
-        mutableStateOf("请选择题库文件。")
+        mutableStateOf("璇烽€夋嫨棰樺簱鏂囦欢銆?)
     }
     var isStatusWarn by rememberSaveable { mutableStateOf(false) }
     var useDualImport by rememberSaveable { mutableStateOf(false) }
@@ -163,12 +172,12 @@ fun ImportScreen(
     var aiReviewSuggestions by remember { mutableStateOf<List<AiReviewSuggestion>>(emptyList()) }
     var saveMode by rememberSaveable { mutableStateOf(ImportSaveMode.NEW_BANK.name) }
     var newBankGroupName by rememberSaveable { mutableStateOf(DEFAULT_BANK_GROUP_NAME) }
-    var newBankName by rememberSaveable { mutableStateOf("导入题库") }
+    var newBankName by rememberSaveable { mutableStateOf("瀵煎叆棰樺簱") }
     var appendTargetBankId by rememberSaveable { mutableStateOf<String?>(null) }
 
     LaunchedEffect(selectedFileName) {
         val defaultBankName = defaultImportBankName(selectedFileName)
-        if (newBankName.isBlank() || newBankName == "导入题库" || newBankName == "未选择文件") {
+        if (newBankName.isBlank() || newBankName == "瀵煎叆棰樺簱" || newBankName == "鏈€夋嫨鏂囦欢") {
             newBankName = defaultBankName
         }
     }
@@ -203,7 +212,7 @@ fun ImportScreen(
         aiReviewSuggestions = emptyList()
         val hardCount = resultWithExtraWarnings.warnings.count { it.level == WarningLevel.ERROR }
         val softCount = resultWithExtraWarnings.warnings.count { it.level == WarningLevel.WARNING }
-        statusText = "已完成${if (useDualImport) "双文件" else "原生"}解析：${resultWithExtraWarnings.questions.size} 题，硬错误 $hardCount 条，可确认提示 $softCount 条。"
+        statusText = "宸插畬鎴?{if (useDualImport) "鍙屾枃浠? else "鍘熺敓"}瑙ｆ瀽锛?{resultWithExtraWarnings.questions.size} 棰橈紝纭敊璇?$hardCount 鏉★紝鍙‘璁ゆ彁绀?$softCount 鏉°€?
         isStatusWarn = hardCount > 0 || softCount > 0
     }
 
@@ -221,9 +230,9 @@ fun ImportScreen(
     if (rawFullEditorMode) {
         BackHandler { rawFullEditorMode = false }
         FullImportTextEditorScreen(
-            title = if (useDualImport) "编辑题目文本" else "编辑原始文本",
+            title = if (useDualImport) "缂栬緫棰樼洰鏂囨湰" else "缂栬緫鍘熷鏂囨湰",
             value = rawText,
-            placeholder = "把标准题库文本粘贴到这里，或通过文件导入后在这里调整。",
+            placeholder = "鎶婃爣鍑嗛搴撴枃鏈矘璐村埌杩欓噷锛屾垨閫氳繃鏂囦欢瀵煎叆鍚庡湪杩欓噷璋冩暣銆?,
             onValueChange = {
                 rawText = it
                 if (importResult != null || editableQuestions.isNotEmpty() || reviewMode || importedImages.isNotEmpty()) {
@@ -238,9 +247,9 @@ fun ImportScreen(
     if (answerFullEditorMode) {
         BackHandler { answerFullEditorMode = false }
         FullImportTextEditorScreen(
-            title = "编辑答案文本",
+            title = "缂栬緫绛旀鏂囨湰",
             value = answerText,
-            placeholder = "粘贴答案文本，或通过上方按钮选择答案文件。",
+            placeholder = "绮樿创绛旀鏂囨湰锛屾垨閫氳繃涓婃柟鎸夐挳閫夋嫨绛旀鏂囦欢銆?,
             onValueChange = {
                 answerText = it
                 if (importResult != null || editableQuestions.isNotEmpty() || reviewMode) {
@@ -262,8 +271,8 @@ fun ImportScreen(
             return@rememberLauncherForActivityResult
         }
         isImportBusy = true
-        busyText = "正在读取题库文件……"
-        statusText = fileSizeCheck.warnMessage ?: "正在读取：$selectedFileName"
+        busyText = "姝ｅ湪璇诲彇棰樺簱鏂囦欢鈥︹€?
+        statusText = fileSizeCheck.warnMessage ?: "姝ｅ湪璇诲彇锛?selectedFileName"
         isStatusWarn = fileSizeCheck.warnMessage != null
         clearParsedResult(clearImages = true)
         importScope.launch {
@@ -274,21 +283,21 @@ fun ImportScreen(
             }
             isImportBusy = false
             when (val decodeResult = result.getOrElse {
-                QuestionImportAssetExtractor.DecodeResult.Failure("文件无法读取，可能已损坏或没有访问权限。")
+                QuestionImportAssetExtractor.DecodeResult.Failure("鏂囦欢鏃犳硶璇诲彇锛屽彲鑳藉凡鎹熷潖鎴栨病鏈夎闂潈闄愩€?)
             }) {
                 is QuestionImportAssetExtractor.DecodeResult.Success -> {
                     val content = decodeResult.content
                     if (content.text.isBlank()) {
-                        statusText = "已读取文件，但没有发现可用文本内容。请确认文档不是空白、扫描图片或旧版 xls。"
+                        statusText = "宸茶鍙栨枃浠讹紝浣嗘病鏈夊彂鐜板彲鐢ㄦ枃鏈唴瀹广€傝纭鏂囨。涓嶆槸绌虹櫧銆佹壂鎻忓浘鐗囨垨鏃х増 xls銆?
                         isStatusWarn = true
                     } else {
                         rawText = content.text
                         importedImages = content.images
                         rawTextEditorExpanded = content.text.length <= LARGE_TEXT_PREVIEW_THRESHOLD
                         statusText = if (content.images.isNotEmpty()) {
-                            "已读取：$selectedFileName，含 ${content.images.size} 张图片。"
+                            "宸茶鍙栵細$selectedFileName锛屽惈 ${content.images.size} 寮犲浘鐗囥€?
                         } else {
-                            "已读取：$selectedFileName。"
+                            "宸茶鍙栵細$selectedFileName銆?
                         }
                         isStatusWarn = false
                     }
@@ -311,8 +320,8 @@ fun ImportScreen(
             return@rememberLauncherForActivityResult
         }
         isImportBusy = true
-        busyText = "正在读取答案文件……"
-        statusText = fileSizeCheck.warnMessage ?: "正在读取答案文件：$selectedAnswerFileName"
+        busyText = "姝ｅ湪璇诲彇绛旀鏂囦欢鈥︹€?
+        statusText = fileSizeCheck.warnMessage ?: "姝ｅ湪璇诲彇绛旀鏂囦欢锛?selectedAnswerFileName"
         isStatusWarn = fileSizeCheck.warnMessage != null
         importScope.launch {
             val result = runCatching {
@@ -322,18 +331,18 @@ fun ImportScreen(
             }
             isImportBusy = false
             when (val decodeResult = result.getOrElse {
-                TextImportDecoder.DecodeResult.Failure("答案文件无法读取，可能已损坏或没有访问权限。")
+                TextImportDecoder.DecodeResult.Failure("绛旀鏂囦欢鏃犳硶璇诲彇锛屽彲鑳藉凡鎹熷潖鎴栨病鏈夎闂潈闄愩€?)
             }) {
                 is TextImportDecoder.DecodeResult.Success -> {
                     val text = decodeResult.text
                     if (text.isBlank()) {
-                        statusText = "已读取答案文件，但没有发现可用文本内容。请确认文件不是空白、扫描图片或旧版 xls。"
+                        statusText = "宸茶鍙栫瓟妗堟枃浠讹紝浣嗘病鏈夊彂鐜板彲鐢ㄦ枃鏈唴瀹广€傝纭鏂囦欢涓嶆槸绌虹櫧銆佹壂鎻忓浘鐗囨垨鏃х増 xls銆?
                         isStatusWarn = true
                     } else {
                         answerText = text
                         answerTextEditorExpanded = text.length <= LARGE_TEXT_PREVIEW_THRESHOLD
                         clearParsedResult()
-                        statusText = "已读取答案文件：$selectedAnswerFileName。"
+                        statusText = "宸茶鍙栫瓟妗堟枃浠讹細$selectedAnswerFileName銆?
                         isStatusWarn = false
                     }
                 }
@@ -349,9 +358,9 @@ fun ImportScreen(
         if (isImportBusy) return
         if (rawText.isBlank() || (useDualImport && answerText.isBlank())) {
             statusText = if (useDualImport) {
-                "请同时提供题目文本和答案文本，再开始双文件解析。"
+                "璇峰悓鏃舵彁渚涢鐩枃鏈拰绛旀鏂囨湰锛屽啀寮€濮嬪弻鏂囦欢瑙ｆ瀽銆?
             } else {
-                "请先提供题库文本，再开始原生解析。"
+                "璇峰厛鎻愪緵棰樺簱鏂囨湰锛屽啀寮€濮嬪師鐢熻В鏋愩€?
             }
             isStatusWarn = true
             return
@@ -362,7 +371,7 @@ fun ImportScreen(
         val imagesSnapshot = importedImages
         val dualSnapshot = useDualImport
         isImportBusy = true
-        busyText = if (dualSnapshot) "正在合并题目和答案……" else "正在解析题库文本……"
+        busyText = if (dualSnapshot) "姝ｅ湪鍚堝苟棰樼洰鍜岀瓟妗堚€︹€? else "姝ｅ湪瑙ｆ瀽棰樺簱鏂囨湰鈥︹€?
         statusText = busyText
         isStatusWarn = false
         clearParsedResult()
@@ -371,13 +380,13 @@ fun ImportScreen(
                 withContext(Dispatchers.Default) {
                     val jsonPreview = if (!dualSnapshot) QuizRepository.parseImportJsonPreview(rawSnapshot) else null
                     if (jsonPreview != null && jsonPreview.banks.size > 1) {
-                        throw IllegalArgumentException("${jsonPreview.message} 请在 我的 → 数据管理 → 导入题库 中导入多题库 JSON / 备份包。")
+                        throw IllegalArgumentException("${jsonPreview.message} 璇峰湪 鎴戠殑 鈫?鏁版嵁绠＄悊 鈫?瀵煎叆棰樺簱 涓鍏ュ棰樺簱 JSON / 澶囦唤鍖呫€?)
                     }
                     val jsonBank = jsonPreview?.banks?.singleOrNull()
                     val parsedResult = if (jsonBank != null) {
                         ImportResult(
                             questions = jsonBank.questions,
-                            strategyName = "JSON题库导入",
+                            strategyName = "JSON棰樺簱瀵煎叆",
                             warnings = emptyList(),
                             diagnostics = ImportDiagnostics(
                                 normalizedLength = rawSnapshot.length,
@@ -413,7 +422,7 @@ fun ImportScreen(
                     isStatusWarn = false
                 }
             }.onFailure { error ->
-                statusText = "解析失败：${error.message ?: "请检查题库文件格式"}"
+                statusText = "瑙ｆ瀽澶辫触锛?{error.message ?: "璇锋鏌ラ搴撴枃浠舵牸寮?}"
                 isStatusWarn = true
             }
         }
@@ -444,7 +453,7 @@ fun ImportScreen(
             aiAnalysisAppliedQuestionIds = aiAnalysisAppliedQuestionIds,
             filter = reviewFilterFromName(reviewFilterName)
         )?.let { reviewIndex = it }
-        statusText = "已从核对列表中移除 1 题。保存题库时会使用当前核对后的题目。"
+        statusText = "宸蹭粠鏍稿鍒楄〃涓Щ闄?1 棰樸€備繚瀛橀搴撴椂浼氫娇鐢ㄥ綋鍓嶆牳瀵瑰悗鐨勯鐩€?
         isStatusWarn = false
     }
 
@@ -487,7 +496,7 @@ fun ImportScreen(
                     }
                     syncEditableQuestions(nextQuestions, baseWarnings)
                     aiReviewSuggestions = aiReviewSuggestions.filterNot { it.questionId == suggestion.questionId }
-                    statusText = "已采纳 1 条 AI 核对建议，保存题库前仍可继续人工调整。"
+                    statusText = "宸查噰绾?1 鏉?AI 鏍稿寤鸿锛屼繚瀛橀搴撳墠浠嶅彲缁х画浜哄伐璋冩暣銆?
                     isStatusWarn = false
                 }
             },
@@ -556,7 +565,7 @@ fun ImportScreen(
                     }
                     syncEditableQuestions(nextQuestions, baseWarnings)
                     aiReviewSuggestions = aiReviewSuggestions.filterNot { it.questionId == suggestion.questionId }
-                    statusText = "已采纳 1 条 AI 核对建议，保存题库前仍可继续人工调整。"
+                    statusText = "宸查噰绾?1 鏉?AI 鏍稿寤鸿锛屼繚瀛橀搴撳墠浠嶅彲缁х画浜哄伐璋冩暣銆?
                     isStatusWarn = false
                 }
             },
@@ -576,34 +585,72 @@ fun ImportScreen(
         return
     }
 
-    val shouldPickAnswerFile = useDualImport && selectedFileName != "未选择文件"
+    val shouldPickAnswerFile = useDualImport && selectedFileName != "鏈€夋嫨鏂囦欢"
 
-    Column(
+    BoxWithConstraints(
         modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Sm),
-        verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
+            .fillMaxSize()
+            .shirohaEditorialBackground()
     ) {
-        ShirohaHeader(
-            kicker = "Import",
-            title = "导入题库",
-            subtitle = ""
-        )
+        val screenClass = screenClassFor(maxWidth)
+        val scale = editorialScaleFor(screenClass)
+        val uiScale = uiScaleFor(screenClass)
+        val importedBankCount = QuizRepository.banks.size
+        val totalImportedQuestions = QuizRepository.banks.sumOf { it.questions.size }
 
-        ImportStepHeroCard()
-
-        GlassCard {
-            Text(
-                text = "导入方式",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Sm),
+            verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
+        ) {
+            ShirohaHeader(
+                kicker = "Import",
+                title = "瀵煎叆棰樺簱",
+                subtitle = "閫夋嫨棰樺簱鏂囦欢銆佺矘璐存枃鏈垨浣跨敤绀轰緥銆?,
+                scale = scale
             )
-            Spacer(Modifier.height(14.dp))
-            Surface(
-                shape = RoundedCornerShape(22.dp),
-                color = ShirohaColors.CardWhite62,
-                border = BorderStroke(ShirohaDimens.Hairline, ShirohaColors.LineSoft)
+
+            // === 椤堕儴缁熻:宸插鍏ラ搴撴暟 / 鎬婚鐩暟 ===
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xl)
             ) {
+                EditorialFigure(
+                    modifier = Modifier.weight(1f),
+                    scale = scale,
+                    value = "$importedBankCount",
+                    label = "宸插鍏ラ搴?,
+                    unit = "涓?
+                )
+                EditorialFigure(
+                    modifier = Modifier.weight(1f),
+                    scale = scale,
+                    value = "$totalImportedQuestions",
+                    label = "鎬婚鐩暟",
+                    unit = "棰?
+                )
+            }
+
+            // === 寮曞鏂囨。閾炬帴 ===
+            NoticeCard(
+                text = "棣栨瀵煎叆锛熸煡鐪嬨€屾爣鍑嗘牸寮忚鏄庛€嶄簡瑙ｅ瓧娈靛惈涔夈€佽瘑鍒鍒欎笌绀轰緥銆?,
+                warning = false
+            )
+
+            // === 瀵煎叆鏂瑰紡:EditorialSection 鍖呰９ ===
+            EditorialSection(
+                    kicker = "Methods",
+                    title = "瀵煎叆鏂瑰紡",
+                    scale = scale
+                ) {
+                    GlassCard {
+                        Surface(
+                            shape = RoundedCornerShape(22.dp),
+                            color = ShirohaColors.CardWhite62,
+                            border = BorderStroke(ShirohaDimens.Hairline, ShirohaColors.LineSoft)
+                        ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -612,19 +659,19 @@ fun ImportScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.FileOpen,
-                        contentDescription = "选择题库文件",
+                        contentDescription = "閫夋嫨棰樺簱鏂囦欢",
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(28.dp)
                     )
                     Spacer(Modifier.width(12.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
-                            text = "选择题库文件",
+                            text = "閫夋嫨棰樺簱鏂囦欢",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            text = "支持 docx / txt / json / xlsx / csv",
+                            text = "鏀寔 docx / txt / json / xlsx / csv",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -634,9 +681,9 @@ fun ImportScreen(
             Spacer(Modifier.height(12.dp))
             Text(
                 text = if (useDualImport) {
-                    "当前题库文件：$selectedFileName\n当前答案文件：$selectedAnswerFileName"
+                    "褰撳墠棰樺簱鏂囦欢锛?selectedFileName\n褰撳墠绛旀鏂囦欢锛?selectedAnswerFileName"
                 } else {
-                    "当前文件：$selectedFileName"
+                    "褰撳墠鏂囦欢锛?selectedFileName"
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -648,7 +695,7 @@ fun ImportScreen(
             ) {
                 ActionPillButton(
                     icon = Icons.Rounded.FileOpen,
-                    text = if (shouldPickAnswerFile) "选择答案文件" else "选择题库文件",
+                    text = if (shouldPickAnswerFile) "閫夋嫨绛旀鏂囦欢" else "閫夋嫨棰樺簱鏂囦欢",
                     primary = true,
                     modifier = Modifier
                         .weight(1f)
@@ -666,7 +713,7 @@ fun ImportScreen(
                 )
                 ActionPillButton(
                     icon = Icons.Rounded.Refresh,
-                    text = "填入示例",
+                    text = "濉叆绀轰緥",
                     primary = false,
                     modifier = Modifier
                         .weight(1f)
@@ -675,13 +722,13 @@ fun ImportScreen(
                     onClick = {
                         if (!isImportBusy) {
                             useDualImport = false
-                            selectedFileName = "示例题库"
+                            selectedFileName = "绀轰緥棰樺簱"
                             rawText = sampleImportText()
                             rawTextEditorExpanded = true
                             answerTextEditorExpanded = true
                             importedImages = emptyList()
                             clearParsedResult()
-                            statusText = "已填入示例题库。"
+                            statusText = "宸插～鍏ョず渚嬮搴撱€?
                             isStatusWarn = false
                         }
                     }
@@ -694,7 +741,7 @@ fun ImportScreen(
             ) {
                 ImportModeChip(
                     icon = Icons.Rounded.Description,
-                    text = "标准导入",
+                    text = "鏍囧噯瀵煎叆",
                     selected = !useDualImport,
                     modifier = Modifier
                         .weight(1f)
@@ -703,14 +750,14 @@ fun ImportScreen(
                         if (!isImportBusy) {
                             useDualImport = false
                             clearParsedResult()
-                            statusText = "已切换到标准导入。"
+                            statusText = "宸插垏鎹㈠埌鏍囧噯瀵煎叆銆?
                             isStatusWarn = false
                         }
                     }
                 )
                 ImportModeChip(
                     icon = Icons.Rounded.AutoAwesome,
-                    text = "双文件导入",
+                    text = "鍙屾枃浠跺鍏?,
                     selected = useDualImport,
                     modifier = Modifier
                         .weight(1f)
@@ -719,7 +766,7 @@ fun ImportScreen(
                         if (!isImportBusy) {
                             useDualImport = true
                             clearParsedResult()
-                            statusText = "已切换到双文件导入。先选择题库文件，再选择答案文件。"
+                            statusText = "宸插垏鎹㈠埌鍙屾枃浠跺鍏ャ€傚厛閫夋嫨棰樺簱鏂囦欢锛屽啀閫夋嫨绛旀鏂囦欢銆?
                             isStatusWarn = false
                         }
                     }
@@ -734,22 +781,22 @@ fun ImportScreen(
 
         if (isImportBusy) {
             LoadingIllustration(
-                text = busyText.ifBlank { "正在处理导入任务……" },
+                text = busyText.ifBlank { "姝ｅ湪澶勭悊瀵煎叆浠诲姟鈥︹€? },
                 imageRes = R.drawable.illus_loading_state_webp
             )
         } else {
             GlassCard {
                 val hasRawText = rawText.isNotBlank()
-                val hasSelectedFile = selectedFileName != "未选择文件"
+                val hasSelectedFile = selectedFileName != "鏈€夋嫨鏂囦欢"
                 val rawTextTitle = when {
-                    useDualImport -> "题目文本"
-                    hasRawText || hasSelectedFile -> "原始文本"
-                    else -> "粘贴导入"
+                    useDualImport -> "棰樼洰鏂囨湰"
+                    hasRawText || hasSelectedFile -> "鍘熷鏂囨湰"
+                    else -> "绮樿创瀵煎叆"
                 }
                 val rawTextHint = when {
-                    useDualImport -> "题库文件内容，可在解析前核对调整。"
-                    hasRawText || hasSelectedFile -> "可在解析前核对或调整导入文本。"
-                    else -> "粘贴题库文本后解析。"
+                    useDualImport -> "棰樺簱鏂囦欢鍐呭锛屽彲鍦ㄨВ鏋愬墠鏍稿璋冩暣銆?
+                    hasRawText || hasSelectedFile -> "鍙湪瑙ｆ瀽鍓嶆牳瀵规垨璋冩暣瀵煎叆鏂囨湰銆?
+                    else -> "绮樿创棰樺簱鏂囨湰鍚庤В鏋愩€?
                 }
                 val rawTextActionButtonWidth = 128.dp
                 val rawTextActionButtonHeight = ShirohaDimens.ActionButtonMinHeight
@@ -777,7 +824,7 @@ fun ImportScreen(
                     Spacer(Modifier.width(12.dp))
                     ActionPillButton(
                         icon = Icons.Rounded.PlayArrow,
-                        text = "开始解析",
+                        text = "寮€濮嬭В鏋?,
                         primary = true,
                         modifier = Modifier
                             .width(rawTextActionButtonWidth)
@@ -790,7 +837,7 @@ fun ImportScreen(
                 if (!rawTextEditorExpanded && rawText.length > LARGE_TEXT_PREVIEW_THRESHOLD) {
                     LargeImportTextPreview(
                         text = rawText,
-                        label = "题目文本较长，已收起全文编辑以减少卡顿。",
+                        label = "棰樼洰鏂囨湰杈冮暱锛屽凡鏀惰捣鍏ㄦ枃缂栬緫浠ュ噺灏戝崱椤裤€?,
                         showEditButton = false,
                         onEditFullText = { rawFullEditorMode = true }
                     )
@@ -820,7 +867,7 @@ fun ImportScreen(
                             else -> 4
                         },
                         textStyle = MaterialTheme.typography.bodyMedium,
-                        placeholder = { Text("把标准题库文本粘贴到这里，或通过上方选择文件导入。") }
+                        placeholder = { Text("鎶婃爣鍑嗛搴撴枃鏈矘璐村埌杩欓噷锛屾垨閫氳繃涓婃柟閫夋嫨鏂囦欢瀵煎叆銆?) }
                     )
                 }
                 if (hasRawText) {
@@ -831,7 +878,7 @@ fun ImportScreen(
                     ) {
                         ActionPillButton(
                             icon = Icons.Rounded.Edit,
-                            text = "编辑全文",
+                            text = "缂栬緫鍏ㄦ枃",
                             primary = false,
                             modifier = Modifier
                                 .width(rawTextActionButtonWidth)
@@ -845,7 +892,7 @@ fun ImportScreen(
                 if (useDualImport) {
                     Spacer(Modifier.height(14.dp))
                     Text(
-                        text = "答案文本",
+                        text = "绛旀鏂囨湰",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -853,7 +900,7 @@ fun ImportScreen(
                     if (!answerTextEditorExpanded && answerText.length > LARGE_TEXT_PREVIEW_THRESHOLD) {
                         LargeImportTextPreview(
                             text = answerText,
-                            label = "答案文本较长，已收起全文编辑以减少卡顿。",
+                            label = "绛旀鏂囨湰杈冮暱锛屽凡鏀惰捣鍏ㄦ枃缂栬緫浠ュ噺灏戝崱椤裤€?,
                             onEditFullText = { answerFullEditorMode = true }
                         )
                     } else {
@@ -872,7 +919,7 @@ fun ImportScreen(
                             enabled = true,
                             minLines = 7,
                             textStyle = MaterialTheme.typography.bodyMedium,
-                            placeholder = { Text("粘贴答案文本，或通过上方按钮选择答案文件。") }
+                            placeholder = { Text("绮樿创绛旀鏂囨湰锛屾垨閫氳繃涓婃柟鎸夐挳閫夋嫨绛旀鏂囦欢銆?) }
                         )
                     }
                 }
@@ -904,19 +951,19 @@ fun ImportScreen(
 
                 GlassCard {
                     Text(
-                        text = "核对与写入",
+                        text = "鏍稿涓庡啓鍏?,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold
                     )
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        text = "人工核对，可用AI辅助，最后确认保存",
+                        text = "浜哄伐鏍稿锛屽彲鐢ˋI杈呭姪锛屾渶鍚庣‘璁や繚瀛?,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(14.dp))
                     Text(
-                        text = "人工核对",
+                        text = "浜哄伐鏍稿",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -927,7 +974,7 @@ fun ImportScreen(
                     ) {
                         ActionPillButton(
                             icon = Icons.Rounded.Edit,
-                            text = "进入沉浸核对",
+                            text = "杩涘叆娌夋蹈鏍稿",
                             primary = false,
                             onClick = {
                                 if (editableQuestions.isNotEmpty()) {
@@ -939,22 +986,22 @@ fun ImportScreen(
                         )
                         ActionPillButton(
                             icon = Icons.Rounded.CheckCircle,
-                            text = if (previewOnlyAnomaly) "显示全部题" else "仅看异常题",
+                            text = if (previewOnlyAnomaly) "鏄剧ず鍏ㄩ儴棰? else "浠呯湅寮傚父棰?,
                             primary = previewOnlyAnomaly,
                             onClick = {
                                 val nextOnlyAnomaly = !previewOnlyAnomaly
                                 previewOnlyAnomaly = nextOnlyAnomaly
                                 statusText = if (nextOnlyAnomaly) {
-                                    "快速预览已切换为仅显示异常题，共 ${anomalyQuestions.size} 题。"
+                                    "蹇€熼瑙堝凡鍒囨崲涓轰粎鏄剧ず寮傚父棰橈紝鍏?${anomalyQuestions.size} 棰樸€?
                                 } else {
-                                    "快速预览已切换为全部题目。"
+                                    "蹇€熼瑙堝凡鍒囨崲涓哄叏閮ㄩ鐩€?
                                 }
                                 isStatusWarn = false
                             }
                         )
                         ActionPillButton(
                             icon = Icons.Rounded.Description,
-                            text = "看缺解析 $missingAnalysisCount",
+                            text = "鐪嬬己瑙ｆ瀽 $missingAnalysisCount",
                             primary = false,
                             enabled = missingAnalysisCount > 0,
                             onClick = {
@@ -974,7 +1021,7 @@ fun ImportScreen(
                     }
                     Spacer(Modifier.height(14.dp))
                     Text(
-                        text = "AI 辅助",
+                        text = "AI 杈呭姪",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -985,45 +1032,45 @@ fun ImportScreen(
                     ) {
                         ActionPillButton(
                             icon = Icons.Rounded.AutoAwesome,
-                            text = "AI重构",
+                            text = "AI閲嶆瀯",
                             primary = QuizRepository.isAiConfigured() && QuizRepository.aiRefactorEnabled,
                             modifier = Modifier.alpha(if (QuizRepository.isAiConfigured() && QuizRepository.aiRefactorEnabled) 1f else ShirohaDimens.DisabledAlpha),
                             enabled = editableQuestions.isNotEmpty() && rawText.isNotBlank() && !isImportBusy,
                             onClick = {
                                 if (!QuizRepository.isAiConfigured()) {
                                     showAiConfigPrompt = true
-                                    statusText = "AI 重构：请先在个人偏好 → AI 设置中配置接口。"
+                                    statusText = "AI 閲嶆瀯锛氳鍏堝湪涓汉鍋忓ソ 鈫?AI 璁剧疆涓厤缃帴鍙ｃ€?
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
                                 if (!QuizRepository.aiRefactorEnabled) {
-                                    statusText = "AI 重构未启用，请先在个人偏好 → AI 设置中开启。"
+                                    statusText = "AI 閲嶆瀯鏈惎鐢紝璇峰厛鍦ㄤ釜浜哄亸濂?鈫?AI 璁剧疆涓紑鍚€?
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
                                 val sourceText = rawText.trim()
                                 val answerSourceText = answerText.trim()
                                 if (sourceText.isBlank()) {
-                                    statusText = "AI 重构需要原始文本，请先导入或粘贴题库文本。"
+                                    statusText = "AI 閲嶆瀯闇€瑕佸師濮嬫枃鏈紝璇峰厛瀵煎叆鎴栫矘璐撮搴撴枃鏈€?
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
                                 val sourceLength = sourceText.length + answerSourceText.length
                                 if (sourceLength > QuizRepository.aiRefactorMaxChars) {
-                                    statusText = "AI 重构：原文约 ${sourceLength} 字，超过当前上限 ${QuizRepository.aiRefactorMaxChars} 字。请在 AI 设置中调大上限，或拆分题库后处理。"
+                                    statusText = "AI 閲嶆瀯锛氬師鏂囩害 ${sourceLength} 瀛楋紝瓒呰繃褰撳墠涓婇檺 ${QuizRepository.aiRefactorMaxChars} 瀛椼€傝鍦?AI 璁剧疆涓皟澶т笂闄愶紝鎴栨媶鍒嗛搴撳悗澶勭悊銆?
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
                                 val warningTexts = displayResult.warnings.map { warning ->
-                                    val numberText = warning.questionNumber?.takeIf { it.isNotBlank() }?.let { "题号$it：" }.orEmpty()
-                                    "${warning.level.name}：$numberText${warning.message}"
+                                    val numberText = warning.questionNumber?.takeIf { it.isNotBlank() }?.let { "棰樺彿$it锛? }.orEmpty()
+                                    "${warning.level.name}锛?numberText${warning.message}"
                                 }.distinct().take(120)
                                 val beforeCount = editableQuestions.size
-                                statusText = "AI 重构中：优先清洗原文并重新本地解析，必要时再使用 AI 直接重构结果。"
+                                statusText = "AI 閲嶆瀯涓細浼樺厛娓呮礂鍘熸枃骞堕噸鏂版湰鍦拌В鏋愶紝蹇呰鏃跺啀浣跨敤 AI 鐩存帴閲嶆瀯缁撴灉銆?
                                 isStatusWarn = false
                                 importScope.launch {
                                     isImportBusy = true
-                                    busyText = "AI 重构中……"
+                                    busyText = "AI 閲嶆瀯涓€︹€?
                                     runCatching {
                                         withContext(Dispatchers.IO) {
                                             val refactorResult = ShirohaAiClient.refactorQuestions(
@@ -1064,15 +1111,15 @@ fun ImportScreen(
                                         if (shouldUseReparsed && reparsedResult != null) {
                                             val refactoredQuestions = reparsedResult.questions
                                             val nextWarnings = refreshImportWarningsForQuestions(
-                                                aiRefactorImportWarnings(refactorResult.notes, "AI重构已清洗原文并重新本地解析，请人工确认题量、题干、选项、答案和解析后再保存。") +
+                                                aiRefactorImportWarnings(refactorResult.notes, "AI閲嶆瀯宸叉竻娲楀師鏂囧苟閲嶆柊鏈湴瑙ｆ瀽锛岃浜哄伐纭棰橀噺銆侀骞层€侀€夐」銆佺瓟妗堝拰瑙ｆ瀽鍚庡啀淇濆瓨銆?) +
                                                     reparsedResult.warnings,
                                                 refactoredQuestions
                                             )
                                             val nextResult = reparsedResult.copy(
-                                                strategyName = "AI重构重解析 + ${reparsedResult.strategyName}",
+                                                strategyName = "AI閲嶆瀯閲嶈В鏋?+ ${reparsedResult.strategyName}",
                                                 warnings = nextWarnings,
                                                 diagnostics = reparsedResult.diagnostics.copy(
-                                                    notes = (reparsedResult.diagnostics.notes + "AI重构：已清洗原文并重新本地解析，由 $beforeCount 题解析为 ${refactoredQuestions.size} 题。" + refactorResult.notes).distinct()
+                                                    notes = (reparsedResult.diagnostics.notes + "AI閲嶆瀯锛氬凡娓呮礂鍘熸枃骞堕噸鏂版湰鍦拌В鏋愶紝鐢?$beforeCount 棰樿В鏋愪负 ${refactoredQuestions.size} 棰樸€? + refactorResult.notes).distinct()
                                                 )
                                             )
                                             importResult = nextResult
@@ -1084,20 +1131,20 @@ fun ImportScreen(
                                             aiAnalyzedQuestionIds = emptyList()
                                             aiAnalysisAppliedQuestionIds = emptyList()
                                             aiReviewSuggestions = emptyList()
-                                            statusText = "AI 重构完成：已清洗原文并重新本地解析，由 $beforeCount 题得到 ${refactoredQuestions.size} 题。请先人工核对，再继续 AI 核对或 AI 解析。"
+                                            statusText = "AI 閲嶆瀯瀹屾垚锛氬凡娓呮礂鍘熸枃骞堕噸鏂版湰鍦拌В鏋愶紝鐢?$beforeCount 棰樺緱鍒?${refactoredQuestions.size} 棰樸€傝鍏堜汉宸ユ牳瀵癸紝鍐嶇户缁?AI 鏍稿鎴?AI 瑙ｆ瀽銆?
                                             isStatusWarn = nextWarnings.isNotEmpty()
                                         } else if (directQuestions.isNotEmpty()) {
                                             val refactoredQuestions = directQuestions
                                             val nextWarnings = refreshImportWarningsForQuestions(
-                                                aiRefactorImportWarnings(refactorResult.notes, "AI重构已生成新的待核对结果，请人工确认题量、题干、选项、答案和解析后再保存。"),
+                                                aiRefactorImportWarnings(refactorResult.notes, "AI閲嶆瀯宸茬敓鎴愭柊鐨勫緟鏍稿缁撴灉锛岃浜哄伐纭棰橀噺銆侀骞层€侀€夐」銆佺瓟妗堝拰瑙ｆ瀽鍚庡啀淇濆瓨銆?),
                                                 refactoredQuestions
                                             )
                                             val nextResult = displayResult.copy(
                                                 questions = refactoredQuestions,
-                                                strategyName = "${displayResult.strategyName} + AI重构",
+                                                strategyName = "${displayResult.strategyName} + AI閲嶆瀯",
                                                 warnings = nextWarnings,
                                                 diagnostics = displayResult.diagnostics.copy(
-                                                    notes = (displayResult.diagnostics.notes + "AI重构：由 $beforeCount 题重整为 ${refactoredQuestions.size} 题。" + refactorResult.notes).distinct()
+                                                    notes = (displayResult.diagnostics.notes + "AI閲嶆瀯锛氱敱 $beforeCount 棰橀噸鏁翠负 ${refactoredQuestions.size} 棰樸€? + refactorResult.notes).distinct()
                                                 )
                                             )
                                             importResult = nextResult
@@ -1109,17 +1156,17 @@ fun ImportScreen(
                                             aiAnalyzedQuestionIds = emptyList()
                                             aiAnalysisAppliedQuestionIds = emptyList()
                                             aiReviewSuggestions = emptyList()
-                                            statusText = "AI 重构完成：由 $beforeCount 题重整为 ${refactoredQuestions.size} 题。请先人工核对，再继续 AI 核对或 AI 解析。"
+                                            statusText = "AI 閲嶆瀯瀹屾垚锛氱敱 $beforeCount 棰橀噸鏁翠负 ${refactoredQuestions.size} 棰樸€傝鍏堜汉宸ユ牳瀵癸紝鍐嶇户缁?AI 鏍稿鎴?AI 瑙ｆ瀽銆?
                                             isStatusWarn = nextWarnings.isNotEmpty()
                                         } else if (reparsedResult != null) {
-                                            statusText = "AI 重构已返回清洗文本，但本地重解析未得到可用题目，当前待核对结果未改动。"
+                                            statusText = "AI 閲嶆瀯宸茶繑鍥炴竻娲楁枃鏈紝浣嗘湰鍦伴噸瑙ｆ瀽鏈緱鍒板彲鐢ㄩ鐩紝褰撳墠寰呮牳瀵圭粨鏋滄湭鏀瑰姩銆?
                                             isStatusWarn = true
                                         } else {
-                                            statusText = "AI 重构完成但没有返回可用清洗文本或题目，当前待核对结果未改动。"
+                                            statusText = "AI 閲嶆瀯瀹屾垚浣嗘病鏈夎繑鍥炲彲鐢ㄦ竻娲楁枃鏈垨棰樼洰锛屽綋鍓嶅緟鏍稿缁撴灉鏈敼鍔ㄣ€?
                                             isStatusWarn = true
                                         }
                                     }.onFailure { error ->
-                                        statusText = "AI 重构失败：${error.message ?: "请检查接口配置"}"
+                                        statusText = "AI 閲嶆瀯澶辫触锛?{error.message ?: "璇锋鏌ユ帴鍙ｉ厤缃?}"
                                         isStatusWarn = true
                                     }
                                     isImportBusy = false
@@ -1129,19 +1176,19 @@ fun ImportScreen(
                         )
                         ActionPillButton(
                             icon = Icons.Rounded.AutoAwesome,
-                            text = "AI核对",
+                            text = "AI鏍稿",
                             primary = QuizRepository.isAiConfigured() && QuizRepository.aiReviewEnabled,
                             modifier = Modifier.alpha(if (QuizRepository.isAiConfigured() && QuizRepository.aiReviewEnabled) 1f else ShirohaDimens.DisabledAlpha),
                             enabled = editableQuestions.isNotEmpty() && !isImportBusy,
                             onClick = {
                                 if (!QuizRepository.isAiConfigured()) {
                                     showAiConfigPrompt = true
-                                    statusText = "AI 核对：请先在个人偏好 → AI 设置中配置接口。"
+                                    statusText = "AI 鏍稿锛氳鍏堝湪涓汉鍋忓ソ 鈫?AI 璁剧疆涓厤缃帴鍙ｃ€?
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
                                 if (!QuizRepository.aiReviewEnabled) {
-                                    statusText = "AI 核对未启用，请先在个人偏好 → AI 设置中开启。"
+                                    statusText = "AI 鏍稿鏈惎鐢紝璇峰厛鍦ㄤ釜浜哄亸濂?鈫?AI 璁剧疆涓紑鍚€?
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
@@ -1151,24 +1198,24 @@ fun ImportScreen(
                                 val limitedQuestions = remainingReviewQuestions.take(QuizRepository.aiMaxQuestions)
                                 if (baseReviewQuestions.isEmpty()) {
                                     statusText = if (QuizRepository.aiOnlyAnomaly) {
-                                        "AI 核对：当前开启了仅处理异常题，但没有可核对的异常题。"
+                                        "AI 鏍稿锛氬綋鍓嶅紑鍚簡浠呭鐞嗗紓甯搁锛屼絾娌℃湁鍙牳瀵圭殑寮傚父棰樸€?
                                     } else {
-                                        "AI 核对：当前没有可供核对的题目。"
+                                        "AI 鏍稿锛氬綋鍓嶆病鏈夊彲渚涙牳瀵圭殑棰樼洰銆?
                                     }
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
                                 if (limitedQuestions.isEmpty()) {
-                                    statusText = "AI 核对：当前范围已全部处理。如需重新核对，请重新解析题库或切换处理范围。"
+                                    statusText = "AI 鏍稿锛氬綋鍓嶈寖鍥村凡鍏ㄩ儴澶勭悊銆傚闇€閲嶆柊鏍稿锛岃閲嶆柊瑙ｆ瀽棰樺簱鎴栧垏鎹㈠鐞嗚寖鍥淬€?
                                     isStatusWarn = false
                                     return@ActionPillButton
                                 }
                                 val processedBefore = baseReviewQuestions.count { it.id in reviewedIdSet }.coerceAtMost(baseReviewQuestions.size)
-                                statusText = "AI 核对中：本次处理 ${limitedQuestions.size} 题，进度 ${processedBefore + 1}-${processedBefore + limitedQuestions.size}/${baseReviewQuestions.size}。"
+                                statusText = "AI 鏍稿涓細鏈澶勭悊 ${limitedQuestions.size} 棰橈紝杩涘害 ${processedBefore + 1}-${processedBefore + limitedQuestions.size}/${baseReviewQuestions.size}銆?
                                 isStatusWarn = false
                                 importScope.launch {
                                     isImportBusy = true
-                                    busyText = "AI 核对中……"
+                                    busyText = "AI 鏍稿涓€︹€?
                                     runCatching {
                                         withContext(Dispatchers.IO) {
                                             ShirohaAiClient.reviewQuestions(
@@ -1194,13 +1241,13 @@ fun ImportScreen(
                                         val processedAfter = baseReviewQuestions.count { it.id in nextReviewedIds.toSet() }.coerceAtMost(baseReviewQuestions.size)
                                         previewOnlyAnomaly = aiWarnings.isNotEmpty() || previewOnlyAnomaly
                                         statusText = if (aiWarnings.isEmpty()) {
-                                            "AI 核对完成：本批未发现重点问题，已处理 ${processedAfter}/${baseReviewQuestions.size} 题。"
+                                            "AI 鏍稿瀹屾垚锛氭湰鎵规湭鍙戠幇閲嶇偣闂锛屽凡澶勭悊 ${processedAfter}/${baseReviewQuestions.size} 棰樸€?
                                         } else {
-                                            "AI 核对完成：本批生成 ${aiWarnings.size} 条建议，已处理 ${processedAfter}/${baseReviewQuestions.size} 题。"
-                                        } + if (processedAfter < baseReviewQuestions.size) " 可继续点击 AI 核对处理下一批。" else " 当前范围已处理完。"
+                                            "AI 鏍稿瀹屾垚锛氭湰鎵圭敓鎴?${aiWarnings.size} 鏉″缓璁紝宸插鐞?${processedAfter}/${baseReviewQuestions.size} 棰樸€?
+                                        } + if (processedAfter < baseReviewQuestions.size) " 鍙户缁偣鍑?AI 鏍稿澶勭悊涓嬩竴鎵广€? else " 褰撳墠鑼冨洿宸插鐞嗗畬銆?
                                         isStatusWarn = aiWarnings.isNotEmpty()
                                     }.onFailure { error ->
-                                        statusText = "AI 核对失败：${error.message ?: "请检查接口配置"}"
+                                        statusText = "AI 鏍稿澶辫触锛?{error.message ?: "璇锋鏌ユ帴鍙ｉ厤缃?}"
                                         isStatusWarn = true
                                     }
                                     isImportBusy = false
@@ -1210,26 +1257,26 @@ fun ImportScreen(
                         )
                         ActionPillButton(
                             icon = Icons.Rounded.AutoAwesome,
-                            text = "AI解析",
+                            text = "AI瑙ｆ瀽",
                             primary = QuizRepository.isAiConfigured() && QuizRepository.aiAnalysisEnabled,
                             modifier = Modifier.alpha(if (QuizRepository.isAiConfigured() && QuizRepository.aiAnalysisEnabled) 1f else ShirohaDimens.DisabledAlpha),
                             enabled = editableQuestions.isNotEmpty() && !isImportBusy,
                             onClick = {
                                 if (!QuizRepository.isAiConfigured()) {
                                     showAiConfigPrompt = true
-                                    statusText = "AI 解析：请先在个人偏好 → AI 设置中配置接口。"
+                                    statusText = "AI 瑙ｆ瀽锛氳鍏堝湪涓汉鍋忓ソ 鈫?AI 璁剧疆涓厤缃帴鍙ｃ€?
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
                                 if (!QuizRepository.aiAnalysisEnabled) {
-                                    statusText = "AI 解析未启用，请先在个人偏好 → AI 设置中开启。"
+                                    statusText = "AI 瑙ｆ瀽鏈惎鐢紝璇峰厛鍦ㄤ釜浜哄亸濂?鈫?AI 璁剧疆涓紑鍚€?
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
                                 val allAnalysisTargets = editableQuestions.filter(::shouldApplyAiAnalysis)
                                 val anomalyAnalysisTargets = anomalyQuestions.filter(::shouldApplyAiAnalysis)
                                 if (allAnalysisTargets.isEmpty()) {
-                                    statusText = "AI 解析：当前没有缺少解析或解析过短的题目。"
+                                    statusText = "AI 瑙ｆ瀽锛氬綋鍓嶆病鏈夌己灏戣В鏋愭垨瑙ｆ瀽杩囩煭鐨勯鐩€?
                                     isStatusWarn = false
                                     return@ActionPillButton
                                 }
@@ -1241,21 +1288,21 @@ fun ImportScreen(
                                 val analysisTargetPool = if (useAnomalyScope) anomalyAnalysisTargets else allAnalysisTargets
                                 val remainingAnalysisTargets = if (useAnomalyScope) remainingAnomalyTargets else remainingAllTargets
                                 if (remainingAnalysisTargets.isEmpty()) {
-                                    statusText = "AI 解析：当前缺解析题已全部尝试。若仍有题目缺解析，可能是模型未返回对应结果；可重新解析题库或调整单次题数后重试。"
+                                    statusText = "AI 瑙ｆ瀽锛氬綋鍓嶇己瑙ｆ瀽棰樺凡鍏ㄩ儴灏濊瘯銆傝嫢浠嶆湁棰樼洰缂鸿В鏋愶紝鍙兘鏄ā鍨嬫湭杩斿洖瀵瑰簲缁撴灉锛涘彲閲嶆柊瑙ｆ瀽棰樺簱鎴栬皟鏁村崟娆￠鏁板悗閲嶈瘯銆?
                                     isStatusWarn = false
                                     return@ActionPillButton
                                 }
                                 val aiTargetQuestions = remainingAnalysisTargets.take(QuizRepository.aiMaxQuestions)
                                 val processedBefore = analysisTargetPool.count { it.id in analyzedIdSet }.coerceAtMost(analysisTargetPool.size)
                                 statusText = if (usingFallbackTargets) {
-                                    "AI 解析中：异常题范围已无未尝试解析目标，已改为处理全部缺解析题；本次处理 ${aiTargetQuestions.size} 道，进度 ${processedBefore + 1}-${processedBefore + aiTargetQuestions.size}/${analysisTargetPool.size}。"
+                                    "AI 瑙ｆ瀽涓細寮傚父棰樿寖鍥村凡鏃犳湭灏濊瘯瑙ｆ瀽鐩爣锛屽凡鏀逛负澶勭悊鍏ㄩ儴缂鸿В鏋愰锛涙湰娆″鐞?${aiTargetQuestions.size} 閬擄紝杩涘害 ${processedBefore + 1}-${processedBefore + aiTargetQuestions.size}/${analysisTargetPool.size}銆?
                                 } else {
-                                    "AI 解析中：本次处理 ${aiTargetQuestions.size} 道缺解析题，进度 ${processedBefore + 1}-${processedBefore + aiTargetQuestions.size}/${analysisTargetPool.size}。"
+                                    "AI 瑙ｆ瀽涓細鏈澶勭悊 ${aiTargetQuestions.size} 閬撶己瑙ｆ瀽棰橈紝杩涘害 ${processedBefore + 1}-${processedBefore + aiTargetQuestions.size}/${analysisTargetPool.size}銆?
                                 }
                                 isStatusWarn = false
                                 importScope.launch {
                                     isImportBusy = true
-                                    busyText = "AI 解析生成中……"
+                                    busyText = "AI 瑙ｆ瀽鐢熸垚涓€︹€?
                                     runCatching {
                                         withContext(Dispatchers.IO) {
                                             ShirohaAiClient.generateAnalysis(
@@ -1289,21 +1336,21 @@ fun ImportScreen(
                                             shouldApplyAiAnalysis(question) && question.id !in nextAnalyzedIdSet
                                         }
                                         statusText = if (changedIds.isEmpty()) {
-                                            "AI 解析完成：本批没有可写入的解析建议。"
+                                            "AI 瑙ｆ瀽瀹屾垚锛氭湰鎵规病鏈夊彲鍐欏叆鐨勮В鏋愬缓璁€?
                                         } else {
-                                            "AI 解析完成：已为 ${changedIds.size} 道题写入待核对解析，保存前请人工确认。"
+                                            "AI 瑙ｆ瀽瀹屾垚锛氬凡涓?${changedIds.size} 閬撻鍐欏叆寰呮牳瀵硅В鏋愶紝淇濆瓨鍓嶈浜哄伐纭銆?
                                         } + if (skippedCount > 0) {
-                                            " 本批有 ${skippedCount} 道未返回解析，已跳过以避免反复卡住。"
+                                            " 鏈壒鏈?${skippedCount} 閬撴湭杩斿洖瑙ｆ瀽锛屽凡璺宠繃浠ラ伩鍏嶅弽澶嶅崱浣忋€?
                                         } else {
                                             ""
                                         } + if (remainingAnalysisCount > 0) {
-                                            " 仍有约 ${remainingAnalysisCount} 道缺解析题，可继续点击 AI 解析处理下一批。"
+                                            " 浠嶆湁绾?${remainingAnalysisCount} 閬撶己瑙ｆ瀽棰橈紝鍙户缁偣鍑?AI 瑙ｆ瀽澶勭悊涓嬩竴鎵广€?
                                         } else {
-                                            " 当前范围已处理完。"
+                                            " 褰撳墠鑼冨洿宸插鐞嗗畬銆?
                                         }
                                         isStatusWarn = false
                                     }.onFailure { error ->
-                                        statusText = "AI 解析失败：${error.message ?: "请检查接口配置"}"
+                                        statusText = "AI 瑙ｆ瀽澶辫触锛?{error.message ?: "璇锋鏌ユ帴鍙ｉ厤缃?}"
                                         isStatusWarn = true
                                     }
                                     isImportBusy = false
@@ -1314,7 +1361,7 @@ fun ImportScreen(
 
                         ActionPillButton(
                             icon = Icons.Rounded.CheckCircle,
-                            text = "看AI建议 $aiSuggestionCount",
+                            text = "鐪婣I寤鸿 $aiSuggestionCount",
                             primary = aiSuggestionCount > 0,
                             enabled = aiSuggestionCount > 0,
                             onClick = {
@@ -1333,7 +1380,7 @@ fun ImportScreen(
                         )
                         ActionPillButton(
                             icon = Icons.Rounded.CheckCircle,
-                            text = "看可采纳 $aiApplicableCount",
+                            text = "鐪嬪彲閲囩撼 $aiApplicableCount",
                             primary = aiApplicableCount > 0,
                             enabled = aiApplicableCount > 0,
                             onClick = {
@@ -1352,7 +1399,7 @@ fun ImportScreen(
                         )
                         ActionPillButton(
                             icon = Icons.Rounded.Description,
-                            text = "看AI补解析 $aiAnalysisAppliedCount",
+                            text = "鐪婣I琛ヨВ鏋?$aiAnalysisAppliedCount",
                             primary = aiAnalysisAppliedCount > 0,
                             enabled = aiAnalysisAppliedCount > 0,
                             onClick = {
@@ -1377,7 +1424,7 @@ fun ImportScreen(
                     }
                     Spacer(Modifier.height(14.dp))
                     Text(
-                        text = "确认写入",
+                        text = "纭鍐欏叆",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -1388,7 +1435,7 @@ fun ImportScreen(
                     ) {
                         ActionPillButton(
                             icon = Icons.Rounded.Save,
-                            text = "新建题库",
+                            text = "鏂板缓棰樺簱",
                             primary = saveMode == ImportSaveMode.NEW_BANK.name,
                             modifier = Modifier.weight(1f),
                             fillWidthContent = true,
@@ -1396,7 +1443,7 @@ fun ImportScreen(
                         )
                         ActionPillButton(
                             icon = Icons.Rounded.Add,
-                            text = "追加题目",
+                            text = "杩藉姞棰樼洰",
                             primary = saveMode == ImportSaveMode.APPEND_TO_BANK.name,
                             modifier = Modifier.weight(1f),
                             fillWidthContent = true,
@@ -1414,26 +1461,26 @@ fun ImportScreen(
                             OutlinedTextField(
                                 value = newBankGroupName,
                                 onValueChange = { newBankGroupName = it },
-                                label = { Text("一级分组") },
+                                label = { Text("涓€绾у垎缁?) },
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
                             )
                             OutlinedTextField(
                                 value = newBankName,
                                 onValueChange = { newBankName = it },
-                                label = { Text("二级题库名") },
+                                label = { Text("浜岀骇棰樺簱鍚?) },
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
                             )
                             ActionPillButton(
                                 icon = Icons.Rounded.Save,
-                                text = "保存新题库",
+                                text = "淇濆瓨鏂伴搴?,
                                 primary = true,
                                 onClick = {
                                     val cleanGroupName = newBankGroupName.trim().ifBlank { DEFAULT_BANK_GROUP_NAME }
                                     val bankName = newBankName.trim().ifBlank { defaultImportBankName(selectedFileName) }
                                     QuizRepository.importBank(context, bankName, editableQuestions, cleanGroupName)
-                                    statusText = "已新建题库：$cleanGroupName / $bankName，共 ${editableQuestions.size} 题。"
+                                    statusText = "宸叉柊寤洪搴擄細$cleanGroupName / $bankName锛屽叡 ${editableQuestions.size} 棰樸€?
                                     isStatusWarn = false
                                     onImportSaved()
                                 }
@@ -1444,12 +1491,12 @@ fun ImportScreen(
                             ?: QuizRepository.activeBank()
                             ?: QuizRepository.banks.firstOrNull()
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            NoticeCard("追加导入会保留旧题并添加新题；本版不会自动去重，也不会替换原题库。", warning = false)
+                            NoticeCard("杩藉姞瀵煎叆浼氫繚鐣欐棫棰樺苟娣诲姞鏂伴锛涙湰鐗堜笉浼氳嚜鍔ㄥ幓閲嶏紝涔熶笉浼氭浛鎹㈠師棰樺簱銆?, warning = false)
                             if (QuizRepository.banks.isEmpty()) {
-                                NoticeCard("当前没有可追加的旧题库，请先保存为新题库。", warning = true)
+                                NoticeCard("褰撳墠娌℃湁鍙拷鍔犵殑鏃ч搴擄紝璇峰厛淇濆瓨涓烘柊棰樺簱銆?, warning = true)
                             } else {
                                 Text(
-                                    text = "选择目标题库",
+                                    text = "閫夋嫨鐩爣棰樺簱",
                                     style = MaterialTheme.typography.labelLarge,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -1469,7 +1516,7 @@ fun ImportScreen(
                                 }
                                 ActionPillButton(
                                     icon = Icons.Rounded.Add,
-                                    text = "追加到选中题库",
+                                    text = "杩藉姞鍒伴€変腑棰樺簱",
                                     primary = true,
                                     enabled = appendTargetBank != null,
                                     onClick = {
@@ -1477,9 +1524,9 @@ fun ImportScreen(
                                         val oldCount = target.questions.size
                                         val success = QuizRepository.appendQuestionsToBank(context, target.id, editableQuestions)
                                         statusText = if (success) {
-                                            "已追加到：${bankDisplayPath(target.groupName, target.name)}，新增 ${editableQuestions.size} 题，当前共 ${oldCount + editableQuestions.size} 题。"
+                                            "宸茶拷鍔犲埌锛?{bankDisplayPath(target.groupName, target.name)}锛屾柊澧?${editableQuestions.size} 棰橈紝褰撳墠鍏?${oldCount + editableQuestions.size} 棰樸€?
                                         } else {
-                                            "追加失败：没有找到目标题库。"
+                                            "杩藉姞澶辫触锛氭病鏈夋壘鍒扮洰鏍囬搴撱€?
                                         }
                                         isStatusWarn = !success
                                         if (success) onImportSaved()
@@ -1503,9 +1550,62 @@ fun ImportScreen(
 
             if (importResult == null && rawText.isNotBlank()) {
                 LoadingIllustration(
-                    text = "准备好以后，点击“开始解析”。",
+                    text = "鍑嗗濂戒互鍚庯紝鐐瑰嚮鈥滃紑濮嬭В鏋愨€濄€?,
                     imageRes = R.drawable.illus_loading_state_webp
                 )
+            }
+
+            // === 鏈€杩戝鍏?EditorialSection 鍖呰９ ===
+            EditorialSection(
+                kicker = "Recent",
+                title = "鏈€杩戝鍏?,
+                scale = scale
+            ) {
+                if (QuizRepository.banks.isEmpty()) {
+                    Text(
+                        text = "鏆傛棤宸插鍏ラ搴?瀹屾垚棣栨瀵煎叆鍚庝細鍦ㄨ繖閲屽垪鍑恒€?,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = ShirohaColors.TextSecondary
+                    )
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Sm)) {
+                        QuizRepository.banks.takeLast(5).reversed().forEach { bank ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = bank.name,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = "${bank.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }} 路 ${bank.questions.size} 棰?,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = ShirohaColors.TextSecondary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                StatusChip(
+                                    text = "${bank.questions.size} 棰?,
+                                    selected = false
+                                )
+                            }
+                        }
+                        if (QuizRepository.banks.size > 5) {
+                            Text(
+                                text = "鍙︽湁 ${QuizRepository.banks.size - 5} 涓搴?璇峰埌棰樺簱绠＄悊鏌ョ湅瀹屾暣鍒楄〃銆?,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = ShirohaColors.TextSecondary
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -1513,8 +1613,8 @@ fun ImportScreen(
     if (showAiConfigPrompt) {
         AlertDialog(
             onDismissRequest = { showAiConfigPrompt = false },
-            title = { Text("需要配置 AI 接口") },
-            text = { Text("请先在 我的 → AI 设置 中配置接口。") },
+            title = { Text("闇€瑕侀厤缃?AI 鎺ュ彛") },
+            text = { Text("璇峰厛鍦?鎴戠殑 鈫?AI 璁剧疆 涓厤缃帴鍙ｃ€?) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -1522,12 +1622,12 @@ fun ImportScreen(
                         onOpenPreference()
                     }
                 ) {
-                    Text("去配置")
+                    Text("鍘婚厤缃?)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAiConfigPrompt = false }) {
-                    Text("稍后再说")
+                    Text("绋嶅悗鍐嶈")
                 }
             }
         )
@@ -1570,7 +1670,7 @@ private fun LargeImportTextPreview(
                     Spacer(Modifier.width(10.dp))
                     ActionPillButton(
                         icon = Icons.Rounded.Edit,
-                        text = "编辑全文",
+                        text = "缂栬緫鍏ㄦ枃",
                         primary = false,
                         onClick = onEditFullText
                     )
@@ -1579,7 +1679,7 @@ private fun LargeImportTextPreview(
             Spacer(Modifier.height(10.dp))
             SelectionContainer {
                 Text(
-                    text = text.take(LARGE_TEXT_PREVIEW_CHARS).trimEnd() + if (text.length > LARGE_TEXT_PREVIEW_CHARS) "\n……" else "",
+                    text = text.take(LARGE_TEXT_PREVIEW_CHARS).trimEnd() + if (text.length > LARGE_TEXT_PREVIEW_CHARS) "\n鈥︹€? else "",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 8,
@@ -1651,14 +1751,14 @@ private fun FullImportTextEditorScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "全文编辑",
+                        text = "鍏ㄦ枃缂栬緫",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.weight(1f)
                     )
                     ActionPillButton(
                         icon = Icons.Rounded.Search,
-                        text = "查找",
+                        text = "鏌ユ壘",
                         primary = false,
                         onClick = { showFindReplaceDialog = true }
                     )
@@ -1681,20 +1781,20 @@ private fun FullImportTextEditorScreen(
     if (showFindReplaceDialog) {
         AlertDialog(
             onDismissRequest = { showFindReplaceDialog = false },
-            title = { Text("查找 / 替换") },
+            title = { Text("鏌ユ壘 / 鏇挎崲") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedTextField(
                         value = findText,
                         onValueChange = { findText = it },
-                        label = { Text("查找内容") },
+                        label = { Text("鏌ユ壘鍐呭") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
                     OutlinedTextField(
                         value = replaceText,
                         onValueChange = { replaceText = it },
-                        label = { Text("替换内容（留空则删除）") },
+                        label = { Text("鏇挎崲鍐呭锛堢暀绌哄垯鍒犻櫎锛?) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -1703,7 +1803,7 @@ private fun FullImportTextEditorScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = if (useRegexFind) "正则模式已开启" else "普通文本匹配",
+                            text = if (useRegexFind) "姝ｅ垯妯″紡宸插紑鍚? else "鏅€氭枃鏈尮閰?,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.weight(1f)
@@ -1712,14 +1812,14 @@ private fun FullImportTextEditorScreen(
                             useRegexFind = !useRegexFind
                             findReplaceError = null
                         }) {
-                            Text(if (useRegexFind) "关闭正则" else "使用正则")
+                            Text(if (useRegexFind) "鍏抽棴姝ｅ垯" else "浣跨敤姝ｅ垯")
                         }
                     }
                     Text(
                         text = if (useRegexFind) {
-                            "会按正则表达式替换全部匹配内容；替换内容不填时，将直接删除匹配文本。"
+                            "浼氭寜姝ｅ垯琛ㄨ揪寮忔浛鎹㈠叏閮ㄥ尮閰嶅唴瀹癸紱鏇挎崲鍐呭涓嶅～鏃讹紝灏嗙洿鎺ュ垹闄ゅ尮閰嶆枃鏈€?
                         } else {
-                            "会替换全部匹配内容；替换内容不填时，将直接删除匹配文本。"
+                            "浼氭浛鎹㈠叏閮ㄥ尮閰嶅唴瀹癸紱鏇挎崲鍐呭涓嶅～鏃讹紝灏嗙洿鎺ュ垹闄ゅ尮閰嶆枃鏈€?
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1740,7 +1840,7 @@ private fun FullImportTextEditorScreen(
                         val updatedText = if (useRegexFind) {
                             runCatching { Regex(findText).replace(value, replaceText) }
                                 .onFailure { error ->
-                                    findReplaceError = "正则表达式无效：${error.message ?: "请检查语法"}"
+                                    findReplaceError = "姝ｅ垯琛ㄨ揪寮忔棤鏁堬細${error.message ?: "璇锋鏌ヨ娉?}"
                                 }
                                 .getOrNull()
                         } else {
@@ -1753,12 +1853,12 @@ private fun FullImportTextEditorScreen(
                         }
                     }
                 ) {
-                    Text(if (replaceText.isBlank()) "删除" else "全部替换")
+                    Text(if (replaceText.isBlank()) "鍒犻櫎" else "鍏ㄩ儴鏇挎崲")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showFindReplaceDialog = false }) {
-                    Text("取消")
+                    Text("鍙栨秷")
                 }
             }
         )
@@ -1783,13 +1883,13 @@ private fun EditorSaveButton(onClick: () -> Unit) {
         ) {
             Icon(
                 imageVector = Icons.Rounded.Save,
-                contentDescription = "保存更改",
+                contentDescription = "淇濆瓨鏇存敼",
                 modifier = Modifier.size(16.dp),
                 tint = ShirohaColors.TextOnBrand
             )
             Spacer(Modifier.width(5.dp))
             Text(
-                text = "保存更改",
+                text = "淇濆瓨鏇存敼",
                 color = ShirohaColors.TextOnBrand,
                 fontWeight = FontWeight.SemiBold,
                 style = MaterialTheme.typography.labelMedium,
@@ -1800,8 +1900,7 @@ private fun EditorSaveButton(onClick: () -> Unit) {
     }
 }
 
-@Composable
-private fun ImportModeChip(
+
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     text: String,
     selected: Boolean,
@@ -1925,7 +2024,7 @@ private fun NativeImportSummary(
 
     GlassCard {
         Text(
-            text = "解析结果",
+            text = "瑙ｆ瀽缁撴灉",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold
         )
@@ -1934,20 +2033,20 @@ private fun NativeImportSummary(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            StatusChip("策略：${result.strategyName}", selected = true)
-            StatusChip("识别题数：${result.questions.size}", selected = true)
-            StatusChip("已识别答案：$answeredCount", selected = answeredCount == result.questions.size)
-            if (imageQuestionCount > 0) StatusChip("图片题：$imageQuestionCount", selected = true)
-            StatusChip("硬错误：$hardCount", selected = hardCount == 0)
-            StatusChip("提示：$softCount", selected = softCount == 0)
-            StatusChip("缺/短解析：$missingAnalysisCount", selected = missingAnalysisCount == 0)
-            if (aiReviewedCount > 0) StatusChip("AI已核对：$aiReviewedCount", selected = true)
-            if (aiReviewSuggestionCount > 0) StatusChip("AI建议：$aiReviewSuggestionCount", selected = true)
-            if (aiApplicableCount > 0) StatusChip("可采纳：$aiApplicableCount", selected = true)
-            if (aiNeedConfirmCount > 0) StatusChip("需确认：$aiNeedConfirmCount", selected = false)
-            if (aiHardErrorCount > 0) StatusChip("AI硬错误：$aiHardErrorCount", selected = false)
-            if (aiAnalyzedCount > 0) StatusChip("AI已尝试解析：$aiAnalyzedCount", selected = true)
-            if (aiAnalysisAppliedCount > 0) StatusChip("AI已补解析：$aiAnalysisAppliedCount", selected = true)
+            StatusChip("绛栫暐锛?{result.strategyName}", selected = true)
+            StatusChip("璇嗗埆棰樻暟锛?{result.questions.size}", selected = true)
+            StatusChip("宸茶瘑鍒瓟妗堬細$answeredCount", selected = answeredCount == result.questions.size)
+            if (imageQuestionCount > 0) StatusChip("鍥剧墖棰橈細$imageQuestionCount", selected = true)
+            StatusChip("纭敊璇細$hardCount", selected = hardCount == 0)
+            StatusChip("鎻愮ず锛?softCount", selected = softCount == 0)
+            StatusChip("缂?鐭В鏋愶細$missingAnalysisCount", selected = missingAnalysisCount == 0)
+            if (aiReviewedCount > 0) StatusChip("AI宸叉牳瀵癸細$aiReviewedCount", selected = true)
+            if (aiReviewSuggestionCount > 0) StatusChip("AI寤鸿锛?aiReviewSuggestionCount", selected = true)
+            if (aiApplicableCount > 0) StatusChip("鍙噰绾筹細$aiApplicableCount", selected = true)
+            if (aiNeedConfirmCount > 0) StatusChip("闇€纭锛?aiNeedConfirmCount", selected = false)
+            if (aiHardErrorCount > 0) StatusChip("AI纭敊璇細$aiHardErrorCount", selected = false)
+            if (aiAnalyzedCount > 0) StatusChip("AI宸插皾璇曡В鏋愶細$aiAnalyzedCount", selected = true)
+            if (aiAnalysisAppliedCount > 0) StatusChip("AI宸茶ˉ瑙ｆ瀽锛?aiAnalysisAppliedCount", selected = true)
         }
         if (result.warnings.isNotEmpty()) {
             val (globalWarnings, questionWarnings) = result.warnings.partition { warning ->
@@ -1956,7 +2055,7 @@ private fun NativeImportSummary(
             if (globalWarnings.isNotEmpty()) {
                 Spacer(Modifier.height(14.dp))
                 Text(
-                    text = "全局提示",
+                    text = "鍏ㄥ眬鎻愮ず",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -1972,7 +2071,7 @@ private fun NativeImportSummary(
             if (questionWarnings.isNotEmpty()) {
                 Spacer(Modifier.height(if (globalWarnings.isEmpty()) 14.dp else 6.dp))
                 Text(
-                    text = "题目提示",
+                    text = "棰樼洰鎻愮ず",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -1986,7 +2085,7 @@ private fun NativeImportSummary(
                 }
                 if (questionWarnings.size > 6) {
                     Text(
-                        text = "另有 ${questionWarnings.size - 6} 条题目提示，请在沉浸核对中查看对应题目。",
+                        text = "鍙︽湁 ${questionWarnings.size - 6} 鏉￠鐩彁绀猴紝璇峰湪娌夋蹈鏍稿涓煡鐪嬪搴旈鐩€?,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1996,14 +2095,14 @@ private fun NativeImportSummary(
         if (result.diagnostics.notes.isNotEmpty()) {
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "候选策略诊断",
+                text = "鍊欓€夌瓥鐣ヨ瘖鏂?,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(Modifier.height(8.dp))
             result.diagnostics.notes.take(4).forEach { note ->
                 Text(
-                    text = "• $note",
+                    text = "鈥?$note",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -2025,14 +2124,14 @@ private fun NativeImportPreview(
 ) {
     GlassCard {
         Text(
-            text = if (onlyShowAnomaly) "异常题预览" else "快速预览",
+            text = if (onlyShowAnomaly) "寮傚父棰橀瑙? else "蹇€熼瑙?,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold
         )
         Spacer(Modifier.height(12.dp))
         if (questions.isEmpty()) {
             NoticeCard(
-                text = if (onlyShowAnomaly) "当前没有可预览的异常题。" else "当前没有可预览的题目。",
+                text = if (onlyShowAnomaly) "褰撳墠娌℃湁鍙瑙堢殑寮傚父棰樸€? else "褰撳墠娌℃湁鍙瑙堢殑棰樼洰銆?,
                 warning = false
             )
             return@GlassCard
@@ -2069,7 +2168,7 @@ private fun NativeImportPreview(
             }
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "答案：$answerText",
+                text = "绛旀锛?answerText",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -2092,7 +2191,7 @@ private fun NativeImportPreview(
             if (question.analysis.isNotBlank()) {
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "解析：${question.analysis}",
+                    text = "瑙ｆ瀽锛?{question.analysis}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -2100,9 +2199,9 @@ private fun NativeImportPreview(
             Spacer(Modifier.height(18.dp))
         }
         if (questions.size > 8) {
-            NoticeCard("当前仅展示前 8 题用于快速预览，完整核对请进入沉浸核对。", warning = false)
+            NoticeCard("褰撳墠浠呭睍绀哄墠 8 棰樼敤浜庡揩閫熼瑙堬紝瀹屾暣鏍稿璇疯繘鍏ユ矇娴告牳瀵广€?, warning = false)
         } else if (onlyShowAnomaly && questions.size < totalQuestionCount) {
-            NoticeCard("当前仅预览异常题。点击上方“显示全部题”可恢复全部预览。", warning = false)
+            NoticeCard("褰撳墠浠呴瑙堝紓甯搁銆傜偣鍑讳笂鏂光€滄樉绀哄叏閮ㄩ鈥濆彲鎭㈠鍏ㄩ儴棰勮銆?, warning = false)
         }
     }
 }
@@ -2136,12 +2235,12 @@ private fun NativeQuestionReviewScreen(
         ) {
             ShirohaHeader(
                 kicker = "Review",
-                title = "沉浸核对",
-                subtitle = "当前没有可核对的题目。"
+                title = "娌夋蹈鏍稿",
+                subtitle = "褰撳墠娌℃湁鍙牳瀵圭殑棰樼洰銆?
             )
             ActionPillButton(
                 icon = Icons.Rounded.ArrowBack,
-                text = "返回导入页",
+                text = "杩斿洖瀵煎叆椤?,
                 primary = false,
                 onClick = onBack
             )
@@ -2208,13 +2307,13 @@ private fun NativeQuestionReviewScreen(
     ) {
         ShirohaHeader(
             kicker = "Review",
-            title = "沉浸核对",
-            subtitle = "逐题核对导入结果，可先筛选异常或无答案。"
+            title = "娌夋蹈鏍稿",
+            subtitle = "閫愰鏍稿瀵煎叆缁撴灉锛屽彲鍏堢瓫閫夊紓甯告垨鏃犵瓟妗堛€?
         )
 
         GlassCard {
             Text(
-                text = "核对筛选",
+                text = "鏍稿绛涢€?,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
@@ -2244,14 +2343,14 @@ private fun NativeQuestionReviewScreen(
             }
             if (activeFilter != ReviewFilter.ALL && visibleIndices.isEmpty()) {
                 Spacer(Modifier.height(12.dp))
-                NoticeCard("当前筛选下没有需要核对的题目，可以切换到“全部”继续浏览。", warning = false)
+                NoticeCard("褰撳墠绛涢€変笅娌℃湁闇€瑕佹牳瀵圭殑棰樼洰锛屽彲浠ュ垏鎹㈠埌鈥滃叏閮ㄢ€濈户缁祻瑙堛€?, warning = false)
             }
         }
 
         if (activeFilter != ReviewFilter.ALL && visibleIndices.isEmpty()) {
             ActionPillButton(
                 icon = Icons.Rounded.ArrowBack,
-                text = "返回导入页",
+                text = "杩斿洖瀵煎叆椤?,
                 primary = false,
                 onClick = onBack
             )
@@ -2266,7 +2365,7 @@ private fun NativeQuestionReviewScreen(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "第 ${safeIndex + 1} / ${questions.size} 题",
+                        text = "绗?${safeIndex + 1} / ${questions.size} 棰?,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -2274,10 +2373,10 @@ private fun NativeQuestionReviewScreen(
                     Text(
                         text = buildString {
                             append(typeLabel(question.type))
-                            append(" · 答案：")
+                            append(" 路 绛旀锛?)
                             append(answerDisplayText(question))
                             if (activeFilter != ReviewFilter.ALL) {
-                                append(" · ${reviewFilterLabel(activeFilter)} ${visiblePosition + 1}/${visibleIndices.size}")
+                                append(" 路 ${reviewFilterLabel(activeFilter)} ${visiblePosition + 1}/${visibleIndices.size}")
                             }
                         },
                         style = MaterialTheme.typography.bodySmall,
@@ -2288,7 +2387,7 @@ private fun NativeQuestionReviewScreen(
                 }
                 ReviewCompactButton(
                     icon = Icons.Rounded.CheckCircle,
-                    text = "保存返回",
+                    text = "淇濆瓨杩斿洖",
                     primary = true,
                     onClick = onBack
                 )
@@ -2300,13 +2399,13 @@ private fun NativeQuestionReviewScreen(
             ) {
                 ReviewCompactButton(
                     icon = Icons.Rounded.Edit,
-                    text = "编辑本题",
+                    text = "缂栬緫鏈",
                     modifier = Modifier.weight(1f),
                     onClick = { onEditQuestion(safeIndex, false) }
                 )
                 ReviewCompactButton(
                     icon = Icons.Rounded.ArrowBack,
-                    text = if (activeFilter == ReviewFilter.ALL) "上一题" else "上一条",
+                    text = if (activeFilter == ReviewFilter.ALL) "涓婁竴棰? else "涓婁竴鏉?,
                     modifier = Modifier.weight(1f),
                     onClick = {
                         val target = previousIndexInList(visibleIndices, safeIndex) ?: (safeIndex - 1)
@@ -2315,7 +2414,7 @@ private fun NativeQuestionReviewScreen(
                 )
                 ReviewCompactButton(
                     icon = Icons.Rounded.ArrowForward,
-                    text = if (activeFilter == ReviewFilter.ALL) "下一题" else "下一条",
+                    text = if (activeFilter == ReviewFilter.ALL) "涓嬩竴棰? else "涓嬩竴鏉?,
                     modifier = Modifier.weight(1f),
                     onClick = {
                         val target = nextIndexInList(visibleIndices, safeIndex) ?: (safeIndex + 1)
@@ -2384,8 +2483,8 @@ private fun ReviewQuestionEditScreen(
     ) {
         ShirohaHeader(
             kicker = "Edit",
-            title = "编辑题目",
-            subtitle = "第 ${questionIndex + 1} / $totalCount 题 · ${typeLabel(question.type)} · 答案：${answerDisplayText(question)}"
+            title = "缂栬緫棰樼洰",
+            subtitle = "绗?${questionIndex + 1} / $totalCount 棰?路 ${typeLabel(question.type)} 路 绛旀锛?{answerDisplayText(question)}"
         )
 
         GlassCard {
@@ -2396,20 +2495,20 @@ private fun ReviewQuestionEditScreen(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "题目编辑",
+                        text = "棰樼洰缂栬緫",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "修改内容会同步回沉浸核对列表。",
+                        text = "淇敼鍐呭浼氬悓姝ュ洖娌夋蹈鏍稿鍒楄〃銆?,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 ReviewCompactButton(
                     icon = Icons.Rounded.CheckCircle,
-                    text = "保存更改",
+                    text = "淇濆瓨鏇存敼",
                     primary = true,
                     onClick = onBack
                 )
@@ -2447,7 +2546,7 @@ private fun ReviewQuestionAssistBlocks(
     if (questionWarnings.isNotEmpty()) {
         GlassCard {
             Text(
-                text = "本题提示",
+                text = "鏈鎻愮ず",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
@@ -2462,19 +2561,19 @@ private fun ReviewQuestionAssistBlocks(
     if (question.id in aiReviewedQuestionIds.toSet() && questionAiSuggestions.isEmpty()) {
         GlassCard {
             Text(
-                text = "AI 核对状态",
+                text = "AI 鏍稿鐘舵€?,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(Modifier.height(10.dp))
-            NoticeCard("AI 已核对本题：未发现需要显示的重点问题。", warning = false)
+            NoticeCard("AI 宸叉牳瀵规湰棰橈細鏈彂鐜伴渶瑕佹樉绀虹殑閲嶇偣闂銆?, warning = false)
         }
     }
 
     if (shouldApplyAiAnalysis(question) || question.id in aiAnalyzedQuestionIds.toSet() || question.id in aiAnalysisAppliedQuestionIds.toSet()) {
         GlassCard {
             Text(
-                text = "AI 解析状态",
+                text = "AI 瑙ｆ瀽鐘舵€?,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
@@ -2493,7 +2592,7 @@ private fun ReviewQuestionAssistBlocks(
     if (questionAiSuggestions.isNotEmpty()) {
         GlassCard {
             Text(
-                text = "AI 核对建议",
+                text = "AI 鏍稿寤鸿",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
@@ -2523,9 +2622,9 @@ private fun ReviewQuestionEditorContent(
 
     if (showRemoveImagesConfirm) {
         ShirohaDangerConfirmDialog(
-            title = "确认移除本题图片？",
-            message = "这会从当前核对题目中移除已绑定图片。保存题库时会使用移除图片后的题目。",
-            confirmText = "确认移除",
+            title = "纭绉婚櫎鏈鍥剧墖锛?,
+            message = "杩欎細浠庡綋鍓嶆牳瀵归鐩腑绉婚櫎宸茬粦瀹氬浘鐗囥€備繚瀛橀搴撴椂浼氫娇鐢ㄧЩ闄ゅ浘鐗囧悗鐨勯鐩€?,
+            confirmText = "纭绉婚櫎",
             onDismiss = { showRemoveImagesConfirm = false },
             onConfirm = {
                 onQuestionChange(question.copy(images = emptyList()))
@@ -2536,9 +2635,9 @@ private fun ReviewQuestionEditorContent(
 
     if (showDeleteLastOptionConfirm) {
         ShirohaDangerConfirmDialog(
-            title = "确认删除最后一个选项？",
-            message = "这会删除当前题目的最后一个选项。保存题库时会使用删除后的题目。",
-            confirmText = "确认删除",
+            title = "纭鍒犻櫎鏈€鍚庝竴涓€夐」锛?,
+            message = "杩欎細鍒犻櫎褰撳墠棰樼洰鐨勬渶鍚庝竴涓€夐」銆備繚瀛橀搴撴椂浼氫娇鐢ㄥ垹闄ゅ悗鐨勯鐩€?,
+            confirmText = "纭鍒犻櫎",
             onDismiss = { showDeleteLastOptionConfirm = false },
             onConfirm = {
                 if (question.options.isNotEmpty()) {
@@ -2551,9 +2650,9 @@ private fun ReviewQuestionEditorContent(
 
     if (showDeleteQuestionConfirm) {
         ShirohaDangerConfirmDialog(
-            title = "确认删除本题？",
-            message = "这会从当前核对列表中删除本题。保存题库时会使用删除后的题目列表。",
-            confirmText = "确认删除",
+            title = "纭鍒犻櫎鏈锛?,
+            message = "杩欎細浠庡綋鍓嶆牳瀵瑰垪琛ㄤ腑鍒犻櫎鏈銆備繚瀛橀搴撴椂浼氫娇鐢ㄥ垹闄ゅ悗鐨勯鐩垪琛ㄣ€?,
+            confirmText = "纭鍒犻櫎",
             onDismiss = { showDeleteQuestionConfirm = false },
             onConfirm = {
                 onDeleteQuestion?.invoke()
@@ -2565,7 +2664,7 @@ private fun ReviewQuestionEditorContent(
     Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)) {
         GlassCard {
             Text(
-                text = "题目内容",
+                text = "棰樼洰鍐呭",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold
             )
@@ -2577,7 +2676,7 @@ private fun ReviewQuestionEditorContent(
                         onQuestionChange(question.copy(number = value))
                     },
                     modifier = Modifier.weight(1f),
-                    label = { Text("题号") },
+                    label = { Text("棰樺彿") },
                     singleLine = true
                 )
                 OutlinedTextField(
@@ -2586,7 +2685,7 @@ private fun ReviewQuestionEditorContent(
                         onQuestionChange(question.copy(category = value))
                     },
                     modifier = Modifier.weight(1.4f),
-                    label = { Text("分区/来源") },
+                    label = { Text("鍒嗗尯/鏉ユ簮") },
                     singleLine = true
                 )
             }
@@ -2615,7 +2714,7 @@ private fun ReviewQuestionEditorContent(
                     .fillMaxWidth()
                     .height(180.dp),
                 minLines = 6,
-                label = { Text("题干") },
+                label = { Text("棰樺共") },
                 textStyle = MaterialTheme.typography.bodyLarge
             )
         }
@@ -2623,18 +2722,18 @@ private fun ReviewQuestionEditorContent(
         if (question.images.isNotEmpty()) {
             GlassCard {
                 Text(
-                    text = "题目图片",
+                    text = "棰樼洰鍥剧墖",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold
                 )
                 Spacer(Modifier.height(8.dp))
-                NoticeCard("图片按导入文档中的位置自动绑定。资料分析类共享图片会引用到后续题目；请重点核对图片是否属于本题。", warning = false)
+                NoticeCard("鍥剧墖鎸夊鍏ユ枃妗ｄ腑鐨勪綅缃嚜鍔ㄧ粦瀹氥€傝祫鏂欏垎鏋愮被鍏变韩鍥剧墖浼氬紩鐢ㄥ埌鍚庣画棰樼洰锛涜閲嶇偣鏍稿鍥剧墖鏄惁灞炰簬鏈銆?, warning = false)
                 Spacer(Modifier.height(12.dp))
                 QuestionImagesBlock(question.images, maxPreviewHeight = 360.dp, showMeta = true)
                 Spacer(Modifier.height(12.dp))
                 ActionPillButton(
                     icon = Icons.Rounded.Delete,
-                    text = "移除本题图片",
+                    text = "绉婚櫎鏈鍥剧墖",
                     primary = false,
                     onClick = { showRemoveImagesConfirm = true }
                 )
@@ -2643,13 +2742,13 @@ private fun ReviewQuestionEditorContent(
 
         GlassCard {
             Text(
-                text = "选项",
+                text = "閫夐」",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(Modifier.height(12.dp))
             if (question.options.isEmpty()) {
-                NoticeCard("当前题目没有选项。判断题可以点击“补齐判断选项”，选择题可以点击“添加选项”。", warning = false)
+                NoticeCard("褰撳墠棰樼洰娌℃湁閫夐」銆傚垽鏂鍙互鐐瑰嚮鈥滆ˉ榻愬垽鏂€夐」鈥濓紝閫夋嫨棰樺彲浠ョ偣鍑烩€滄坊鍔犻€夐」鈥濄€?, warning = false)
                 Spacer(Modifier.height(12.dp))
             }
             question.options.forEachIndexed { optionIndex, option ->
@@ -2667,7 +2766,7 @@ private fun ReviewQuestionEditorContent(
                             onQuestionChange(question.copy(options = updated))
                         },
                         modifier = Modifier.width(74.dp),
-                        label = { Text("项") },
+                        label = { Text("椤?) },
                         singleLine = true
                     )
                     OutlinedTextField(
@@ -2679,7 +2778,7 @@ private fun ReviewQuestionEditorContent(
                             onQuestionChange(question.copy(options = updated))
                         },
                         modifier = Modifier.weight(1f),
-                        label = { Text("选项内容") }
+                        label = { Text("閫夐」鍐呭") }
                     )
                 }
                 Spacer(Modifier.height(10.dp))
@@ -2690,7 +2789,7 @@ private fun ReviewQuestionEditorContent(
             ) {
                 ActionPillButton(
                     icon = Icons.Rounded.Add,
-                    text = "添加选项",
+                    text = "娣诲姞閫夐」",
                     primary = false,
                     onClick = {
                         val key = nextOptionKey(question.options)
@@ -2699,7 +2798,7 @@ private fun ReviewQuestionEditorContent(
                 )
                 ActionPillButton(
                     icon = Icons.Rounded.RemoveCircle,
-                    text = "删除最后选项",
+                    text = "鍒犻櫎鏈€鍚庨€夐」",
                     primary = false,
                     onClick = {
                         if (question.options.isNotEmpty()) {
@@ -2709,7 +2808,7 @@ private fun ReviewQuestionEditorContent(
                 )
                 ActionPillButton(
                     icon = Icons.Rounded.CheckCircle,
-                    text = "补齐判断选项",
+                    text = "琛ラ綈鍒ゆ柇閫夐」",
                     primary = false,
                     onClick = {
                         onQuestionChange(
@@ -2727,13 +2826,13 @@ private fun ReviewQuestionEditorContent(
 
         GlassCard {
             Text(
-                text = "答案与解析",
+                text = "绛旀涓庤В鏋?,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "单选 A，多选 ABC，判断 正确/错误；多空填空可逐空配置主答案与备选答案。",
+                text = "鍗曢€?A锛屽閫?ABC锛屽垽鏂?姝ｇ‘/閿欒锛涘绌哄～绌哄彲閫愮┖閰嶇疆涓荤瓟妗堜笌澶囬€夌瓟妗堛€?,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -2765,14 +2864,14 @@ private fun ReviewQuestionEditorContent(
                         )
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("答案") },
+                    label = { Text("绛旀") },
                     singleLine = true
                 )
                 if (question.type == QuestionType.BLANK && detectedBlankCount > 1) {
                     Spacer(Modifier.height(10.dp))
                     ActionPillButton(
                         icon = Icons.Rounded.Add,
-                        text = "启用多空答案",
+                        text = "鍚敤澶氱┖绛旀",
                         primary = false,
                         onClick = {
                             onQuestionChange(
@@ -2795,7 +2894,7 @@ private fun ReviewQuestionEditorContent(
                     .fillMaxWidth()
                     .height(160.dp),
                 minLines = 5,
-                label = { Text("解析") },
+                label = { Text("瑙ｆ瀽") },
                 textStyle = MaterialTheme.typography.bodyMedium
             )
             Spacer(Modifier.height(10.dp))
@@ -2810,20 +2909,20 @@ private fun ReviewQuestionEditorContent(
 
         GlassCard {
             Text(
-                text = "危险操作",
+                text = "鍗遍櫓鎿嶄綔",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(Modifier.height(10.dp))
             Text(
-                text = "误识别的说明、页眉页脚或碎片，可删除本题。",
+                text = "璇瘑鍒殑璇存槑銆侀〉鐪夐〉鑴氭垨纰庣墖锛屽彲鍒犻櫎鏈銆?,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(12.dp))
             ActionPillButton(
                 icon = Icons.Rounded.Delete,
-                text = "删除本题",
+                text = "鍒犻櫎鏈",
                 primary = false,
                 onClick = { showDeleteQuestionConfirm = true }
             )
@@ -2839,11 +2938,11 @@ private fun AiReviewSuggestionCard(
     onApply: () -> Unit
 ) {
     val riskText = when (suggestion.riskLevel.lowercase()) {
-        "auto_safe" -> "低风险"
-        "hard_error" -> "硬错误"
-        else -> "需确认"
+        "auto_safe" -> "浣庨闄?
+        "hard_error" -> "纭敊璇?
+        else -> "闇€纭"
     }
-    val issueText = suggestion.issueTypes.takeIf { it.isNotEmpty() }?.joinToString("、").orEmpty()
+    val issueText = suggestion.issueTypes.takeIf { it.isNotEmpty() }?.joinToString("銆?).orEmpty()
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -2856,10 +2955,10 @@ private fun AiReviewSuggestionCard(
         ) {
             Text(
                 text = buildString {
-                    append("AI 建议")
-                    append(" · ").append(riskText)
-                    if (suggestion.confidence > 0.0) append(" · 置信度 ").append((suggestion.confidence * 100).toInt()).append("%")
-                    if (issueText.isNotBlank()) append(" · ").append(issueText)
+                    append("AI 寤鸿")
+                    append(" 路 ").append(riskText)
+                    if (suggestion.confidence > 0.0) append(" 路 缃俊搴?").append((suggestion.confidence * 100).toInt()).append("%")
+                    if (issueText.isNotBlank()) append(" 路 ").append(issueText)
                 },
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
@@ -2874,7 +2973,7 @@ private fun AiReviewSuggestionCard(
             }
             if (suggestion.suggestion.isNotBlank()) {
                 Text(
-                    text = "建议：${suggestion.suggestion}",
+                    text = "寤鸿锛?{suggestion.suggestion}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -2882,7 +2981,7 @@ private fun AiReviewSuggestionCard(
             val applySummary = aiSuggestionApplySummary(suggestion)
             if (applySummary.isNotBlank()) {
                 Text(
-                    text = "可采纳内容：$applySummary",
+                    text = "鍙噰绾冲唴瀹癸細$applySummary",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -2893,7 +2992,7 @@ private fun AiReviewSuggestionCard(
             ) {
                 ActionPillButton(
                     icon = Icons.Rounded.CheckCircle,
-                    text = if (canApplyAiSuggestion(suggestion)) "采纳 AI 建议" else "仅提示，需手动处理",
+                    text = if (canApplyAiSuggestion(suggestion)) "閲囩撼 AI 寤鸿" else "浠呮彁绀猴紝闇€鎵嬪姩澶勭悊",
                     primary = canApplyAiSuggestion(suggestion),
                     enabled = canApplyAiSuggestion(suggestion),
                     onClick = onApply
@@ -2911,17 +3010,17 @@ private data class AiRefactorApplyResult(
 
 private fun shouldShowAiStatusInImport(text: String): Boolean {
     return text.startsWith("AI ") ||
-        text.startsWith("AI核对") ||
-        text.startsWith("AI解析") ||
-        text.contains("AI 重构") ||
-        text.contains("AI 核对") ||
-        text.contains("AI 解析")
+        text.startsWith("AI鏍稿") ||
+        text.startsWith("AI瑙ｆ瀽") ||
+        text.contains("AI 閲嶆瀯") ||
+        text.contains("AI 鏍稿") ||
+        text.contains("AI 瑙ｆ瀽")
 }
 
 
 private fun aiRefactorImportWarnings(
     notes: List<String>,
-    baseMessage: String = "AI重构已生成新的待核对结果，请人工确认题量、题干、选项、答案和解析后再保存。"
+    baseMessage: String = "AI閲嶆瀯宸茬敓鎴愭柊鐨勫緟鏍稿缁撴灉锛岃浜哄伐纭棰橀噺銆侀骞层€侀€夐」銆佺瓟妗堝拰瑙ｆ瀽鍚庡啀淇濆瓨銆?
 ): List<ImportWarning> {
     val base = listOf(
         ImportWarning(
@@ -2934,7 +3033,7 @@ private fun aiRefactorImportWarnings(
         ImportWarning(
             level = WarningLevel.WARNING,
             questionNumber = null,
-            message = "AI重构提示：$note"
+            message = "AI閲嶆瀯鎻愮ず锛?note"
         )
     }
     return dedupeImportWarnings(base + noteWarnings)
@@ -2967,16 +3066,16 @@ private fun importPreviewQuestionTags(
     aiAnalysisAppliedQuestionIds: List<String>
 ): String {
     val tags = mutableListOf<String>()
-    if (shouldApplyAiAnalysis(question)) tags += "缺/短解析"
-    if (question.id in aiReviewedQuestionIds.toSet()) tags += "AI已核对"
-    if (question.id in aiReviewedQuestionIds.toSet() && aiSuggestions.isEmpty()) tags += "未发现重点问题"
-    if (question.id in aiAnalyzedQuestionIds.toSet()) tags += "AI已尝试解析"
-    if (question.id in aiAnalysisAppliedQuestionIds.toSet()) tags += "AI已补解析"
-    if (aiSuggestions.isNotEmpty()) tags += "AI建议"
-    if (aiSuggestions.any(::canApplyAiSuggestion)) tags += "可采纳"
-    if (aiSuggestions.any(::isNeedHumanReviewAiSuggestion)) tags += "需确认"
-    if (aiSuggestions.any(::isHardErrorAiSuggestion)) tags += "AI硬错误"
-    return tags.distinct().joinToString(" · ")
+    if (shouldApplyAiAnalysis(question)) tags += "缂?鐭В鏋?
+    if (question.id in aiReviewedQuestionIds.toSet()) tags += "AI宸叉牳瀵?
+    if (question.id in aiReviewedQuestionIds.toSet() && aiSuggestions.isEmpty()) tags += "鏈彂鐜伴噸鐐归棶棰?
+    if (question.id in aiAnalyzedQuestionIds.toSet()) tags += "AI宸插皾璇曡В鏋?
+    if (question.id in aiAnalysisAppliedQuestionIds.toSet()) tags += "AI宸茶ˉ瑙ｆ瀽"
+    if (aiSuggestions.isNotEmpty()) tags += "AI寤鸿"
+    if (aiSuggestions.any(::canApplyAiSuggestion)) tags += "鍙噰绾?
+    if (aiSuggestions.any(::isNeedHumanReviewAiSuggestion)) tags += "闇€纭"
+    if (aiSuggestions.any(::isHardErrorAiSuggestion)) tags += "AI纭敊璇?
+    return tags.distinct().joinToString(" 路 ")
 }
 
 private fun analysisStatusText(
@@ -2985,11 +3084,11 @@ private fun analysisStatusText(
     aiAnalysisAppliedQuestionIds: List<String>
 ): String {
     val parts = mutableListOf<String>()
-    if (shouldApplyAiAnalysis(question)) parts += "当前仍缺少有效解析或解析偏短"
-    if (question.id in aiAnalyzedQuestionIds.toSet()) parts += "AI 已尝试解析本题"
-    if (question.id in aiAnalysisAppliedQuestionIds.toSet()) parts += "AI 已写入补充解析，保存前请人工确认"
-    if (parts.isEmpty()) parts += "当前解析长度基本正常"
-    return parts.joinToString("；")
+    if (shouldApplyAiAnalysis(question)) parts += "褰撳墠浠嶇己灏戞湁鏁堣В鏋愭垨瑙ｆ瀽鍋忕煭"
+    if (question.id in aiAnalyzedQuestionIds.toSet()) parts += "AI 宸插皾璇曡В鏋愭湰棰?
+    if (question.id in aiAnalysisAppliedQuestionIds.toSet()) parts += "AI 宸插啓鍏ヨˉ鍏呰В鏋愶紝淇濆瓨鍓嶈浜哄伐纭"
+    if (parts.isEmpty()) parts += "褰撳墠瑙ｆ瀽闀垮害鍩烘湰姝ｅ父"
+    return parts.joinToString("锛?)
 }
 
 private fun suggestionsToImportWarnings(
@@ -3001,25 +3100,25 @@ private fun suggestionsToImportWarnings(
         .filter(::isActionableAiSuggestion)
         .mapNotNull { suggestion ->
             val question = questionById[suggestion.questionId] ?: return@mapNotNull null
-            val issueText = suggestion.issueTypes.takeIf { it.isNotEmpty() }?.joinToString("、").orEmpty()
+            val issueText = suggestion.issueTypes.takeIf { it.isNotEmpty() }?.joinToString("銆?).orEmpty()
             val message = buildString {
-                append("AI建议")
+                append("AI寤鸿")
                 if (issueText.isNotBlank()) append("[").append(issueText).append("]")
-                if (suggestion.reason.isNotBlank()) append("：").append(suggestion.reason)
-                if (suggestion.suggestion.isNotBlank()) append("；建议：").append(suggestion.suggestion)
+                if (suggestion.reason.isNotBlank()) append("锛?).append(suggestion.reason)
+                if (suggestion.suggestion.isNotBlank()) append("锛涘缓璁細").append(suggestion.suggestion)
                 val applySummary = aiSuggestionApplySummary(suggestion)
                 if (applySummary.isNotBlank()) {
-                    append(if (canApplyAiSuggestion(suggestion)) "；可采纳：" else "；建议内容：")
+                    append(if (canApplyAiSuggestion(suggestion)) "锛涘彲閲囩撼锛? else "锛涘缓璁唴瀹癸細")
                     append(applySummary)
                 }
-                append("；").append(AI_WARNING_ID_MARKER).append(question.id)
+                append("锛?).append(AI_WARNING_ID_MARKER).append(question.id)
             }
             val hard = suggestion.status.equals("error", ignoreCase = true) ||
                 suggestion.riskLevel.equals("hard_error", ignoreCase = true)
             ImportWarning(
                 level = if (hard) WarningLevel.ERROR else WarningLevel.WARNING,
                 questionNumber = question.number,
-                message = message.ifBlank { "AI 建议人工确认本题；$AI_WARNING_ID_MARKER${question.id}" }
+                message = message.ifBlank { "AI 寤鸿浜哄伐纭鏈锛?AI_WARNING_ID_MARKER${question.id}" }
             )
         }
 }
@@ -3028,23 +3127,23 @@ private fun importWarningSummaryText(warning: ImportWarning, questions: List<Que
     val question = questions.firstOrNull { warningBelongsToQuestion(warning, it) }
     val prefix = if (question != null) {
         buildString {
-            append("第 ")
+            append("绗?")
             append(question.number.ifBlank { warning.questionNumber ?: "-" })
-            append(" 题")
-            append(" · ")
+            append(" 棰?)
+            append(" 路 ")
             append(typeLabel(question.type))
             val category = question.category.trim()
             if (category.isNotBlank()) {
-                append(" · ")
+                append(" 路 ")
                 append(category)
             }
         }
     } else if (warning.questionNumber.isNullOrBlank()) {
-        "全局提示"
+        "鍏ㄥ眬鎻愮ず"
     } else {
-        "第 ${warning.questionNumber} 题"
+        "绗?${warning.questionNumber} 棰?
     }
-    return "$prefix：${displayImportWarningMessage(warning.message)}"
+    return "$prefix锛?{displayImportWarningMessage(warning.message)}"
 }
 
 private fun mergeAiWarnings(
@@ -3095,46 +3194,46 @@ private fun validateQuestionsWithIdMarkers(questions: List<Question>): List<Impo
 }
 
 private fun String.withImportWarningQuestionId(questionId: String): String {
-    return "${displayImportWarningMessage(this)}；$IMPORT_WARNING_ID_MARKER$questionId"
+    return "${displayImportWarningMessage(this)}锛?IMPORT_WARNING_ID_MARKER$questionId"
 }
 
 private fun isReplaceableLocalImportWarning(warning: ImportWarning): Boolean {
     val message = displayImportWarningMessage(warning.message)
     return message in replaceableLocalImportWarningMessages ||
-        message.startsWith("同一分区/题型内题号重复") ||
+        message.startsWith("鍚屼竴鍒嗗尯/棰樺瀷鍐呴鍙烽噸澶?) ||
         isMultiBlankLocalWarning(message)
 }
 
 private fun isMultiBlankLocalWarning(message: String): Boolean {
-    return (message.contains("个题空") && (
-        message.contains("未识别逐空答案") ||
-            message.contains("答案数量无法对应") ||
-            message.contains("当前配置了")
-        )) || message == "多空填空题存在未配置答案的题空"
+    return (message.contains("涓绌?) && (
+        message.contains("鏈瘑鍒€愮┖绛旀") ||
+            message.contains("绛旀鏁伴噺鏃犳硶瀵瑰簲") ||
+            message.contains("褰撳墠閰嶇疆浜?)
+        )) || message == "澶氱┖濉┖棰樺瓨鍦ㄦ湭閰嶇疆绛旀鐨勯绌?
 }
 
 private val replaceableLocalImportWarningMessages = setOf(
-    "题干为空",
-    "单选题缺少足够选项",
-    "单选题未识别到答案",
-    "单选题出现多个答案",
-    "多选题缺少足够选项",
-    "多选题未识别到答案",
-    "答案选项不在当前题目选项范围内",
-    "判断题缺少对/错选项，已尝试自动补全",
-    "判断题未识别到答案",
-    "判断题答案不是标准对/错标记",
-    "主观题未识别到参考答案"
+    "棰樺共涓虹┖",
+    "鍗曢€夐缂哄皯瓒冲閫夐」",
+    "鍗曢€夐鏈瘑鍒埌绛旀",
+    "鍗曢€夐鍑虹幇澶氫釜绛旀",
+    "澶氶€夐缂哄皯瓒冲閫夐」",
+    "澶氶€夐鏈瘑鍒埌绛旀",
+    "绛旀閫夐」涓嶅湪褰撳墠棰樼洰閫夐」鑼冨洿鍐?,
+    "鍒ゆ柇棰樼己灏戝/閿欓€夐」锛屽凡灏濊瘯鑷姩琛ュ叏",
+    "鍒ゆ柇棰樻湭璇嗗埆鍒扮瓟妗?,
+    "鍒ゆ柇棰樼瓟妗堜笉鏄爣鍑嗗/閿欐爣璁?,
+    "涓昏棰樻湭璇嗗埆鍒板弬鑰冪瓟妗?
 )
 
 private fun normalizeImportWarningForDedupe(message: String): String {
     return displayImportWarningMessage(message)
         .replace(Regex("\\s+"), "")
-        .trim('；', ';', '。', ' ', '\n', '\t')
+        .trim('锛?, ';', '銆?, ' ', '\n', '\t')
 }
 
 private fun isAiImportWarning(warning: ImportWarning): Boolean {
-    return warning.message.startsWith("AI建议") || warning.message.startsWith("AI 建议")
+    return warning.message.startsWith("AI寤鸿") || warning.message.startsWith("AI 寤鸿")
 }
 
 private fun aiWarningQuestionId(warning: ImportWarning): String? {
@@ -3150,7 +3249,7 @@ private fun markerValue(message: String, marker: String): String? {
     if (markerIndex < 0) return null
     return message.substring(markerIndex + marker.length)
         .substringBefore(' ')
-        .substringBefore('；')
+        .substringBefore('锛?)
         .substringBefore(';')
         .trim()
         .takeIf { it.isNotBlank() }
@@ -3171,7 +3270,7 @@ private fun displayImportWarningMessage(message: String): String {
         message.indexOf(AI_WARNING_ID_MARKER),
         message.indexOf(IMPORT_WARNING_ID_MARKER)
     ).filter { it >= 0 }.minOrNull() ?: return message
-    return message.substring(0, markerIndex).trimEnd('；', ';', ' ', '\n', '\t')
+    return message.substring(0, markerIndex).trimEnd('锛?, ';', ' ', '\n', '\t')
 }
 
 private fun canApplyAiSuggestion(suggestion: AiReviewSuggestion): Boolean {
@@ -3210,20 +3309,20 @@ private fun mergeAiReviewSuggestions(
 
 private fun aiSuggestionApplySummary(suggestion: AiReviewSuggestion): String {
     val parts = mutableListOf<String>()
-    suggestion.suggestedType?.let { parts += "题型→${suggestedTypeLabel(it)}" }
-    if (suggestion.suggestedAnswer.isNotEmpty()) parts += "答案→${suggestion.suggestedAnswer.joinToString("")}"
-    if (suggestion.suggestedQuestion != null) parts += "题干"
-    if (suggestion.suggestedOptions.isNotEmpty()) parts += "选项 ${suggestion.suggestedOptions.size} 项"
-    if (suggestion.suggestedAnalysis != null) parts += "解析"
-    return parts.joinToString("、")
+    suggestion.suggestedType?.let { parts += "棰樺瀷鈫?{suggestedTypeLabel(it)}" }
+    if (suggestion.suggestedAnswer.isNotEmpty()) parts += "绛旀鈫?{suggestion.suggestedAnswer.joinToString("")}"
+    if (suggestion.suggestedQuestion != null) parts += "棰樺共"
+    if (suggestion.suggestedOptions.isNotEmpty()) parts += "閫夐」 ${suggestion.suggestedOptions.size} 椤?
+    if (suggestion.suggestedAnalysis != null) parts += "瑙ｆ瀽"
+    return parts.joinToString("銆?)
 }
 
 private fun suggestedTypeLabel(type: String): String = when (type.lowercase()) {
-    "single" -> "单选题"
-    "multiple" -> "多选题"
-    "judge" -> "判断题"
-    "blank" -> "填空题"
-    "short" -> "简答题"
+    "single" -> "鍗曢€夐"
+    "multiple" -> "澶氶€夐"
+    "judge" -> "鍒ゆ柇棰?
+    "blank" -> "濉┖棰?
+    "short" -> "绠€绛旈"
     else -> type
 }
 
@@ -3255,25 +3354,25 @@ private fun applyAiReviewSuggestion(question: Question, suggestion: AiReviewSugg
 }
 
 private fun suggestedQuestionType(type: String): QuestionType? = when (type.trim().lowercase()) {
-    "single", "单选", "单选题" -> QuestionType.SINGLE
-    "multiple", "multi", "多选", "多选题" -> QuestionType.MULTIPLE
-    "judge", "true_false", "判断", "判断题" -> QuestionType.JUDGE
-    "blank", "填空", "填空题" -> QuestionType.BLANK
-    "short", "essay", "简答", "简答题" -> QuestionType.SHORT
+    "single", "鍗曢€?, "鍗曢€夐" -> QuestionType.SINGLE
+    "multiple", "multi", "澶氶€?, "澶氶€夐" -> QuestionType.MULTIPLE
+    "judge", "true_false", "鍒ゆ柇", "鍒ゆ柇棰? -> QuestionType.JUDGE
+    "blank", "濉┖", "濉┖棰? -> QuestionType.BLANK
+    "short", "essay", "绠€绛?, "绠€绛旈" -> QuestionType.SHORT
     else -> null
 }
 
 private fun normalizeSuggestedAnswer(answer: List<String>, type: QuestionType): List<String> {
     val normalized = answer
-        .flatMap { item -> item.split(',', '，', '、', '/', ' ') }
+        .flatMap { item -> item.split(',', '锛?, '銆?, '/', ' ') }
         .map { it.trim().uppercase() }
         .filter { it.isNotBlank() }
     return when (type) {
         QuestionType.SINGLE -> normalized.take(1)
         QuestionType.JUDGE -> normalized.map { value ->
             when (value) {
-                "正确", "对", "TRUE", "T" -> "A"
-                "错误", "错", "FALSE", "F" -> "B"
+                "姝ｇ‘", "瀵?, "TRUE", "T" -> "A"
+                "閿欒", "閿?, "FALSE", "F" -> "B"
                 else -> value.take(1)
             }
         }.take(1)
@@ -3293,7 +3392,7 @@ private fun analysisTargetQuestions(
 
 private fun shouldApplyAiAnalysis(question: Question): Boolean {
     val clean = question.analysis.trim()
-    val missingOrShortAnalysis = clean.isBlank() || clean.length < 20 || clean == "无" || clean == "暂无解析"
+    val missingOrShortAnalysis = clean.isBlank() || clean.length < 20 || clean == "鏃? || clean == "鏆傛棤瑙ｆ瀽"
     val subjectiveMissingAnswer = question.type == QuestionType.SHORT && question.answer.isEmpty() && question.options.isEmpty()
     return missingOrShortAnalysis || subjectiveMissingAnswer
 }
@@ -3322,7 +3421,7 @@ private fun duplicateQuestionNumberWarnings(questions: List<Question>): List<Imp
         ImportWarning(
             level = WarningLevel.WARNING,
             questionNumber = question.number,
-            message = "同一分区/题型内题号重复：建议人工确认。导入预览已按内部题目ID区分，避免仅按题号混淆。；$IMPORT_WARNING_ID_MARKER${question.id}"
+            message = "鍚屼竴鍒嗗尯/棰樺瀷鍐呴鍙烽噸澶嶏細寤鸿浜哄伐纭銆傚鍏ラ瑙堝凡鎸夊唴閮ㄩ鐩甀D鍖哄垎锛岄伩鍏嶄粎鎸夐鍙锋贩娣嗐€傦紱$IMPORT_WARNING_ID_MARKER${question.id}"
         )
     }
 }
@@ -3365,18 +3464,18 @@ private fun reviewFilterFromName(name: String): ReviewFilter {
 }
 
 private fun reviewFilterLabel(filter: ReviewFilter): String = when (filter) {
-    ReviewFilter.ALL -> "全部"
-    ReviewFilter.ANOMALY -> "仅异常"
-    ReviewFilter.NO_ANSWER -> "仅无答案"
-    ReviewFilter.MISSING_ANALYSIS -> "缺/短解析"
-    ReviewFilter.IMAGE -> "仅图片题"
-    ReviewFilter.HARD_ERROR -> "仅硬错误"
-    ReviewFilter.AI_REVIEWED -> "AI已核对"
-    ReviewFilter.AI_SUGGESTION -> "仅AI建议"
-    ReviewFilter.AI_APPLICABLE -> "仅可采纳"
-    ReviewFilter.AI_NEED_REVIEW -> "仅需确认"
-    ReviewFilter.AI_HARD_ERROR -> "AI硬错误"
-    ReviewFilter.AI_ANALYZED -> "AI已补解析"
+    ReviewFilter.ALL -> "鍏ㄩ儴"
+    ReviewFilter.ANOMALY -> "浠呭紓甯?
+    ReviewFilter.NO_ANSWER -> "浠呮棤绛旀"
+    ReviewFilter.MISSING_ANALYSIS -> "缂?鐭В鏋?
+    ReviewFilter.IMAGE -> "浠呭浘鐗囬"
+    ReviewFilter.HARD_ERROR -> "浠呯‖閿欒"
+    ReviewFilter.AI_REVIEWED -> "AI宸叉牳瀵?
+    ReviewFilter.AI_SUGGESTION -> "浠匒I寤鸿"
+    ReviewFilter.AI_APPLICABLE -> "浠呭彲閲囩撼"
+    ReviewFilter.AI_NEED_REVIEW -> "浠呴渶纭"
+    ReviewFilter.AI_HARD_ERROR -> "AI纭敊璇?
+    ReviewFilter.AI_ANALYZED -> "AI宸茶ˉ瑙ｆ瀽"
 }
 
 private fun reviewFilterCount(
@@ -3482,7 +3581,7 @@ private fun hasHardReviewError(question: Question, warnings: List<ImportWarning>
         if (optionKeys.isNotEmpty() && question.answer.any { it.uppercase() !in optionKeys }) return true
     }
     if (question.type == QuestionType.JUDGE && question.answer.isNotEmpty()) {
-        val allowed = setOf("A", "B", "正确", "错误", "对", "错")
+        val allowed = setOf("A", "B", "姝ｇ‘", "閿欒", "瀵?, "閿?)
         if (question.answer.any { it.uppercase() !in allowed }) return true
     }
     return false
@@ -3510,7 +3609,7 @@ private fun ReviewFilteredJumpList(
 ) {
     GlassCard(modifier = modifier) {
         Text(
-            text = "当前筛选列表",
+            text = "褰撳墠绛涢€夊垪琛?,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )
@@ -3544,21 +3643,21 @@ private fun ReviewFilteredJumpList(
                             .shirohaNoRippleClickable { onIndexChange(index) }
                     ) {
                         Text(
-                            text = "第 ${index + 1} 题 · ${typeLabel(question.type)} · 答案：${answerDisplayText(question)}",
+                            text = "绗?${index + 1} 棰?路 ${typeLabel(question.type)} 路 绛旀锛?{answerDisplayText(question)}",
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.primary
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            text = question.question.ifBlank { "题干为空" }.take(70),
+                            text = question.question.ifBlank { "棰樺共涓虹┖" }.take(70),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         if (warningCount > 0) {
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                text = "提示 $warningCount 条",
+                                text = "鎻愮ず $warningCount 鏉?,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.error
                             )
@@ -3566,7 +3665,7 @@ private fun ReviewFilteredJumpList(
                     }
                     ReviewCompactButton(
                         icon = Icons.Rounded.Edit,
-                        text = "编辑",
+                        text = "缂栬緫",
                         onClick = { onEditQuestion(index) }
                     )
                 }
@@ -3575,7 +3674,7 @@ private fun ReviewFilteredJumpList(
         }
         if (indices.size > pageSize) {
             NoticeCard(
-                "当前筛选共有 ${indices.size} 题，正在显示第 ${pageStart + 1}-${pageEnd} 条；可用“上一条 / 下一条”继续核对。",
+                "褰撳墠绛涢€夊叡鏈?${indices.size} 棰橈紝姝ｅ湪鏄剧ず绗?${pageStart + 1}-${pageEnd} 鏉★紱鍙敤鈥滀笂涓€鏉?/ 涓嬩竴鏉♀€濈户缁牳瀵广€?,
                 warning = false
             )
         }
@@ -3601,16 +3700,16 @@ private fun normalizeJudgeAnswer(answer: List<String>): List<String> {
     if (answer.isEmpty()) return emptyList()
     return answer.mapNotNull { value ->
         when (value.trim().uppercase()) {
-            "A", "正确", "对", "是", "TRUE", "T", "√", "✓", "✔", "✅", "☑" -> "A"
-            "B", "错误", "错", "否", "FALSE", "F", "×", "X", "✘", "✖", "❌", "❎" -> "B"
+            "A", "姝ｇ‘", "瀵?, "鏄?, "TRUE", "T", "鈭?, "鉁?, "鉁?, "鉁?, "鈽? -> "A"
+            "B", "閿欒", "閿?, "鍚?, "FALSE", "F", "脳", "X", "鉁?, "鉁?, "鉂?, "鉂? -> "B"
             else -> value.trim().takeIf { it.isNotBlank() }
         }
     }
 }
 
 private fun defaultJudgeOptions(): List<Option> = listOf(
-    Option("A", "正确"),
-    Option("B", "错误")
+    Option("A", "姝ｇ‘"),
+    Option("B", "閿欒")
 )
 
 private fun nextOptionKey(options: List<Option>): String {
@@ -3628,17 +3727,17 @@ private fun parseReviewAnswer(text: String, type: QuestionType): List<String> {
         normalizeJudgeAnswer(listOf(clean)).takeIf { it.isNotEmpty() }?.let { return it }
     }
 
-    val compactLetters = clean.uppercase().replace(Regex("[\\s,，、/／;；]+"), "")
+    val compactLetters = clean.uppercase().replace(Regex("[\\s,锛屻€?锛?锛沒+"), "")
     if (compactLetters.matches(Regex("^[A-H]{1,8}$"))) {
         return compactLetters.map { it.toString() }.distinct()
     }
 
     return clean
-        .replace("，", ",")
-        .replace("、", ",")
+        .replace("锛?, ",")
+        .replace("銆?, ",")
         .replace("/", ",")
-        .replace("／", ",")
-        .replace("；", ",")
+        .replace("锛?, ",")
+        .replace("锛?, ",")
         .replace(";", ",")
         .split(Regex("[\\s,]+"))
         .map { token -> token.trim() }
@@ -3656,8 +3755,8 @@ private fun parseReviewAnswer(text: String, type: QuestionType): List<String> {
 private fun answerInputText(question: Question): String {
     if (question.type == QuestionType.JUDGE && question.answer.size == 1) {
         return when (question.answer.first().trim().uppercase()) {
-            "A", "正确", "对", "是", "TRUE", "T", "√", "✓", "✔", "✅", "☑" -> "正确"
-            "B", "错误", "错", "否", "FALSE", "F", "×", "X", "✘", "✖", "❌", "❎" -> "错误"
+            "A", "姝ｇ‘", "瀵?, "鏄?, "TRUE", "T", "鈭?, "鉁?, "鉁?, "鉁?, "鈽? -> "姝ｇ‘"
+            "B", "閿欒", "閿?, "鍚?, "FALSE", "F", "脳", "X", "鉁?, "鉁?, "鉂?, "鉂? -> "閿欒"
             else -> question.answer.first()
         }
     }
@@ -3669,15 +3768,15 @@ private fun answerDisplayText(question: Question): String {
         return MultiBlankSupport.expectedAnswerText(question.blankAnswers)
     }
     val value = answerInputText(question)
-    return value.ifBlank { "未识别答案" }
+    return value.ifBlank { "鏈瘑鍒瓟妗? }
 }
 
 private fun typeLabel(type: QuestionType): String = when (type) {
-    QuestionType.SINGLE -> "单选题"
-    QuestionType.MULTIPLE -> "多选题"
-    QuestionType.JUDGE -> "判断题"
-    QuestionType.BLANK -> "填空题"
-    QuestionType.SHORT -> "简答题"
+    QuestionType.SINGLE -> "鍗曢€夐"
+    QuestionType.MULTIPLE -> "澶氶€夐"
+    QuestionType.JUDGE -> "鍒ゆ柇棰?
+    QuestionType.BLANK -> "濉┖棰?
+    QuestionType.SHORT -> "绠€绛旈"
 }
 
 private fun queryFileName(context: Context, uri: Uri): String {
@@ -3685,10 +3784,10 @@ private fun queryFileName(context: Context, uri: Uri): String {
     cursor?.use {
         val index = it.getColumnIndex("_display_name")
         if (index >= 0 && it.moveToFirst()) {
-            return it.getString(index) ?: "未命名文件"
+            return it.getString(index) ?: "鏈懡鍚嶆枃浠?
         }
     }
-    return uri.lastPathSegment ?: "未命名文件"
+    return uri.lastPathSegment ?: "鏈懡鍚嶆枃浠?
 }
 
 private data class ImportFileSizeCheck(
@@ -3700,10 +3799,10 @@ private fun checkImportFileSize(context: Context, uri: Uri, fileName: String): I
     val size = queryFileSize(context, uri) ?: return ImportFileSizeCheck()
     return when {
         size > IMPORT_FILE_BLOCK_BYTES -> ImportFileSizeCheck(
-            blockMessage = "文件过大：$fileName（约 ${formatFileSize(size)}）。建议先压缩图片、拆分题库，或改用标准文本/Excel/JSON 导入。"
+            blockMessage = "鏂囦欢杩囧ぇ锛?fileName锛堢害 ${formatFileSize(size)}锛夈€傚缓璁厛鍘嬬缉鍥剧墖銆佹媶鍒嗛搴擄紝鎴栨敼鐢ㄦ爣鍑嗘枃鏈?Excel/JSON 瀵煎叆銆?
         )
         size > IMPORT_FILE_WARN_BYTES -> ImportFileSizeCheck(
-            warnMessage = "文件较大：$fileName（约 ${formatFileSize(size)}），含大图或复杂 Word 内容时可能读取较慢。"
+            warnMessage = "鏂囦欢杈冨ぇ锛?fileName锛堢害 ${formatFileSize(size)}锛夛紝鍚ぇ鍥炬垨澶嶆潅 Word 鍐呭鏃跺彲鑳借鍙栬緝鎱€?
         )
         else -> ImportFileSizeCheck()
     }
@@ -3736,43 +3835,34 @@ private fun readImportedContent(
     fileName: String
 ): QuestionImportAssetExtractor.DecodeResult {
     val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-        ?: return QuestionImportAssetExtractor.DecodeResult.Failure("文件无法读取，请确认文件仍可访问。")
+        ?: return QuestionImportAssetExtractor.DecodeResult.Failure("鏂囦欢鏃犳硶璇诲彇锛岃纭鏂囦欢浠嶅彲璁块棶銆?)
     return QuestionImportAssetExtractor.decodeDetailed(context, bytes, fileName)
 }
 
 private fun readImportedText(context: Context, uri: Uri, fileName: String): TextImportDecoder.DecodeResult {
     val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-        ?: return TextImportDecoder.DecodeResult.Failure("文件无法读取，请确认文件仍可访问。")
+        ?: return TextImportDecoder.DecodeResult.Failure("鏂囦欢鏃犳硶璇诲彇锛岃纭鏂囦欢浠嶅彲璁块棶銆?)
     return TextImportDecoder.decodeDetailed(bytes, fileName)
 }
 
 private fun sampleImportText(): String = """
-1. 安全帽的主要作用是（A）
-A. 保护头部
-B. 装饰作用
-C. 增加重量
-D. 无实际作用
-答案：A
-解析：安全帽用于减轻坠落物和碰撞对头部造成的伤害。
-
-2. 雨天驾驶时应注意哪些事项（AB）
-A. 降低车速
-B. 加大跟车距离
-C. 急打方向
-D. 紧急制动
-答案：AB
-解析：雨天路滑，应平稳控制车辆并留足安全距离。
-
-3. 国家安全生产方针是“安全第一，预防为主”。（对）
-答案：对
-解析：这是一道基础判断题，答案为正确。
-""".trimIndent()
+1. 瀹夊叏甯界殑涓昏浣滅敤鏄紙A锛?A. 淇濇姢澶撮儴
+B. 瑁呴グ浣滅敤
+C. 澧炲姞閲嶉噺
+D. 鏃犲疄闄呬綔鐢?绛旀锛欰
+瑙ｆ瀽锛氬畨鍏ㄥ附鐢ㄤ簬鍑忚交鍧犺惤鐗╁拰纰版挒瀵瑰ご閮ㄩ€犳垚鐨勪激瀹炽€?
+2. 闆ㄥぉ椹鹃┒鏃跺簲娉ㄦ剰鍝簺浜嬮」锛圓B锛?A. 闄嶄綆杞﹂€?B. 鍔犲ぇ璺熻溅璺濈
+C. 鎬ユ墦鏂瑰悜
+D. 绱ф€ュ埗鍔?绛旀锛欰B
+瑙ｆ瀽锛氶洦澶╄矾婊戯紝搴斿钩绋虫帶鍒惰溅杈嗗苟鐣欒冻瀹夊叏璺濈銆?
+3. 鍥藉瀹夊叏鐢熶骇鏂归拡鏄€滃畨鍏ㄧ涓€锛岄闃蹭负涓烩€濄€傦紙瀵癸級
+绛旀锛氬
+瑙ｆ瀽锛氳繖鏄竴閬撳熀纭€鍒ゆ柇棰橈紝绛旀涓烘纭€?""".trimIndent()
 
 private fun sampleAnswerText(): String = """
 1. A
 2. AB
-3. 对
-""".trimIndent()
+3. 瀵?""".trimIndent()
 
 @Composable
 private fun ImportStepHeroCard() {
@@ -3803,9 +3893,9 @@ private fun ImportStepHeroCard() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                ImportStepPill(index = "1", text = "导入文件", selected = true)
-                ImportStepPill(index = "2", text = "核对结果", selected = false)
-                ImportStepPill(index = "3", text = "创建题库", selected = false)
+                ImportStepPill(index = "1", text = "瀵煎叆鏂囦欢", selected = true)
+                ImportStepPill(index = "2", text = "鏍稿缁撴灉", selected = false)
+                ImportStepPill(index = "3", text = "鍒涘缓棰樺簱", selected = false)
             }
             if (QuizRepository.shirohaModeEnabled) {
                 Box(
@@ -3834,11 +3924,11 @@ private enum class ImportSaveMode {
 
 private fun defaultImportBankName(fileName: String): String {
     return fileName
-        .takeIf { it.isNotBlank() && it != "未选择文件" }
+        .takeIf { it.isNotBlank() && it != "鏈€夋嫨鏂囦欢" }
         ?.substringBeforeLast('.')
         ?.trim()
         ?.takeIf { it.isNotBlank() }
-        ?: "导入题库"
+        ?: "瀵煎叆棰樺簱"
 }
 
 @Composable

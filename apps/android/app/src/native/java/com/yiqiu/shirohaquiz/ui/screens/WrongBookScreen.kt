@@ -1,12 +1,17 @@
-package com.yiqiu.shirohaquiz.ui.screens
+﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+
+import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -59,8 +64,10 @@ import com.yiqiu.shirohaquiz.state.QuizRepository
 import com.yiqiu.shirohaquiz.state.WrongQuestionEntry
 import com.yiqiu.shirohaquiz.state.WrongStatus
 import com.yiqiu.shirohaquiz.ui.components.ActionPillButton
+import com.yiqiu.shirohaquiz.ui.components.EditorialDivider
+import com.yiqiu.shirohaquiz.ui.components.EditorialFigure
+import com.yiqiu.shirohaquiz.ui.components.EditorialSection
 import com.yiqiu.shirohaquiz.ui.components.EmptyStateIllustration
-import com.yiqiu.shirohaquiz.ui.components.GlassCard
 import com.yiqiu.shirohaquiz.ui.components.IllustrationHeroCard
 import com.yiqiu.shirohaquiz.ui.components.NoticeCard
 import com.yiqiu.shirohaquiz.ui.components.QuestionAiAnalysisButton
@@ -73,28 +80,30 @@ import com.yiqiu.shirohaquiz.ui.theme.ShirohaColors
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaDimens
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaRadius
 import com.yiqiu.shirohaquiz.ui.theme.ShirohaSpacing
+import com.yiqiu.shirohaquiz.ui.theme.editorialScaleFor
+import com.yiqiu.shirohaquiz.ui.theme.screenClassFor
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
 private enum class WrongBookFilter(val label: String) {
-    NOT_MASTERED("未掌握"),
-    MASTERED("已掌握"),
-    ALL("全部")
+    NOT_MASTERED("鏈帉鎻?),
+    MASTERED("宸叉帉鎻?),
+    ALL("鍏ㄩ儴")
 }
 
 private enum class WrongBookSort(val label: String) {
-    RECENT_WRONG("最近错"),
-    WRONG_COUNT("错误次数"),
-    MASTERY("掌握程度")
+    RECENT_WRONG("鏈€杩戦敊"),
+    WRONG_COUNT("閿欒娆℃暟"),
+    MASTERY("鎺屾彙绋嬪害")
 }
 
 private enum class WrongBookReviewCountMode(val label: String) {
-    TEN("10题"),
-    TWENTY("20题"),
-    CUSTOM("自定义"),
-    ALL("全部")
+    TEN("10棰?),
+    TWENTY("20棰?),
+    CUSTOM("鑷畾涔?),
+    ALL("鍏ㄩ儴")
 }
 
 private const val WRONG_BOOK_PAGE_SCOPE_ALL = "all"
@@ -118,8 +127,7 @@ fun WrongBookScreen(
     var customReviewCountText by remember { mutableStateOf("10") }
     var showCustomReviewCountDialog by remember { mutableStateOf(false) }
     var showClearWrongBookConfirm by remember { mutableStateOf(false) }
-    // 手动添加错题流程相关状态
-    var showManualAddDialog by remember { mutableStateOf(false) }
+    // 鎵嬪姩娣诲姞閿欓娴佺▼鐩稿叧鐘舵€?    var showManualAddDialog by remember { mutableStateOf(false) }
     var manualAddBankId by remember { mutableStateOf<String?>(null) }
     var manualAddQuestionId by remember { mutableStateOf("") }
     var manualAddErrorReason by remember { mutableStateOf("") }
@@ -137,7 +145,7 @@ fun WrongBookScreen(
     val wrongBook = selectedBank?.let { bank ->
         allWrongBook.filter { it.bankId == bank.id }
     } ?: allWrongBook
-    val scopeLabel = selectedBank?.name ?: "全部题库"
+    val scopeLabel = selectedBank?.name ?: "鍏ㄩ儴棰樺簱"
     val isSingleBankScope = selectedBank != null
 
     val advancedReviewSettingsEnabled = QuizRepository.wrongBookAdvancedReviewSettingsEnabled
@@ -189,13 +197,13 @@ fun WrongBookScreen(
 
     if (showClearWrongBookConfirm) {
         ShirohaDangerConfirmDialog(
-            title = if (isSingleBankScope) "确认清空“${selectedBank?.name.orEmpty()}”错题？" else "确认清空全部错题？",
+            title = if (isSingleBankScope) "纭娓呯┖鈥?{selectedBank?.name.orEmpty()}鈥濋敊棰橈紵" else "纭娓呯┖鍏ㄩ儴閿欓锛?,
             message = if (isSingleBankScope) {
-                "这会移除该题库的错题记录，包括错题次数、掌握状态和复习统计。其他题库错题不会受影响。"
+                "杩欎細绉婚櫎璇ラ搴撶殑閿欓璁板綍锛屽寘鎷敊棰樻鏁般€佹帉鎻＄姸鎬佸拰澶嶄範缁熻銆傚叾浠栭搴撻敊棰樹笉浼氬彈褰卞搷銆?
             } else {
-                "这会移除全部题库的错题记录，包括错题次数、掌握状态和复习统计。操作不可撤销。"
+                "杩欎細绉婚櫎鍏ㄩ儴棰樺簱鐨勯敊棰樿褰曪紝鍖呮嫭閿欓娆℃暟銆佹帉鎻＄姸鎬佸拰澶嶄範缁熻銆傛搷浣滀笉鍙挙閿€銆?
             },
-            confirmText = if (isSingleBankScope) "清空当前范围" else "清空全部",
+            confirmText = if (isSingleBankScope) "娓呯┖褰撳墠鑼冨洿" else "娓呯┖鍏ㄩ儴",
             onDismiss = { showClearWrongBookConfirm = false },
             onConfirm = {
                 if (selectedBank == null) {
@@ -236,431 +244,503 @@ fun WrongBookScreen(
         )
     }
 
-    LazyColumn(
+    BoxWithConstraints(
         modifier = Modifier
-            .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Sm),
-        verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
+            .fillMaxSize()
+            .shirohaEditorialBackground()
     ) {
-        item {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
-            ) {
-        ShirohaHeader(
-            kicker = "Wrong Book",
-            title = "错题本",
-            subtitle = ""
-        )
+        val screenClass = screenClassFor(maxWidth)
+        val scale = editorialScaleFor(screenClass)
+        val uiScale = com.yiqiu.shirohaquiz.ui.theme.uiScaleFor(screenClass)
 
-        if (allWrongBook.isEmpty()) {
-            EmptyStateIllustration(
-                title = "错题本还是空的",
-                message = "继续练习或考试后，错题会自动进入这里。",
-                imageRes = R.drawable.illus_wrongbook_hint_webp,
-                action = {
-                    Spacer(Modifier.height(12.dp))
-                    ActionPillButton(
-                        icon = Icons.AutoMirrored.Rounded.Undo,
-                        text = "返回首页",
-                        primary = false,
-                        onClick = onBack
-                    )
-                }
-            )
-        }
-
-        if (allWrongBook.isNotEmpty()) {
-            IllustrationHeroCard(
-            title = "错题需要慢慢消化。",
-            subtitle = "筛错题，集中复盘",
-            imageRes = R.drawable.illus_wrongbook_hint_webp,
-            modifier = Modifier.height(ShirohaDimens.HeroCardHeight),
-            imageSize = ShirohaDimens.HeroImageSize
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Sm),
+            verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
         ) {
-            ActionPillButton(
-                icon = Icons.Rounded.Add,
-                text = "手动添加错题",
-                primary = true,
-                enabled = banks.isNotEmpty(),
-                modifier = Modifier
-                    .weight(1f)
-                    .height(46.dp),
-                fillWidthContent = true,
-                onClick = {
-                    manualAddFeedback = null
-                    manualAddQuestionId = ""
-                    manualAddErrorReason = ""
-                    manualAddBankId = selectedBank?.id ?: banks.firstOrNull()?.id
-                    showManualAddDialog = true
-                }
-            )
-            ActionPillButton(
-                icon = Icons.AutoMirrored.Rounded.Undo,
-                text = "返回",
-                primary = false,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(46.dp),
-                fillWidthContent = true,
-                onClick = onBack
-            )
-        }
-
-        if (showManualAddDialog) {
-            WrongBookManualAddDialog(
-                banks = banks,
-                selectedBankId = manualAddBankId,
-                onSelectBank = { manualAddBankId = it },
-                questionId = manualAddQuestionId,
-                onQuestionIdChange = { manualAddQuestionId = it },
-                errorReason = manualAddErrorReason,
-                onErrorReasonChange = { manualAddErrorReason = it },
-                feedback = manualAddFeedback,
-                onConfirm = {
-                    val bankId = manualAddBankId
-                    val qid = manualAddQuestionId.trim()
-                    if (bankId.isNullOrBlank()) {
-                        manualAddFeedback = "请选择题库"
-                    } else if (qid.isBlank()) {
-                        manualAddFeedback = "请输入或选择题目 ID"
-                    } else {
-                        val result = QuizRepository.addWrongContext(
-                            questionId = qid,
-                            bankId = bankId,
-                            userAnswer = emptyList(),
-                            errorReason = manualAddErrorReason.trim(),
-                            addedManually = true
-                        )
-                        if (result != null) {
-                            manualAddFeedback = "已加入错题本"
-                            manualAddQuestionId = ""
-                            manualAddErrorReason = ""
-                        } else {
-                            manualAddFeedback = "未找到该题目，请检查题库与题目 ID"
-                        }
-                    }
-                },
-                onDismiss = { showManualAddDialog = false }
-            )
-        }
-
-        GlassCard {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "错题 ${wrongBook.size} 条",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        StatusChip(if (isSingleBankScope) "单题库" else "全部题库", selected = isSingleBankScope)
-                    }
-                    Spacer(Modifier.height(6.dp))
-                    Text(
-                        text = "未掌握 $notMasteredCount · 已掌握 $masteredCount",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                ActionPillButton(
-                    icon = Icons.Rounded.DeleteOutline,
-                    text = "清空",
-                    primary = false,
-                    enabled = wrongBook.isNotEmpty(),
-                    modifier = Modifier.height(42.dp),
-                    onClick = { showClearWrongBookConfirm = true }
-                )
-            }
-
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = "错题范围",
-                style = MaterialTheme.typography.labelLarge,
-                color = ShirohaColors.TextSecondary,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(Modifier.height(8.dp))
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .shirohaNoRippleClickable { showScopeDialog = true },
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(ShirohaRadius.Md),
-                color = ShirohaColors.CardWhite86,
-                border = BorderStroke(1.dp, ShirohaColors.LineStrong)
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = scopeLabel,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = selectedBank?.let { bank ->
-                                val groupName = bank.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }
-                                "$groupName · 错题 ${wrongBook.size} 条"
-                            } ?: "当前显示全部题库的 ${allWrongBook.size} 道错题",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                    // 缂栬緫寮?Header:kicker + 琛嚎澶ф爣棰?                    ShirohaHeader(
+                        kicker = "Wrong Book",
+                        title = "閿欓鏈?,
+                        subtitle = "鎶婇敊棰樺彉鎴愭彁鍒嗛樁姊?,
+                        scale = scale
+                    )
+
+                    if (allWrongBook.isEmpty()) {
+                        EmptyStateIllustration(
+                            title = "閿欓鏈繕鏄┖鐨?,
+                            message = "缁х画缁冧範鎴栬€冭瘯鍚庯紝閿欓浼氳嚜鍔ㄨ繘鍏ヨ繖閲屻€?,
+                            imageRes = R.drawable.illus_wrongbook_hint_webp,
+                            action = {
+                                Spacer(Modifier.height((12 * uiScale).dp))
+                                ActionPillButton(
+                                    icon = Icons.AutoMirrored.Rounded.Undo,
+                                    text = "杩斿洖棣栭〉",
+                                    primary = false,
+                                    onClick = onBack
+                                )
+                            }
                         )
                     }
-                    Icon(
-                        imageVector = Icons.Rounded.ExpandMore,
-                        contentDescription = "选择错题范围",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-            }
 
-            if (wrongBook.isEmpty()) {
-                Spacer(Modifier.height(14.dp))
-                NoticeCard("当前题库暂无错题。可以切换到其他题库或全部题库。")
-            } else {
-                if (smartReviewEnabled) {
-                    Spacer(Modifier.height(16.dp))
-                    WrongBookSmartReviewSection(
-                        total = smartReviewEntries.size,
-                        notMastered = smartReviewNotMastered,
-                        masteredReview = smartReviewMastered,
-                        onStart = {
-                            if (
-                                smartReviewEntries.isNotEmpty() &&
-                                QuizRepository.startWrongBookPractice(
-                                    entries = smartReviewEntries,
-                                    includeMastered = true,
-                                    sourceLabel = "今日复习"
+                    if (allWrongBook.isNotEmpty()) {
+                        IllustrationHeroCard(
+                            title = "閿欓闇€瑕佹參鎱㈡秷鍖栥€?,
+                            subtitle = "绛涢敊棰橈紝闆嗕腑澶嶇洏",
+                            imageRes = R.drawable.illus_wrongbook_hint_webp,
+                            modifier = Modifier.height(ShirohaDimens.HeroCardHeight),
+                            imageSize = ShirohaDimens.HeroImageSize,
+                            scale = scale
+                        )
+
+                        // === 椤堕儴缂栬緫寮忔暟鎹尯:琛嚎澶ф暟瀛?===
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            EditorialFigure(
+                                value = wrongBook.size.toString(),
+                                label = "閿欓鎬绘暟",
+                                unit = "鏉?,
+                                scale = scale,
+                                modifier = Modifier.weight(1f)
+                            )
+                            EditorialFigure(
+                                value = notMasteredCount.toString(),
+                                label = "鏈帉鎻?,
+                                unit = "棰?,
+                                scale = scale,
+                                modifier = Modifier.weight(1f)
+                            )
+                            EditorialFigure(
+                                value = masteredCount.toString(),
+                                label = "宸叉帉鎻?,
+                                unit = "棰?,
+                                scale = scale,
+                                modifier = Modifier.weight(1f)
+                            )
+                            EditorialFigure(
+                                value = (if (smartReviewEnabled) smartReviewEntries.size else 0).toString(),
+                                label = if (smartReviewEnabled) "浠婃棩寰呭涔? else "鏅鸿兘澶嶄範",
+                                unit = "棰?,
+                                scale = scale,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+
+                        Spacer(Modifier.height((4 * uiScale).dp))
+                        EditorialDivider(label = "鑼冨洿")
+                        Spacer(Modifier.height((4 * uiScale).dp))
+
+                        // 椤堕儴鎿嶄綔 Row:鎵嬪姩娣诲姞 + 杩斿洖
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy((10 * uiScale).dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            ActionPillButton(
+                                icon = Icons.Rounded.Add,
+                                text = "鎵嬪姩娣诲姞閿欓",
+                                primary = true,
+                                enabled = banks.isNotEmpty(),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height((46 * uiScale).dp),
+                                fillWidthContent = true,
+                                onClick = {
+                                    manualAddFeedback = null
+                                    manualAddQuestionId = ""
+                                    manualAddErrorReason = ""
+                                    manualAddBankId = selectedBank?.id ?: banks.firstOrNull()?.id
+                                    showManualAddDialog = true
+                                }
+                            )
+                            ActionPillButton(
+                                icon = Icons.AutoMirrored.Rounded.Undo,
+                                text = "杩斿洖",
+                                primary = false,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height((46 * uiScale).dp),
+                                fillWidthContent = true,
+                                onClick = onBack
+                            )
+                        }
+
+                        if (showManualAddDialog) {
+                            WrongBookManualAddDialog(
+                                banks = banks,
+                                selectedBankId = manualAddBankId,
+                                onSelectBank = { manualAddBankId = it },
+                                questionId = manualAddQuestionId,
+                                onQuestionIdChange = { manualAddQuestionId = it },
+                                errorReason = manualAddErrorReason,
+                                onErrorReasonChange = { manualAddErrorReason = it },
+                                feedback = manualAddFeedback,
+                                onConfirm = {
+                                    val bankId = manualAddBankId
+                                    val qid = manualAddQuestionId.trim()
+                                    if (bankId.isNullOrBlank()) {
+                                        manualAddFeedback = "璇烽€夋嫨棰樺簱"
+                                    } else if (qid.isBlank()) {
+                                        manualAddFeedback = "璇疯緭鍏ユ垨閫夋嫨棰樼洰 ID"
+                                    } else {
+                                        val result = QuizRepository.addWrongContext(
+                                            questionId = qid,
+                                            bankId = bankId,
+                                            userAnswer = emptyList(),
+                                            errorReason = manualAddErrorReason.trim(),
+                                            addedManually = true
+                                        )
+                                        if (result != null) {
+                                            manualAddFeedback = "宸插姞鍏ラ敊棰樻湰"
+                                            manualAddQuestionId = ""
+                                            manualAddErrorReason = ""
+                                        } else {
+                                            manualAddFeedback = "鏈壘鍒拌棰樼洰锛岃妫€鏌ラ搴撲笌棰樼洰 ID"
+                                        }
+                                    }
+                                },
+                                onDismiss = { showManualAddDialog = false }
+                            )
+                        }
+
+                        // 鑼冨洿鎽樿(Scope Header)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy((10 * uiScale).dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy((8 * uiScale).dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "閿欓 ${wrongBook.size} 鏉?,
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                    StatusChip(if (isSingleBankScope) "鍗曢搴? else "鍏ㄩ儴棰樺簱", selected = isSingleBankScope)
+                                }
+                                Spacer(Modifier.height((6 * uiScale).dp))
+                                Text(
+                                    text = "鏈帉鎻?$notMasteredCount 路 宸叉帉鎻?$masteredCount",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
+                            }
+                            ActionPillButton(
+                                icon = Icons.Rounded.DeleteOutline,
+                                text = "娓呯┖",
+                                primary = false,
+                                enabled = wrongBook.isNotEmpty(),
+                                modifier = Modifier.height((42 * uiScale).dp),
+                                onClick = { showClearWrongBookConfirm = true }
+                            )
+                        }
+
+                        // 閿欓鑼冨洿閫夋嫨
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .shirohaNoRippleClickable { showScopeDialog = true },
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(ShirohaRadius.Md),
+                            color = ShirohaColors.CardWhite86,
+                            border = BorderStroke(1.dp, ShirohaColors.LineStrong)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = (14 * uiScale).dp, vertical = (12 * uiScale).dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                onGoPractice()
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "閿欓鑼冨洿",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = ShirohaColors.TextSecondary,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                    Spacer(Modifier.height((2 * uiScale).dp))
+                                    Text(
+                                        text = scopeLabel,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = selectedBank?.let { bank ->
+                                            val groupName = bank.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }
+                                            "$groupName 路 閿欓 ${wrongBook.size} 鏉?
+                                        } ?: "褰撳墠鏄剧ず鍏ㄩ儴棰樺簱鐨?${allWrongBook.size} 閬撻敊棰?,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                Icon(
+                                    imageVector = Icons.Rounded.ExpandMore,
+                                    contentDescription = "閫夋嫨閿欓鑼冨洿",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size((22 * uiScale).dp)
+                                )
                             }
                         }
-                    )
-                }
 
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = "掌握筛选",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    WrongBookFilter.entries.forEach { item ->
-                        ActionPillButton(
-                            icon = Icons.Rounded.CheckCircle,
-                            text = item.label,
-                            primary = filter == item,
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(44.dp),
-                            fillWidthContent = true,
-                            onClick = { filter = item }
-                        )
-                    }
-                }
+                        if (wrongBook.isEmpty()) {
+                            NoticeCard("褰撳墠棰樺簱鏆傛棤閿欓銆傚彲浠ュ垏鎹㈠埌鍏朵粬棰樺簱鎴栧叏閮ㄩ搴撱€?)
+                        } else {
+                            // 鏅鸿兘澶嶄範鍖?寮€鍚椂鏄剧ず)
+                            if (smartReviewEnabled) {
+                                EditorialSection(
+                                    kicker = "浠婃棩",
+                                    title = "鏅鸿兘澶嶄範",
+                                    scale = scale
+                                ) {
+                                    WrongBookSmartReviewSection(
+                                        total = smartReviewEntries.size,
+                                        notMastered = smartReviewNotMastered,
+                                        masteredReview = smartReviewMastered,
+                                        onStart = {
+                                            if (
+                                                smartReviewEntries.isNotEmpty() &&
+                                                QuizRepository.startWrongBookPractice(
+                                                    entries = smartReviewEntries,
+                                                    includeMastered = true,
+                                                    sourceLabel = "浠婃棩澶嶄範"
+                                                )
+                                            ) {
+                                                onGoPractice()
+                                            }
+                                        }
+                                    )
+                                }
+                            }
 
-                if (advancedReviewSettingsEnabled) {
-                    Spacer(Modifier.height(14.dp))
-                    Text(
-                        text = "题型",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    if (availableTypes.isEmpty()) {
-                        NoticeCard("当前掌握筛选下没有可选择的题型。")
-                    } else {
-                        FlowRow(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            val allAvailableSelected = availableTypes.all { it in selectedTypes }
-                            ActionPillButton(
-                                icon = Icons.Rounded.CheckCircle,
-                                text = "全部题型",
-                                primary = allAvailableSelected,
-                                modifier = Modifier.height(42.dp),
-                                onClick = { selectedTypes = QuestionType.entries.toSet() }
-                            )
-                            availableTypes.forEach { type ->
-                                val count = masteryFilteredEntries.count { it.question.type == type }
+                            // 澶嶄範璁剧疆:绛涢€?+ 棰樺瀷 + 鍗曟澶嶄範鏁伴噺
+                            EditorialSection(
+                                kicker = "绛涢€?,
+                                title = "澶嶄範璁剧疆",
+                                scale = scale
+                            ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)) {
+                                    // 鎺屾彙绛涢€?                                    Column(verticalArrangement = Arrangement.spacedBy((8 * uiScale).dp)) {
+                                        Text(
+                                            text = "鎺屾彙绛涢€?,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy((8 * uiScale).dp)
+                                        ) {
+                                            WrongBookFilter.entries.forEach { item ->
+                                                ActionPillButton(
+                                                    icon = Icons.Rounded.CheckCircle,
+                                                    text = item.label,
+                                                    primary = filter == item,
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .height((44 * uiScale).dp),
+                                                    fillWidthContent = true,
+                                                    onClick = { filter = item }
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    if (advancedReviewSettingsEnabled) {
+                                        Column(verticalArrangement = Arrangement.spacedBy((8 * uiScale).dp)) {
+                                            Text(
+                                                text = "棰樺瀷",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                            if (availableTypes.isEmpty()) {
+                                                NoticeCard("褰撳墠鎺屾彙绛涢€変笅娌℃湁鍙€夋嫨鐨勯鍨嬨€?)
+                                            } else {
+                                                FlowRow(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.spacedBy((8 * uiScale).dp),
+                                                    verticalArrangement = Arrangement.spacedBy((8 * uiScale).dp)
+                                                ) {
+                                                    val allAvailableSelected = availableTypes.all { it in selectedTypes }
+                                                    ActionPillButton(
+                                                        icon = Icons.Rounded.CheckCircle,
+                                                        text = "鍏ㄩ儴棰樺瀷",
+                                                        primary = allAvailableSelected,
+                                                        modifier = Modifier.height((42 * uiScale).dp),
+                                                        onClick = { selectedTypes = QuestionType.entries.toSet() }
+                                                    )
+                                                    availableTypes.forEach { type ->
+                                                        val count = masteryFilteredEntries.count { it.question.type == type }
+                                                        ActionPillButton(
+                                                            icon = Icons.Rounded.CheckCircle,
+                                                            text = "${typeLabel(type)} $count",
+                                                            primary = type in selectedTypes,
+                                                            modifier = Modifier.height((42 * uiScale).dp),
+                                                            onClick = {
+                                                                selectedTypes = if (type in selectedTypes) {
+                                                                    selectedTypes - type
+                                                                } else {
+                                                                    selectedTypes + type
+                                                                }
+                                                            }
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        Column(verticalArrangement = Arrangement.spacedBy((6 * uiScale).dp)) {
+                                            Text(
+                                                text = "鍗曟澶嶄範鏁伴噺",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                            Text(
+                                                text = "褰撳墠鍙涔?${reviewCandidates.size} 棰?,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                            FlowRow(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.spacedBy((8 * uiScale).dp),
+                                                verticalArrangement = Arrangement.spacedBy((8 * uiScale).dp)
+                                            ) {
+                                                WrongBookReviewCountMode.entries.forEach { item ->
+                                                    val label = when (item) {
+                                                        WrongBookReviewCountMode.CUSTOM -> {
+                                                            if (reviewCountMode == WrongBookReviewCountMode.CUSTOM) "鑷畾涔?${selectedReviewCount}棰? else item.label
+                                                        }
+                                                        WrongBookReviewCountMode.ALL -> "鍏ㄩ儴 ${reviewCandidates.size}棰?
+                                                        else -> item.label
+                                                    }
+                                                    ActionPillButton(
+                                                        icon = Icons.Rounded.PlayArrow,
+                                                        text = label,
+                                                        primary = reviewCountMode == item,
+                                                        enabled = reviewCandidates.isNotEmpty(),
+                                                        modifier = Modifier.height((42 * uiScale).dp),
+                                                        onClick = {
+                                                            if (item == WrongBookReviewCountMode.CUSTOM) {
+                                                                customReviewCountText = customReviewCount
+                                                                    .coerceIn(1, reviewCandidates.size.coerceAtLeast(1))
+                                                                    .toString()
+                                                                showCustomReviewCountDialog = true
+                                                            } else {
+                                                                reviewCountMode = item
+                                                            }
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // 鎺掑簭
+                                    Column(verticalArrangement = Arrangement.spacedBy((8 * uiScale).dp)) {
+                                        Text(
+                                            text = "鎺掑簭",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy((8 * uiScale).dp)
+                                        ) {
+                                            WrongBookSort.entries.forEach { item ->
+                                                ActionPillButton(
+                                                    icon = Icons.Rounded.PlayArrow,
+                                                    text = item.label,
+                                                    primary = sort == item,
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .heightIn(min = (44 * uiScale).dp),
+                                                    fillWidthContent = true,
+                                                    textMaxLines = 2,
+                                                    onClick = { sort = item }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // 搴曢儴鎿嶄綔:寮€濮嬪涔?+ 杩斿洖
+                            Spacer(Modifier.height((4 * uiScale).dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy((10 * uiScale).dp)
+                            ) {
                                 ActionPillButton(
-                                    icon = Icons.Rounded.CheckCircle,
-                                    text = "${typeLabel(type)} $count",
-                                    primary = type in selectedTypes,
-                                    modifier = Modifier.height(42.dp),
+                                    icon = Icons.Rounded.PlayArrow,
+                                    text = when {
+                                        reviewEntries.isEmpty() -> "鏆傛棤鍙涔犻鐩?
+                                        advancedReviewSettingsEnabled -> "寮€濮嬪涔?${reviewEntries.size} 棰?
+                                        else -> "鍒烽敊棰?
+                                    },
+                                    primary = reviewEntries.isNotEmpty(),
+                                    enabled = reviewEntries.isNotEmpty(),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height((50 * uiScale).dp),
+                                    fillWidthContent = true,
                                     onClick = {
-                                        selectedTypes = if (type in selectedTypes) {
-                                            selectedTypes - type
-                                        } else {
-                                            selectedTypes + type
+                                        if (reviewEntries.isNotEmpty() && QuizRepository.startWrongBookPractice(reviewEntries)) {
+                                            onGoPractice()
                                         }
                                     }
                                 )
+                                ActionPillButton(
+                                    icon = Icons.AutoMirrored.Rounded.Undo,
+                                    text = "杩斿洖",
+                                    primary = false,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height((50 * uiScale).dp),
+                                    fillWidthContent = true,
+                                    onClick = onBack
+                                )
                             }
-                        }
-                    }
 
-                    Spacer(Modifier.height(14.dp))
-                    Text(
-                        text = "单次复习数量",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    Text(
-                        text = "当前可复习 ${reviewCandidates.size} 题",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        WrongBookReviewCountMode.entries.forEach { item ->
-                            val label = when (item) {
-                                WrongBookReviewCountMode.CUSTOM -> {
-                                    if (reviewCountMode == WrongBookReviewCountMode.CUSTOM) "自定义 ${selectedReviewCount}题" else item.label
-                                }
-                                WrongBookReviewCountMode.ALL -> "全部 ${reviewCandidates.size}题"
-                                else -> item.label
-                            }
-                            ActionPillButton(
-                                icon = Icons.Rounded.PlayArrow,
-                                text = label,
-                                primary = reviewCountMode == item,
-                                enabled = reviewCandidates.isNotEmpty(),
-                                modifier = Modifier.height(42.dp),
-                                onClick = {
-                                    if (item == WrongBookReviewCountMode.CUSTOM) {
-                                        customReviewCountText = customReviewCount
-                                            .coerceIn(1, reviewCandidates.size.coerceAtLeast(1))
-                                            .toString()
-                                        showCustomReviewCountDialog = true
-                                    } else {
-                                        reviewCountMode = item
+                            if (reviewEntries.isEmpty()) {
+                                NoticeCard(
+                                    text = when {
+                                        advancedReviewSettingsEnabled && selectedTypes.none { it in availableTypes } -> "璇疯嚦灏戦€夋嫨涓€绉嶆湁閿欓鐨勯鍨嬨€?
+                                        filter == WrongBookFilter.MASTERED -> "宸叉帉鎻￠涓嶄細杩涘叆鎵嬪姩澶嶄範銆傞渶瑕佸涔犳椂鍙厛鏍囦负鏈帉鎻°€?
+                                        else -> "褰撳墠绛涢€変笅娌℃湁闇€瑕佸涔犵殑閿欓銆?
                                     }
-                                }
-                            )
-                        }
-                    }
-
-                }
-
-                Spacer(Modifier.height(14.dp))
-                Text(
-                    text = "排序",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    WrongBookSort.entries.forEach { item ->
-                        ActionPillButton(
-                            icon = Icons.Rounded.PlayArrow,
-                            text = item.label,
-                            primary = sort == item,
-                            modifier = Modifier
-                                .weight(1f)
-                                .heightIn(min = 44.dp),
-                            fillWidthContent = true,
-                            textMaxLines = 2,
-                            onClick = { sort = item }
-                        )
-                    }
-                }
-
-                Spacer(Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    ActionPillButton(
-                        icon = Icons.Rounded.PlayArrow,
-                        text = when {
-                            reviewEntries.isEmpty() -> "暂无可复习题目"
-                            advancedReviewSettingsEnabled -> "开始复习 ${reviewEntries.size} 题"
-                            else -> "刷错题"
-                        },
-                        primary = reviewEntries.isNotEmpty(),
-                        enabled = reviewEntries.isNotEmpty(),
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(50.dp),
-                        fillWidthContent = true,
-                        onClick = {
-                            if (reviewEntries.isNotEmpty() && QuizRepository.startWrongBookPractice(reviewEntries)) {
-                                onGoPractice()
+                                )
                             }
                         }
-                    )
-                    ActionPillButton(
-                        icon = Icons.AutoMirrored.Rounded.Undo,
-                        text = "返回",
-                        primary = false,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(50.dp),
-                        fillWidthContent = true,
-                        onClick = onBack
-                    )
-                }
-
-                if (reviewEntries.isEmpty()) {
-                    Spacer(Modifier.height(12.dp))
-                    NoticeCard(
-                        text = when {
-                            advancedReviewSettingsEnabled && selectedTypes.none { it in availableTypes } -> "请至少选择一种有错题的题型。"
-                            filter == WrongBookFilter.MASTERED -> "已掌握题不会进入手动复习。需要复习时可先标为未掌握。"
-                            else -> "当前筛选下没有需要复习的错题。"
-                        }
-                    )
+                    }
                 }
             }
-        }
 
-            }
-            }
-        }
-
-        if (wrongBook.isNotEmpty()) {
-            if (filteredEntries.isEmpty()) {
-                item {
-                    GlassCard { NoticeCard("当前筛选下没有错题。") }
-                }
-            } else {
-                items(
-                    items = filteredEntries,
-                    key = { entry -> "${entry.bankId}#${entry.question.id}" }
-                ) { entry ->
-                    WrongQuestionPreview(entry)
+            if (wrongBook.isNotEmpty()) {
+                if (filteredEntries.isEmpty()) {
+                    item {
+                        EditorialDivider(label = "鍒楄〃")
+                        NoticeCard("褰撳墠绛涢€変笅娌℃湁閿欓銆?)
+                    }
+                } else {
+                    item {
+                        EditorialDivider(label = "鍒楄〃")
+                    }
+                    items(
+                        items = filteredEntries,
+                        key = { entry -> "${entry.bankId}#${entry.question.id}" }
+                    ) { entry ->
+                        WrongQuestionPreview(entry, uiScale = uiScale, scale = scale)
+                    }
                 }
             }
         }
@@ -683,7 +763,7 @@ private fun WrongBookScopeDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("选择错题范围") },
+        title = { Text("閫夋嫨閿欓鑼冨洿") },
         text = {
             Column(
                 modifier = Modifier
@@ -692,8 +772,8 @@ private fun WrongBookScopeDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 WrongBookScopeOption(
-                    title = "全部题库",
-                    desc = "共 ${wrongBook.size} 道错题",
+                    title = "鍏ㄩ儴棰樺簱",
+                    desc = "鍏?${wrongBook.size} 閬撻敊棰?,
                     selected = selectedScopeKey == WRONG_BOOK_PAGE_SCOPE_ALL,
                     onClick = { onSelect(WRONG_BOOK_PAGE_SCOPE_ALL) }
                 )
@@ -709,7 +789,7 @@ private fun WrongBookScopeDialog(
                         val key = WRONG_BOOK_PAGE_SCOPE_BANK_PREFIX + bank.id
                         WrongBookScopeOption(
                             title = bank.name,
-                            desc = "错题 ${wrongCountByBank[bank.id] ?: 0} 题 · 共 ${bank.questions.size} 题",
+                            desc = "閿欓 ${wrongCountByBank[bank.id] ?: 0} 棰?路 鍏?${bank.questions.size} 棰?,
                             selected = selectedScopeKey == key,
                             onClick = { onSelect(key) }
                         )
@@ -718,7 +798,7 @@ private fun WrongBookScopeDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("关闭") }
+            TextButton(onClick = onDismiss) { Text("鍏抽棴") }
         }
     )
 }
@@ -764,7 +844,7 @@ private fun WrongBookScopeOption(
             if (selected) {
                 Icon(
                     imageVector = Icons.Rounded.Done,
-                    contentDescription = "已选择",
+                    contentDescription = "宸查€夋嫨",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(18.dp)
                 )
@@ -783,11 +863,11 @@ private fun WrongBookReviewCountDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("自定义单次复习数量") },
+        title = { Text("鑷畾涔夊崟娆″涔犳暟閲?) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "请输入 1～$maxCount 之间的题数。",
+                    text = "璇疯緭鍏?1锝?maxCount 涔嬮棿鐨勯鏁般€?,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -795,7 +875,7 @@ private fun WrongBookReviewCountDialog(
                     value = value,
                     onValueChange = { onValueChange(it.filter { ch -> ch.isDigit() }.take(4)) },
                     singleLine = true,
-                    label = { Text("复习题量") },
+                    label = { Text("澶嶄範棰橀噺") },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Done
@@ -809,9 +889,9 @@ private fun WrongBookReviewCountDialog(
                     val count = value.toIntOrNull()?.coerceIn(1, maxCount) ?: 1
                     onConfirm(count)
                 }
-            ) { Text("确定") }
+            ) { Text("纭畾") }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text("鍙栨秷") } }
     )
 }
 
@@ -823,20 +903,20 @@ private fun WrongBookSmartReviewSection(
     onStart: () -> Unit
 ) {
     Text(
-        text = "今日复习",
+        text = "浠婃棩澶嶄範",
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold
     )
     Spacer(Modifier.height(8.dp))
     Text(
-        text = "未掌握 $notMastered · 已掌握回顾 $masteredReview",
+        text = "鏈帉鎻?$notMastered 路 宸叉帉鎻″洖椤?$masteredReview",
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
     Spacer(Modifier.height(10.dp))
     ActionPillButton(
         icon = Icons.Rounded.PlayArrow,
-        text = if (total > 0) "开始今日复习" else "今日暂无到期",
+        text = if (total > 0) "寮€濮嬩粖鏃ュ涔? else "浠婃棩鏆傛棤鍒版湡",
         primary = total > 0,
         modifier = Modifier
             .fillMaxWidth(0.58f)
@@ -850,7 +930,11 @@ private fun WrongBookSmartReviewSection(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun WrongQuestionPreview(entry: WrongQuestionEntry) {
+private fun WrongQuestionPreview(
+    entry: WrongQuestionEntry,
+    uiScale: Float = 1f,
+    scale: Float = 1f
+) {
     var showRemoveConfirm by remember(entry.bankId, entry.question.id) { mutableStateOf(false) }
     var showDetail by remember(entry.bankId, entry.question.id) { mutableStateOf(false) }
     var analysisExpanded by remember(entry.bankId, entry.question.id) { mutableStateOf(false) }
@@ -858,9 +942,9 @@ private fun WrongQuestionPreview(entry: WrongQuestionEntry) {
 
     if (showRemoveConfirm) {
         ShirohaDangerConfirmDialog(
-            title = "确认移出这道错题？",
-            message = "这会从错题本中移出本题，并清除这道题当前的错题复习状态。原题库中的题目不会被删除。",
-            confirmText = "确认移出",
+            title = "纭绉诲嚭杩欓亾閿欓锛?,
+            message = "杩欎細浠庨敊棰樻湰涓Щ鍑烘湰棰橈紝骞舵竻闄よ繖閬撻褰撳墠鐨勯敊棰樺涔犵姸鎬併€傚師棰樺簱涓殑棰樼洰涓嶄細琚垹闄ゃ€?,
+            confirmText = "纭绉诲嚭",
             onDismiss = { showRemoveConfirm = false },
             onConfirm = {
                 QuizRepository.removeWrongQuestion(entry)
@@ -880,25 +964,34 @@ private fun WrongQuestionPreview(entry: WrongQuestionEntry) {
         )
     }
 
-    GlassCard {
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(ShirohaRadius.Lg),
+        color = ShirohaColors.CardWhite86,
+        border = BorderStroke(1.dp, ShirohaColors.LineSoft)
+    ) {
+        Column(modifier = Modifier.padding((16 * uiScale).dp.coerceAtLeast(12.dp))) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy((8 * uiScale).dp),
+            verticalArrangement = Arrangement.spacedBy((8 * uiScale).dp)
+        ) {
             StatusChip(displayWrongStatus(entry.status), selected = entry.status != WrongStatus.MASTERED.label)
             StatusChip(typeLabel(entry.question.type))
             StatusChip(entry.bankName)
             if (entry.addedManually) {
-                StatusChip("手动添加", selected = true)
+                StatusChip("鎵嬪姩娣诲姞", selected = true)
             } else {
-                StatusChip("自动记录")
+                StatusChip("鑷姩璁板綍")
             }
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height((12 * uiScale).dp))
         Text(
             text = wrongQuestionDisplayTitle(entry),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )
         if (entry.question.images.isNotEmpty()) {
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height((10 * uiScale).dp))
             QuestionImagesBlock(
                 images = entry.question.images,
                 maxPreviewHeight = 260.dp,
@@ -906,68 +999,67 @@ private fun WrongQuestionPreview(entry: WrongQuestionEntry) {
             )
         }
         if (entry.question.options.isNotEmpty()) {
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height((10 * uiScale).dp))
             entry.question.options.forEach { option ->
                 Text(
                     text = "${option.key}. ${option.text}",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height((4 * uiScale).dp))
             }
         }
-        // 正确答案（绿色高亮）
-        Spacer(Modifier.height(10.dp))
+        // 姝ｇ‘绛旀锛堢豢鑹查珮浜級
+        Spacer(Modifier.height((10 * uiScale).dp))
         WrongBookAnswerLine(
-            label = "正确答案",
+            label = "姝ｇ‘绛旀",
             text = formatCorrectAnswerText(entry),
             highlightColor = ShirohaColors.StateSuccess
         )
-        // 你的答案（红色高亮，NEW 标签）
-        WrongBookAnswerLine(
-            label = "你的答案",
+        // 浣犵殑绛旀锛堢孩鑹查珮浜紝NEW 鏍囩锛?        WrongBookAnswerLine(
+            label = "浣犵殑绛旀",
             text = formatUserAnswerText(entry),
             highlightColor = ShirohaColors.StateDanger,
             showNewBadge = true
         )
-        // AI 解析折叠
+        // AI 瑙ｆ瀽鎶樺彔
         if (entry.aiAnalysis.isNotBlank()) {
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height((10 * uiScale).dp))
             WrongBookExpandableSection(
-                title = "AI 解析",
+                title = "AI 瑙ｆ瀽",
                 expanded = analysisExpanded,
                 onToggle = { analysisExpanded = !analysisExpanded },
                 content = entry.aiAnalysis
             )
         }
-        // 错误原因折叠
+        // 閿欒鍘熷洜鎶樺彔
         if (entry.errorReason.isNotBlank()) {
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height((8 * uiScale).dp))
             WrongBookExpandableSection(
-                title = "错误原因",
+                title = "閿欒鍘熷洜",
                 expanded = reasonExpanded,
                 onToggle = { reasonExpanded = !reasonExpanded },
                 content = entry.errorReason
             )
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height((8 * uiScale).dp))
         Text(
-            text = "错 ${entry.wrongCount} 次 · 对 ${entry.rightCount} 次 · 最近错误 ${formatTimestamp(entry.lastWrongAt)}",
+            text = "閿?${entry.wrongCount} 娆?路 瀵?${entry.rightCount} 娆?路 鏈€杩戦敊璇?${formatTimestamp(entry.lastWrongAt)}",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height((12 * uiScale).dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy((10 * uiScale).dp)
         ) {
             ActionPillButton(
                 icon = Icons.Rounded.CheckCircle,
-                text = if (entry.status == WrongStatus.MASTERED.label) "重新复习" else "标记掌握",
+                text = if (entry.status == WrongStatus.MASTERED.label) "閲嶆柊澶嶄範" else "鏍囪鎺屾彙",
                 primary = entry.status != WrongStatus.MASTERED.label,
                 modifier = Modifier
                     .weight(1f)
-                    .height(46.dp),
+                    .height((46 * uiScale).dp),
                 fillWidthContent = true,
                 onClick = {
                     QuizRepository.markWrongQuestionMastered(
@@ -978,30 +1070,31 @@ private fun WrongQuestionPreview(entry: WrongQuestionEntry) {
             )
             ActionPillButton(
                 icon = Icons.Rounded.Visibility,
-                text = "详情",
+                text = "璇︽儏",
                 primary = false,
                 modifier = Modifier
                     .weight(1f)
-                    .height(46.dp),
+                    .height((46 * uiScale).dp),
                 fillWidthContent = true,
                 onClick = { showDetail = true }
             )
             ActionPillButton(
                 icon = Icons.Rounded.DeleteOutline,
-                text = "移出",
+                text = "绉诲嚭",
                 primary = false,
                 modifier = Modifier
                     .weight(1f)
-                    .height(46.dp),
+                    .height((46 * uiScale).dp),
                 fillWidthContent = true,
                 onClick = { showRemoveConfirm = true }
             )
         }
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height((10 * uiScale).dp))
         QuestionAiAnalysisButton(
             question = entry.question,
             userAnswer = entry.lastAnswer
         )
+        }
     }
 }
 
@@ -1014,7 +1107,7 @@ private fun WrongBookAnswerLine(
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = "$label：",
+            text = "$label锛?,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -1068,7 +1161,7 @@ private fun WrongBookExpandableSection(
                 )
                 Icon(
                     imageVector = Icons.Rounded.ExpandMore,
-                    contentDescription = if (expanded) "收起" else "展开",
+                    contentDescription = if (expanded) "鏀惰捣" else "灞曞紑",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )
@@ -1097,7 +1190,7 @@ private fun WrongQuestionDetailDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("错题详情") },
+        title = { Text("閿欓璇︽儏") },
         text = {
             Column(
                 modifier = Modifier
@@ -1110,9 +1203,9 @@ private fun WrongQuestionDetailDialog(
                     StatusChip(typeLabel(entry.question.type))
                     StatusChip(entry.bankName)
                     if (entry.addedManually) {
-                        StatusChip("手动添加", selected = true)
+                        StatusChip("鎵嬪姩娣诲姞", selected = true)
                     } else {
-                        StatusChip("自动记录")
+                        StatusChip("鑷姩璁板綍")
                     }
                 }
                 Text(
@@ -1137,63 +1230,63 @@ private fun WrongQuestionDetailDialog(
                     }
                 }
                 WrongBookAnswerLine(
-                    label = "正确答案",
+                    label = "姝ｇ‘绛旀",
                     text = formatCorrectAnswerText(entry),
                     highlightColor = ShirohaColors.StateSuccess
                 )
                 WrongBookAnswerLine(
-                    label = "你的答案",
+                    label = "浣犵殑绛旀",
                     text = formatUserAnswerText(entry),
                     highlightColor = ShirohaColors.StateDanger,
                     showNewBadge = true
                 )
                 if (entry.aiAnalysis.isNotBlank()) {
                     WrongBookExpandableSection(
-                        title = "AI 解析",
+                        title = "AI 瑙ｆ瀽",
                         expanded = analysisExpanded,
                         onToggle = onToggleAnalysis,
                         content = entry.aiAnalysis
                     )
                 } else {
-                    NoticeCard("暂无 AI 解析缓存。")
+                    NoticeCard("鏆傛棤 AI 瑙ｆ瀽缂撳瓨銆?)
                 }
                 if (entry.errorReason.isNotBlank()) {
                     WrongBookExpandableSection(
-                        title = "错误原因",
+                        title = "閿欒鍘熷洜",
                         expanded = reasonExpanded,
                         onToggle = onToggleReason,
                         content = entry.errorReason
                     )
                 } else {
-                    NoticeCard("尚未填写错误原因。")
+                    NoticeCard("灏氭湭濉啓閿欒鍘熷洜銆?)
                 }
                 Text(
-                    text = "错 ${entry.wrongCount} 次 · 对 ${entry.rightCount} 次 · 最近错误 ${formatTimestamp(entry.lastWrongAt)}",
+                    text = "閿?${entry.wrongCount} 娆?路 瀵?${entry.rightCount} 娆?路 鏈€杩戦敊璇?${formatTimestamp(entry.lastWrongAt)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("关闭") } }
+        confirmButton = { TextButton(onClick = onDismiss) { Text("鍏抽棴") } }
     )
 }
 
 private fun formatUserAnswerText(entry: WrongQuestionEntry): String {
     val fromNew = entry.userAnswer.joinToString(" / ").trim()
     if (fromNew.isNotBlank()) return fromNew
-    // 兼容旧数据：使用 lastAnswer
+    // 鍏煎鏃ф暟鎹細浣跨敤 lastAnswer
     val fromLegacy = entry.lastAnswer.joinToString(" / ").trim()
-    return fromLegacy.ifBlank { "未作答" }
+    return fromLegacy.ifBlank { "鏈綔绛? }
 }
 
 private fun formatCorrectAnswerText(entry: WrongQuestionEntry): String {
     val fromNew = entry.correctAnswer.joinToString(" / ").trim()
     if (fromNew.isNotBlank()) return fromNew
-    // 兼容旧数据：从 question.answer 兜底
+    // 鍏煎鏃ф暟鎹細浠?question.answer 鍏滃簳
     return if (MultiBlankSupport.hasStructuredAnswers(entry.question)) {
         MultiBlankSupport.expectedAnswerText(entry.question.blankAnswers)
     } else {
-        entry.question.answer.joinToString(" / ").ifBlank { "未识别答案" }
+        entry.question.answer.joinToString(" / ").ifBlank { "鏈瘑鍒瓟妗? }
     }
 }
 
@@ -1215,7 +1308,7 @@ private fun isSuspiciousWrongQuestionNumber(number: String): Boolean {
     if (compact.length > 24) return true
 
     val numericParts = Regex("""\d+""").findAll(compact).count()
-    val dashCount = compact.count { it == '-' || it == '－' || it == '—' || it == '–' }
+    val dashCount = compact.count { it == '-' || it == '锛? || it == '鈥? || it == '鈥? }
     return numericParts >= 4 && dashCount >= 3
 }
 
@@ -1273,21 +1366,21 @@ private fun statusRank(status: String): Int = when (status) {
 }
 
 private fun displayWrongStatus(status: String): String =
-    if (status == WrongStatus.MASTERED.label) "已掌握" else "未掌握"
+    if (status == WrongStatus.MASTERED.label) "宸叉帉鎻? else "鏈帉鎻?
 
 private fun typeLabel(type: QuestionType): String = when (type) {
-    QuestionType.SINGLE -> "单选题"
-    QuestionType.MULTIPLE -> "多选题"
-    QuestionType.JUDGE -> "判断题"
-    QuestionType.BLANK -> "填空题"
-    QuestionType.SHORT -> "简答题"
+    QuestionType.SINGLE -> "鍗曢€夐"
+    QuestionType.MULTIPLE -> "澶氶€夐"
+    QuestionType.JUDGE -> "鍒ゆ柇棰?
+    QuestionType.BLANK -> "濉┖棰?
+    QuestionType.SHORT -> "绠€绛旈"
 }
 
 private fun formatTimestamp(timestamp: Long): String {
     return SimpleDateFormat("MM-dd HH:mm", Locale.getDefault()).format(Date(timestamp))
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+
 @Composable
 private fun WrongBookManualAddDialog(
     banks: List<QuizBank>,
@@ -1306,7 +1399,7 @@ private fun WrongBookManualAddDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("手动添加错题") },
+        title = { Text("鎵嬪姩娣诲姞閿欓") },
         text = {
             Column(
                 modifier = Modifier
@@ -1315,12 +1408,12 @@ private fun WrongBookManualAddDialog(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
-                    text = "选择题库后，从题库列表中点选要加入错题本的题目。",
+                    text = "閫夋嫨棰樺簱鍚庯紝浠庨搴撳垪琛ㄤ腑鐐归€夎鍔犲叆閿欓鏈殑棰樼洰銆?,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                // 题库下拉
+                // 棰樺簱涓嬫媺
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1340,20 +1433,20 @@ private fun WrongBookManualAddDialog(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = currentBank?.name ?: "选择题库",
+                                    text = currentBank?.name ?: "閫夋嫨棰樺簱",
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Text(
-                                    text = currentBank?.let { "${it.questions.size} 题 · ${it.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }}" }
-                                        ?: "尚未选择",
+                                    text = currentBank?.let { "${it.questions.size} 棰?路 ${it.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }}" }
+                                        ?: "灏氭湭閫夋嫨",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             Icon(
                                 imageVector = Icons.Rounded.ExpandMore,
-                                contentDescription = "选择题库",
+                                contentDescription = "閫夋嫨棰樺簱",
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(22.dp)
                             )
@@ -1369,7 +1462,7 @@ private fun WrongBookManualAddDialog(
                                         Column {
                                             Text(bank.name, style = MaterialTheme.typography.bodyMedium)
                                             Text(
-                                                text = "${bank.questions.size} 题 · ${bank.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }}",
+                                                text = "${bank.questions.size} 棰?路 ${bank.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }}",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -1385,19 +1478,17 @@ private fun WrongBookManualAddDialog(
                     }
                 }
 
-                // 题目 ID 输入（同时可作为手动输入）
-                OutlinedTextField(
+                // 棰樼洰 ID 杈撳叆锛堝悓鏃跺彲浣滀负鎵嬪姩杈撳叆锛?                OutlinedTextField(
                     value = questionId,
                     onValueChange = onQuestionIdChange,
-                    label = { Text("题目 ID（手动输入或从下方选择）") },
+                    label = { Text("棰樼洰 ID锛堟墜鍔ㄨ緭鍏ユ垨浠庝笅鏂归€夋嫨锛?) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // 当前题库题目列表（精简展示）
-                if (questionsInBank.isNotEmpty()) {
+                // 褰撳墠棰樺簱棰樼洰鍒楄〃锛堢簿绠€灞曠ず锛?                if (questionsInBank.isNotEmpty()) {
                     Text(
-                        text = "题库题目（点击即选中）",
+                        text = "棰樺簱棰樼洰锛堢偣鍑诲嵆閫変腑锛?,
                         style = MaterialTheme.typography.labelLarge,
                         color = ShirohaColors.TextSecondary,
                         fontWeight = FontWeight.SemiBold
@@ -1432,20 +1523,20 @@ private fun WrongBookManualAddDialog(
                     }
                     if (questionsInBank.size > 80) {
                         Text(
-                            text = "仅展示前 80 题，剩余请使用上方 ID 输入。",
+                            text = "浠呭睍绀哄墠 80 棰橈紝鍓╀綑璇蜂娇鐢ㄤ笂鏂?ID 杈撳叆銆?,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 } else if (currentBank != null) {
-                    NoticeCard("所选题库暂无题目。")
+                    NoticeCard("鎵€閫夐搴撴殏鏃犻鐩€?)
                 }
 
-                // 错误原因
+                // 閿欒鍘熷洜
                 OutlinedTextField(
                     value = errorReason,
                     onValueChange = onErrorReasonChange,
-                    label = { Text("错误原因（可选）") },
+                    label = { Text("閿欒鍘熷洜锛堝彲閫夛級") },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2,
                     maxLines = 4
@@ -1457,10 +1548,10 @@ private fun WrongBookManualAddDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onConfirm) { Text("加入错题本") }
+            TextButton(onClick = onConfirm) { Text("鍔犲叆閿欓鏈?) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("取消") }
+            TextButton(onClick = onDismiss) { Text("鍙栨秷") }
         }
     )
 }
