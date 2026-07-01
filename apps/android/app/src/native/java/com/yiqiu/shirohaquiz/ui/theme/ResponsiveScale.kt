@@ -94,6 +94,5 @@ fun sectionTitleStyleFor(screenClass: ScreenClass): TextStyle {
     )
 }
 
-// 兼容旧 API:保留常量,但使用桌面尺寸作为默认(响应式函数优先)
-val EditorialFigureStyle: TextStyle = editorialFigureStyleFor(ScreenClass.EXPANDED)
-val EditorialKickerStyle: TextStyle = editorialKickerStyleFor(ScreenClass.EXPANDED)
+// Note: EditorialFigureStyle and EditorialKickerStyle are defined in Type.kt.
+// Use the responsive *For() functions above for screen-size-aware variants.
