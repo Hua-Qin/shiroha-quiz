@@ -5,6 +5,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
@@ -17,8 +18,8 @@ import androidx.compose.ui.unit.sp
 enum class ScreenClass { COMPACT, MEDIUM, EXPANDED }
 
 fun screenClassFor(maxWidth: Dp): ScreenClass = when {
-    maxWidth >= 840.dp() -> ScreenClass.EXPANDED
-    maxWidth >= 600.dp() -> ScreenClass.MEDIUM
+    maxWidth >= 840.dp -> ScreenClass.EXPANDED
+    maxWidth >= 600.dp -> ScreenClass.MEDIUM
     else -> ScreenClass.COMPACT
 }
 
@@ -96,6 +97,3 @@ fun sectionTitleStyleFor(screenClass: ScreenClass): TextStyle {
 // 兼容旧 API:保留常量,但使用桌面尺寸作为默认(响应式函数优先)
 val EditorialFigureStyle: TextStyle = editorialFigureStyleFor(ScreenClass.EXPANDED)
 val EditorialKickerStyle: TextStyle = editorialKickerStyleFor(ScreenClass.EXPANDED)
-
-// 内部用的小工具(Compose 没法直接 .dp() 所以用 infix)
-private infix fun Float.dp() = androidx.compose.ui.unit.Dp(this)
