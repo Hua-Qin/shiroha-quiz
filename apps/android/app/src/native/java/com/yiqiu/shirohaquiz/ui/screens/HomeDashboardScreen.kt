@@ -415,6 +415,7 @@ private fun ShortcutGrid(
             )
         }
     }
+}
 
 @Composable
 private fun DashboardShortcutCard(
