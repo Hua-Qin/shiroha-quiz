@@ -1,4 +1,4 @@
-﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -84,7 +84,7 @@ fun StudyScreen(
         if (uri == null) return@rememberLauncherForActivityResult
         if (isImporting) return@rememberLauncherForActivityResult
         isImporting = true
-        statusText = "姝ｅ湪瑙ｆ瀽璇剧▼鍖呪€?
+        statusText = "姝ｅ湪瑙ｆ瀽璇剧▼鍖呪€"
         isStatusWarn = false
         scope.launch {
             val result = withContext(Dispatchers.IO) {
@@ -96,7 +96,7 @@ fun StudyScreen(
                 }.getOrElse { e -> "瀵煎叆澶辫触锛?{e.message ?: e.javaClass.simpleName}" }
             }
             statusText = result
-            isStatusWarn = result.startsWith("瀵煎叆澶辫触") || result.startsWith("鏈娴嬪埌") || result.startsWith("璇剧▼鍖?)
+            isStatusWarn = result.startsWith("瀵煎叆澶辫触") || result.startsWith("鏈娴嬪埌") || result.startsWith("璇剧▼鍖")
             isImporting = false
         }
     }
@@ -119,7 +119,7 @@ fun StudyScreen(
             ShirohaHeader(
                 kicker = "Study",
                 title = "杈瑰杈圭瓟",
-                subtitle = "瀵煎叆鏁欑▼璇剧▼鍖咃紝瀛﹀畬姣忎釜鐭ヨ瘑鐐圭珛鍗崇瓟棰樺珐鍥?,
+                subtitle = "瀵煎叆鏁欑▼璇剧▼鍖咃紝瀛﹀畬姣忎釜鐭ヨ瘑鐐圭珛鍗崇瓟棰樺珐鍥",
                 scale = scale
             )
 
@@ -130,7 +130,7 @@ fun StudyScreen(
             ) {
                 ActionPillButton(
                     icon = Icons.Rounded.FileOpen,
-                    text = "瀵煎叆璇剧▼鍖?,
+                    text = "瀵煎叆璇剧▼鍖",
                     primary = true,
                     fillWidthContent = true,
                     enabled = !isImporting,
@@ -149,8 +149,8 @@ fun StudyScreen(
             if (courses.isEmpty()) {
                 Spacer(modifier = Modifier.height(ShirohaSpacing.Lg))
                 EmptyStateIllustration(
-                    title = "杩樻病鏈夎绋?,
-                    message = "璇峰鍏ヨ绋嬪寘 JSON锛堝寘鍚?course 鑺傜偣鍜?questions 鏁扮粍锛夈€俓n鐐瑰嚮涓婃柟銆屽鍏ヨ绋嬪寘銆嶆寜閽€夋嫨鏂囦欢銆?
+                    title = "杩樻病鏈夎绋",
+                    message = "璇峰鍏ヨ绋嬪寘 JSON锛堝寘鍚?course 鑺傜偣鍜?questions 鏁扮粍锛夈€俓n鐐瑰嚮涓婃柟銆屽鍏ヨ绋嬪寘銆嶆寜閽€夋嫨鏂囦欢銆"
                 )
             } else {
                 // 椤堕儴缁熻锛欵ditorialFigure 脳N锛堣‖绾垮ぇ鏁板瓧 + 灏忔爣绛?+ 鍙戜笣涓嬪垝绾匡級
@@ -213,14 +213,14 @@ private fun StudyOverviewFigures(
                 modifier = Modifier.weight(1f),
                 scale = scale,
                 value = "$progressPercent",
-                label = "鎬昏繘搴?,
+                label = "鎬昏繘搴",
                 unit = "%"
             )
             EditorialFigure(
                 modifier = Modifier.weight(1f),
                 scale = scale,
                 value = "$studiedSections",
-                label = "宸插涔犵珷鑺?,
+                label = "宸插涔犵珷鑺",
                 unit = if (totalSections > 0) "/ $totalSections" else ""
             )
         }
@@ -232,15 +232,15 @@ private fun StudyOverviewFigures(
                 modifier = Modifier.weight(1f),
                 scale = scale,
                 value = "$masteredSections",
-                label = "宸插畬鎴?,
-                unit = "鑺?
+                label = "宸插畬鎴",
+                unit = "鑺"
             )
             EditorialFigure(
                 modifier = Modifier.weight(1f),
                 scale = scale,
                 value = "$inProgressSections",
-                label = "杩涜涓?,
-                unit = "鑺?
+                label = "杩涜涓",
+                unit = "鑺"
             )
         }
     }
@@ -302,8 +302,8 @@ private fun StudyCourseCard(
                 ProgressStat(label = "绔犺妭", value = "${summary.studiedSections}/${summary.totalSections}")
                 ProgressStat(label = "棰樼洰", value = "${summary.totalQuestions}")
                 ProgressStat(
-                    label = "姝ｇ‘鐜?,
-                    value = if (summary.practicedSections > 0) "${(summary.averageAccuracy * 100).toInt()}%" else "鈥?
+                    label = "姝ｇ‘鐜",
+                    value = if (summary.practicedSections > 0) "${(summary.averageAccuracy * 100).toInt()}%" else "鈥"
                 )
             }
         }

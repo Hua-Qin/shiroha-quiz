@@ -1,4 +1,4 @@
-﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -94,21 +94,21 @@ fun HomeRedirectNotice(onGoStatistics: () -> Unit) {
                 TriggerCaseRow(
                     icon = Icons.Rounded.Warning,
                     title = "棰樺簱涓虹┖",
-                    desc = "鏈湴鏈鍏ヤ换浣曢搴撴椂,棣栭〉浼氬紩瀵艰繘鍏ュ涔犳暟鎹湅鏉裤€?,
+                    desc = "鏈湴鏈鍏ヤ换浣曢搴撴椂,棣栭〉浼氬紩瀵艰繘鍏ュ涔犳暟鎹湅鏉裤€",
                     active = QuizRepository.banks.isEmpty()
                 )
                 EditorialDivider()
                 TriggerCaseRow(
                     icon = Icons.Rounded.QueryStats,
                     title = "棣栨鍚姩",
-                    desc = "棣栨鍚姩鎴栧崌绾у悗,浼氫紭鍏堝睍绀哄涔犳暟鎹湅鏉裤€?,
+                    desc = "棣栨鍚姩鎴栧崌绾у悗,浼氫紭鍏堝睍绀哄涔犳暟鎹湅鏉裤€",
                     active = false
                 )
                 EditorialDivider()
                 TriggerCaseRow(
                     icon = Icons.Rounded.Warning,
-                    title = "鍗囩骇鍚?,
-                    desc = "搴旂敤鍗囩骇鍒版柊鐗堟湰鍚?棣栭〉鍙兘閲嶅畾鍚戜互灞曠ず鏂板姛鑳姐€?,
+                    title = "鍗囩骇鍚",
+                    desc = "搴旂敤鍗囩骇鍒版柊鐗堟湰鍚?棣栭〉鍙兘閲嶅畾鍚戜互灞曠ず鏂板姛鑳姐€",
                     active = false
                 )
             }
@@ -120,7 +120,7 @@ fun HomeRedirectNotice(onGoStatistics: () -> Unit) {
                 scale = scale
             ) {
                 HomeNoticeParagraph(
-                    text = "浣犲彲浠ラ€夋嫨绔嬪嵆杩涘叆瀛︿範鏁版嵁鐪嬫澘,鎴栫户缁暀鍦ㄥ師椤点€?,
+                    text = "浣犲彲浠ラ€夋嫨绔嬪嵆杩涘叆瀛︿範鏁版嵁鐪嬫澘,鎴栫户缁暀鍦ㄥ師椤点€",
                     uiScale = uiScale
                 )
                 Spacer(Modifier.height(ShirohaSpacing.Sm))
@@ -220,17 +220,17 @@ private fun TriggerCaseRow(
  */
 private fun resolveTriggerTitle(): String {
     return if (QuizRepository.banks.isEmpty()) {
-        "棣栭〉宸插崌绾?
+        "棣栭〉宸插崌绾"
     } else {
-        "瀛︿範鏁版嵁鐪嬫澘宸插氨缁?
+        "瀛︿範鏁版嵁鐪嬫澘宸插氨缁"
     }
 }
 
 private fun resolveTriggerSubtitle(): String {
     return if (QuizRepository.banks.isEmpty()) {
-        "鏈湴杩樻病鏈夐搴?鍏堝幓瀵煎叆鍐嶅洖鍒伴椤电粌涔犲惂銆?
+        "鏈湴杩樻病鏈夐搴?鍏堝幓瀵煎叆鍐嶅洖鍒伴椤电粌涔犲惂銆"
     } else {
-        "瀛︿範鏁版嵁鐪嬫澘鎻愪緵瀹屾暣鐨勫涔犳€昏涓庣粺璁″姛鑳姐€?
+        "瀛︿範鏁版嵁鐪嬫澘鎻愪緵瀹屾暣鐨勫涔犳€昏涓庣粺璁″姛鑳姐€"
     }
 }
 

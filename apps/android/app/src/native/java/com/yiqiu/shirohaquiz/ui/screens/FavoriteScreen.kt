@@ -1,4 +1,4 @@
-﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -138,13 +138,13 @@ fun FavoriteScreen(
             ) {
                 ShirohaHeader(
                     kicker = "Favorites",
-                    title = "鏀惰棌澶?,
-                    subtitle = "闆嗕腑鏌ョ湅鍜岀粌涔犱綘涓诲姩鏍囪鐨勯鐩€?,
+                    title = "鏀惰棌澶",
+                    subtitle = "闆嗕腑鏌ョ湅鍜岀粌涔犱綘涓诲姩鏍囪鐨勯鐩€",
                     scale = scale
                 )
                 EmptyStateIllustration(
-                    title = "鏀惰棌澶硅繕鏄┖鐨?,
-                    message = "缁冧範鏃剁偣鍑婚鐩彸涓婅鏄熸爣鍗冲彲鏀惰棌銆?,
+                    title = "鏀惰棌澶硅繕鏄┖鐨",
+                    message = "缁冧範鏃剁偣鍑婚鐩彸涓婅鏄熸爣鍗冲彲鏀惰棌銆",
                     imageRes = R.drawable.illus_empty_state_webp,
                     action = {
                         Spacer(Modifier.height(14.dp))
@@ -175,8 +175,8 @@ fun FavoriteScreen(
                 ) {
                     ShirohaHeader(
                         kicker = "Favorites",
-                        title = "鏀惰棌澶?,
-                        subtitle = "闆嗕腑鏌ョ湅鍜岀粌涔犱綘涓诲姩鏍囪鐨勯鐩€?,
+                        title = "鏀惰棌澶",
+                        subtitle = "闆嗕腑鏌ョ湅鍜岀粌涔犱綘涓诲姩鏍囪鐨勯鐩€",
                         scale = scale
                     )
 
@@ -195,14 +195,14 @@ fun FavoriteScreen(
                                 scale = scale,
                                 value = "${favorites.size}",
                                 label = "鏀惰棌棰樻暟",
-                                unit = "棰?
+                                unit = "棰"
                             )
                             EditorialFigure(
                                 modifier = Modifier.weight(1f),
                                 scale = scale,
                                 value = "$categoryCount",
                                 label = "瑕嗙洊鍒嗙被",
-                                unit = "绫?
+                                unit = "绫"
                             )
                         }
                     }
@@ -210,14 +210,14 @@ fun FavoriteScreen(
                     // 绛涢€夊尯
                     EditorialSection(
                         kicker = "Filter",
-                        title = "绛涢€?,
+                        title = "绛涢€",
                         scale = scale
                     ) {
                         Text(
                             text = if (selectedBank == null) {
-                                "鏀惰棌 ${favorites.size} 棰?
+                                "鏀惰棌 ${favorites.size} 棰"
                             } else {
-                                "鏀惰棌 ${visibleFavorites.size} / ${favorites.size} 棰?
+                                "鏀惰棌 ${visibleFavorites.size} / ${favorites.size} 棰"
                             },
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontSize = (MaterialTheme.typography.titleLarge.fontSize.value * uiScale).sp
@@ -226,7 +226,7 @@ fun FavoriteScreen(
                         )
                         Spacer(Modifier.height(ShirohaSpacing.Xs))
                         Text(
-                            text = "鏀惰棌鏁版嵁缁熶竴淇濆瓨锛屽彲鎸夊叏閮ㄩ搴撴垨鍗曚釜棰樺簱鏌ョ湅鍜岀粌涔犮€?,
+                            text = "鏀惰棌鏁版嵁缁熶竴淇濆瓨锛屽彲鎸夊叏閮ㄩ搴撴垨鍗曚釜棰樺簱鏌ョ湅鍜岀粌涔犮€",
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontSize = (MaterialTheme.typography.bodyMedium.fontSize.value * uiScale).sp
                             ),
@@ -288,8 +288,8 @@ fun FavoriteScreen(
             if (visibleFavorites.isEmpty()) {
                 item {
                     EmptyStateIllustration(
-                        title = "褰撳墠棰樺簱鏆傛棤鏀惰棌棰?,
-                        message = "鍙互鍒囨崲鍒板叾浠栭搴撴垨鍏ㄩ儴棰樺簱銆?,
+                        title = "褰撳墠棰樺簱鏆傛棤鏀惰棌棰",
+                        message = "鍙互鍒囨崲鍒板叾浠栭搴撴垨鍏ㄩ儴棰樺簱銆",
                         imageRes = R.drawable.illus_empty_state_webp
                     )
                 }
@@ -297,11 +297,11 @@ fun FavoriteScreen(
                 item {
                     EditorialSection(
                         kicker = "Items",
-                        title = "鏀惰棌棰?,
+                        title = "鏀惰棌棰",
                         scale = scale
                     ) {
                         Text(
-                            text = "鐐瑰嚮棰樺崱鍙睍寮€绛旀涓庤В鏋愶紱鐐瑰嚮鏄熸爣绉婚櫎鏀惰棌銆?,
+                            text = "鐐瑰嚮棰樺崱鍙睍寮€绛旀涓庤В鏋愶紱鐐瑰嚮鏄熸爣绉婚櫎鏀惰棌銆",
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontSize = (MaterialTheme.typography.bodySmall.fontSize.value * uiScale).sp
                             ),
@@ -372,8 +372,8 @@ private fun FavoriteScopeSelector(
                 Text(
                     text = selectedBank?.let { bank ->
                         val groupName = bank.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }
-                        "$groupName 路 鏀惰棌 $visibleCount 棰?
-                    } ?: "褰撳墠鏄剧ず鍏ㄩ儴棰樺簱鐨?$totalCount 閬撴敹钘?,
+                        "$groupName 路 鏀惰棌 $visibleCount 棰"
+                    } ?: "褰撳墠鏄剧ず鍏ㄩ儴棰樺簱鐨?$totalCount 閬撴敹钘",
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = smallFontSize),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -416,7 +416,7 @@ private fun FavoriteScopeDialog(
             ) {
                 FavoriteScopeOption(
                     title = "鍏ㄩ儴棰樺簱",
-                    desc = "鍏?${favorites.size} 閬撴敹钘?,
+                    desc = "鍏?${favorites.size} 閬撴敹钘",
                     selected = selectedScopeKey == FAVORITE_SCOPE_ALL,
                     onClick = { onSelect(FAVORITE_SCOPE_ALL) }
                 )
@@ -432,7 +432,7 @@ private fun FavoriteScopeDialog(
                         val key = FAVORITE_SCOPE_BANK_PREFIX + bank.id
                         FavoriteScopeOption(
                             title = bank.name,
-                            desc = "鏀惰棌 ${favoriteCountByBank[bank.id] ?: 0} 棰?路 鍏?${bank.questions.size} 棰?,
+                            desc = "鏀惰棌 ${favoriteCountByBank[bank.id] ?: 0} 棰?路 鍏?${bank.questions.size} 棰",
                             selected = selectedScopeKey == key,
                             onClick = { onSelect(key) }
                         )
@@ -565,7 +565,7 @@ private fun FavoriteQuestionPreview(
             }
             Spacer(Modifier.height(10.dp))
             Text(
-                text = "姝ｇ‘绛旀锛?{entry.question.answer.joinToString(" / ").ifBlank { "鏈瘑鍒瓟妗? }}",
+                text = "姝ｇ‘绛旀锛?{entry.question.answer.joinToString(" / ").ifBlank { "鏈瘑鍒瓟妗" }}",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium.copy(fontSize = bodyFontSize)
             )
@@ -596,7 +596,7 @@ private fun FavoriteQuestionPreview(
         } else {
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "鐐瑰嚮棰樺崱灞曞紑绛旀涓庤В鏋?,
+                text = "鐐瑰嚮棰樺崱灞曞紑绛旀涓庤В鏋",
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = smallFontSize),
                 color = ShirohaColors.TextSecondary
             )
@@ -629,8 +629,8 @@ private fun isSuspiciousFavoriteQuestionNumber(number: String): Boolean {
 private fun typeLabel(type: QuestionType): String = when (type) {
     QuestionType.SINGLE -> "鍗曢€夐"
     QuestionType.MULTIPLE -> "澶氶€夐"
-    QuestionType.JUDGE -> "鍒ゆ柇棰?
-    QuestionType.BLANK -> "濉┖棰?
+    QuestionType.JUDGE -> "鍒ゆ柇棰"
+    QuestionType.BLANK -> "濉┖棰"
     QuestionType.SHORT -> "绠€绛旈"
 }
 

@@ -1,4 +1,4 @@
-﻿﻿﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+﻿package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -125,7 +125,7 @@ fun StatisticsScreen(
 
             // === 瓒嬪娍鍥?===
             EditorialSection(
-                kicker = "杩?14 澶?,
+                kicker = "杩?14 澶",
                 title = "瀛︿範瓒嬪娍",
                 scale = scale
             ) {
@@ -141,7 +141,7 @@ fun StatisticsScreen(
                 scale = scale
             ) {
                 if (data.wrongBookByCategory.isEmpty()) {
-                    NoticeCard("褰撳墠娌℃湁閿欓鏁版嵁锛屽畬鎴愮粌涔犲悗浼氬湪杩欓噷缁熻銆?, warning = false)
+                    NoticeCard("褰撳墠娌℃湁閿欓鏁版嵁锛屽畬鎴愮粌涔犲悗浼氬湪杩欓噷缁熻銆", warning = false)
                 } else {
                     CategoryBarChart(categories = data.wrongBookByCategory.take(6))
                 }
@@ -181,7 +181,7 @@ private fun EditorialFiguresSection(stats: StudyStatistics, scale: Float = 1f) {
                 scale = scale,
                 value = "${stats.totalQuestionsAnswered}",
                 label = "绱绛旈",
-                unit = "棰?
+                unit = "棰"
             )
             EditorialFigure(
                 modifier = Modifier.weight(1f),
@@ -198,14 +198,14 @@ private fun EditorialFiguresSection(stats: StudyStatistics, scale: Float = 1f) {
                 modifier = Modifier.weight(1f),
                 scale = scale,
                 value = "${(stats.overallAccuracy * 100).toInt()}",
-                label = "骞冲潎姝ｇ‘鐜?,
+                label = "骞冲潎姝ｇ‘鐜",
                 unit = "%"
             )
             EditorialFigure(
                 modifier = Modifier.weight(1f),
                 scale = scale,
                 value = "${stats.knowledgePointsStudied} / ${stats.totalKnowledgePoints}",
-                label = "宸插鐭ヨ瘑鐐?
+                label = "宸插鐭ヨ瘑鐐"
             )
         }
         Row(
@@ -217,14 +217,14 @@ private fun EditorialFiguresSection(stats: StudyStatistics, scale: Float = 1f) {
                 scale = scale,
                 value = "${stats.practiceCount}",
                 label = "缁冧範娆℃暟",
-                unit = "娆?
+                unit = "娆"
             )
             EditorialFigure(
                 modifier = Modifier.weight(1f),
                 scale = scale,
                 value = "${stats.examCount}",
                 label = "鑰冭瘯娆℃暟",
-                unit = "娆?
+                unit = "娆"
             )
         }
     }
@@ -243,7 +243,7 @@ private fun AiAdviceCard(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)) {
         Text(
-            text = "鍩轰簬浣犵殑绛旈鏁版嵁鐢熸垚涓撳睘瀛︿範寤鸿銆?,
+            text = "鍩轰簬浣犵殑绛旈鏁版嵁鐢熸垚涓撳睘瀛︿範寤鸿銆",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -252,7 +252,7 @@ private fun AiAdviceCard(
                 val isAiConfigured = QuizRepository.isAiConfigured()
                 ActionPillButton(
                     icon = Icons.Rounded.AutoAwesome,
-                    text = if (isAiConfigured) "鑾峰彇瀛︿範寤鸿" else "璇峰厛鍦?AI 璁剧疆涓厤缃?,
+                    text = if (isAiConfigured) "鑾峰彇瀛︿範寤鸿" else "璇峰厛鍦?AI 璁剧疆涓厤缃",
                     primary = true,
                     onClick = {
                         if (!isAiConfigured) {
@@ -285,7 +285,7 @@ private fun AiAdviceCard(
             is StatisticsAdviceUiState.Loading -> {
                 ActionPillButton(
                     icon = Icons.Rounded.AutoAwesome,
-                    text = "鐢熸垚涓€?,
+                    text = "鐢熸垚涓€",
                     primary = true,
                     enabled = false,
                     onClick = {}
@@ -463,8 +463,8 @@ private fun DailyTrendLegend() {
         horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        LegendDot(color = ShirohaColors.BrandPrimary, label = "绛旈閲?)
-        LegendDot(color = ShirohaColors.BrandSecondary, label = "姝ｇ‘鐜?)
+        LegendDot(color = ShirohaColors.BrandPrimary, label = "绛旈閲")
+        LegendDot(color = ShirohaColors.BrandSecondary, label = "姝ｇ‘鐜")
     }
 }
 
@@ -498,7 +498,7 @@ fun CategoryBarChart(
     val trackColor = ShirohaColors.LineSoft
 
     if (categories.isEmpty()) {
-        NoticeCard("娌℃湁鍙樉绀虹殑閿欓鍒嗙被銆?, warning = false)
+        NoticeCard("娌℃湁鍙樉绀虹殑閿欓鍒嗙被銆", warning = false)
         return
     }
     val maxCount = categories.maxOf { it.count }.coerceAtLeast(1)
@@ -523,7 +523,7 @@ fun CategoryBarChart(
                         modifier = Modifier.weight(1f)
                     )
                     Text(
-                        text = "${entry.count} 棰?,
+                        text = "${entry.count} 棰",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold
@@ -595,7 +595,7 @@ private fun StatisticsAdviceBlock(advice: PersonalizedAdvice) {
     }
     if (advice.weakPoints.isNotEmpty()) {
         Text(
-            text = "钖勫急鐐?,
+            text = "钖勫急鐐",
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold
         )
@@ -665,7 +665,7 @@ private fun buildStatisticsRecordsSummary(stats: StudyStatistics): String {
         }
     return buildString {
         append("绱绛旈 ${stats.totalQuestionsAnswered} 棰?绱姝ｇ‘ ${stats.totalCorrect} 棰?")
-        append("骞冲潎姝ｇ‘鐜?${(stats.overallAccuracy * 100).toInt()}%銆?)
+        append("骞冲潎姝ｇ‘鐜?${(stats.overallAccuracy * 100).toInt()}%銆")
         if (recent.isNotEmpty()) {
             append("\n鏈€杩戣褰?\n")
             append(recent)
@@ -675,7 +675,7 @@ private fun buildStatisticsRecordsSummary(stats: StudyStatistics): String {
 
 private fun buildStatisticsWrongSummary(): String {
     val wrongBook = QuizRepository.wrongBook
-    if (wrongBook.isEmpty()) return "鏆傛棤閿欓鏁版嵁銆?
+    if (wrongBook.isEmpty()) return "鏆傛棤閿欓鏁版嵁銆"
     return wrongBook
         .sortedByDescending { it.updatedAt.takeIf { updated -> updated > 0 } ?: it.timestamp }
         .take(10)

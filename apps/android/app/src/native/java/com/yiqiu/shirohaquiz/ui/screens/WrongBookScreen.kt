@@ -1,4 +1,4 @@
-﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -88,8 +88,8 @@ import java.util.Date
 import java.util.Locale
 
 private enum class WrongBookFilter(val label: String) {
-    NOT_MASTERED("鏈帉鎻?),
-    MASTERED("宸叉帉鎻?),
+    NOT_MASTERED("鏈帉鎻"),
+    MASTERED("宸叉帉鎻"),
     ALL("鍏ㄩ儴")
 }
 
@@ -100,9 +100,9 @@ private enum class WrongBookSort(val label: String) {
 }
 
 private enum class WrongBookReviewCountMode(val label: String) {
-    TEN("10棰?),
-    TWENTY("20棰?),
-    CUSTOM("鑷畾涔?),
+    TEN("10棰"),
+    TWENTY("20棰"),
+    CUSTOM("鑷畾涔"),
     ALL("鍏ㄩ儴")
 }
 
@@ -197,11 +197,11 @@ fun WrongBookScreen(
 
     if (showClearWrongBookConfirm) {
         ShirohaDangerConfirmDialog(
-            title = if (isSingleBankScope) "纭娓呯┖鈥?{selectedBank?.name.orEmpty()}鈥濋敊棰橈紵" else "纭娓呯┖鍏ㄩ儴閿欓锛?,
+            title = if (isSingleBankScope) "纭娓呯┖鈥?{selectedBank?.name.orEmpty()}鈥濋敊棰橈紵" else "纭娓呯┖鍏ㄩ儴閿欓锛",
             message = if (isSingleBankScope) {
-                "杩欎細绉婚櫎璇ラ搴撶殑閿欓璁板綍锛屽寘鎷敊棰樻鏁般€佹帉鎻＄姸鎬佸拰澶嶄範缁熻銆傚叾浠栭搴撻敊棰樹笉浼氬彈褰卞搷銆?
+                "杩欎細绉婚櫎璇ラ搴撶殑閿欓璁板綍锛屽寘鎷敊棰樻鏁般€佹帉鎻＄姸鎬佸拰澶嶄範缁熻銆傚叾浠栭搴撻敊棰樹笉浼氬彈褰卞搷銆"
             } else {
-                "杩欎細绉婚櫎鍏ㄩ儴棰樺簱鐨勯敊棰樿褰曪紝鍖呮嫭閿欓娆℃暟銆佹帉鎻＄姸鎬佸拰澶嶄範缁熻銆傛搷浣滀笉鍙挙閿€銆?
+                "杩欎細绉婚櫎鍏ㄩ儴棰樺簱鐨勯敊棰樿褰曪紝鍖呮嫭閿欓娆℃暟銆佹帉鎻＄姸鎬佸拰澶嶄範缁熻銆傛搷浣滀笉鍙挙閿€銆"
             },
             confirmText = if (isSingleBankScope) "娓呯┖褰撳墠鑼冨洿" else "娓呯┖鍏ㄩ儴",
             onDismiss = { showClearWrongBookConfirm = false },
@@ -266,15 +266,15 @@ fun WrongBookScreen(
                 ) {
                     // 缂栬緫寮?Header:kicker + 琛嚎澶ф爣棰?                    ShirohaHeader(
                         kicker = "Wrong Book",
-                        title = "閿欓鏈?,
-                        subtitle = "鎶婇敊棰樺彉鎴愭彁鍒嗛樁姊?,
+                        title = "閿欓鏈",
+                        subtitle = "鎶婇敊棰樺彉鎴愭彁鍒嗛樁姊",
                         scale = scale
                     )
 
                     if (allWrongBook.isEmpty()) {
                         EmptyStateIllustration(
-                            title = "閿欓鏈繕鏄┖鐨?,
-                            message = "缁х画缁冧範鎴栬€冭瘯鍚庯紝閿欓浼氳嚜鍔ㄨ繘鍏ヨ繖閲屻€?,
+                            title = "閿欓鏈繕鏄┖鐨",
+                            message = "缁х画缁冧範鎴栬€冭瘯鍚庯紝閿欓浼氳嚜鍔ㄨ繘鍏ヨ繖閲屻€",
                             imageRes = R.drawable.illus_wrongbook_hint_webp,
                             action = {
                                 Spacer(Modifier.height((12 * uiScale).dp))
@@ -290,7 +290,7 @@ fun WrongBookScreen(
 
                     if (allWrongBook.isNotEmpty()) {
                         IllustrationHeroCard(
-                            title = "閿欓闇€瑕佹參鎱㈡秷鍖栥€?,
+                            title = "閿欓闇€瑕佹參鎱㈡秷鍖栥€",
                             subtitle = "绛涢敊棰橈紝闆嗕腑澶嶇洏",
                             imageRes = R.drawable.illus_wrongbook_hint_webp,
                             modifier = Modifier.height(ShirohaDimens.HeroCardHeight),
@@ -307,28 +307,28 @@ fun WrongBookScreen(
                             EditorialFigure(
                                 value = wrongBook.size.toString(),
                                 label = "閿欓鎬绘暟",
-                                unit = "鏉?,
+                                unit = "鏉",
                                 scale = scale,
                                 modifier = Modifier.weight(1f)
                             )
                             EditorialFigure(
                                 value = notMasteredCount.toString(),
-                                label = "鏈帉鎻?,
-                                unit = "棰?,
+                                label = "鏈帉鎻",
+                                unit = "棰",
                                 scale = scale,
                                 modifier = Modifier.weight(1f)
                             )
                             EditorialFigure(
                                 value = masteredCount.toString(),
-                                label = "宸叉帉鎻?,
-                                unit = "棰?,
+                                label = "宸叉帉鎻",
+                                unit = "棰",
                                 scale = scale,
                                 modifier = Modifier.weight(1f)
                             )
                             EditorialFigure(
                                 value = (if (smartReviewEnabled) smartReviewEntries.size else 0).toString(),
-                                label = if (smartReviewEnabled) "浠婃棩寰呭涔? else "鏅鸿兘澶嶄範",
-                                unit = "棰?,
+                                label = if (smartReviewEnabled) "浠婃棩寰呭涔" else "鏅鸿兘澶嶄範",
+                                unit = "棰",
                                 scale = scale,
                                 modifier = Modifier.weight(1f)
                             )
@@ -423,11 +423,11 @@ fun WrongBookScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "閿欓 ${wrongBook.size} 鏉?,
+                                        text = "閿欓 ${wrongBook.size} 鏉",
                                         style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.SemiBold
                                     )
-                                    StatusChip(if (isSingleBankScope) "鍗曢搴? else "鍏ㄩ儴棰樺簱", selected = isSingleBankScope)
+                                    StatusChip(if (isSingleBankScope) "鍗曢搴" else "鍏ㄩ儴棰樺簱", selected = isSingleBankScope)
                                 }
                                 Spacer(Modifier.height((6 * uiScale).dp))
                                 Text(
@@ -477,8 +477,8 @@ fun WrongBookScreen(
                                     Text(
                                         text = selectedBank?.let { bank ->
                                             val groupName = bank.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }
-                                            "$groupName 路 閿欓 ${wrongBook.size} 鏉?
-                                        } ?: "褰撳墠鏄剧ず鍏ㄩ儴棰樺簱鐨?${allWrongBook.size} 閬撻敊棰?,
+                                            "$groupName 路 閿欓 ${wrongBook.size} 鏉"
+                                        } ?: "褰撳墠鏄剧ず鍏ㄩ儴棰樺簱鐨?${allWrongBook.size} 閬撻敊棰",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1,
@@ -495,7 +495,7 @@ fun WrongBookScreen(
                         }
 
                         if (wrongBook.isEmpty()) {
-                            NoticeCard("褰撳墠棰樺簱鏆傛棤閿欓銆傚彲浠ュ垏鎹㈠埌鍏朵粬棰樺簱鎴栧叏閮ㄩ搴撱€?)
+                            NoticeCard("褰撳墠棰樺簱鏆傛棤閿欓銆傚彲浠ュ垏鎹㈠埌鍏朵粬棰樺簱鎴栧叏閮ㄩ搴撱€")
                         } else {
                             // 鏅鸿兘澶嶄範鍖?寮€鍚椂鏄剧ず)
                             if (smartReviewEnabled) {
@@ -526,14 +526,14 @@ fun WrongBookScreen(
 
                             // 澶嶄範璁剧疆:绛涢€?+ 棰樺瀷 + 鍗曟澶嶄範鏁伴噺
                             EditorialSection(
-                                kicker = "绛涢€?,
+                                kicker = "绛涢€",
                                 title = "澶嶄範璁剧疆",
                                 scale = scale
                             ) {
                                 Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)) {
                                     // 鎺屾彙绛涢€?                                    Column(verticalArrangement = Arrangement.spacedBy((8 * uiScale).dp)) {
                                         Text(
-                                            text = "鎺屾彙绛涢€?,
+                                            text = "鎺屾彙绛涢€",
                                             style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.SemiBold
                                         )
@@ -564,7 +564,7 @@ fun WrongBookScreen(
                                                 fontWeight = FontWeight.SemiBold
                                             )
                                             if (availableTypes.isEmpty()) {
-                                                NoticeCard("褰撳墠鎺屾彙绛涢€変笅娌℃湁鍙€夋嫨鐨勯鍨嬨€?)
+                                                NoticeCard("褰撳墠鎺屾彙绛涢€変笅娌℃湁鍙€夋嫨鐨勯鍨嬨€")
                                             } else {
                                                 FlowRow(
                                                     modifier = Modifier.fillMaxWidth(),
@@ -606,7 +606,7 @@ fun WrongBookScreen(
                                                 fontWeight = FontWeight.SemiBold
                                             )
                                             Text(
-                                                text = "褰撳墠鍙涔?${reviewCandidates.size} 棰?,
+                                                text = "褰撳墠鍙涔?${reviewCandidates.size} 棰",
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -618,9 +618,9 @@ fun WrongBookScreen(
                                                 WrongBookReviewCountMode.entries.forEach { item ->
                                                     val label = when (item) {
                                                         WrongBookReviewCountMode.CUSTOM -> {
-                                                            if (reviewCountMode == WrongBookReviewCountMode.CUSTOM) "鑷畾涔?${selectedReviewCount}棰? else item.label
+                                                            if (reviewCountMode == WrongBookReviewCountMode.CUSTOM) "鑷畾涔?${selectedReviewCount}棰" else item.label
                                                         }
-                                                        WrongBookReviewCountMode.ALL -> "鍏ㄩ儴 ${reviewCandidates.size}棰?
+                                                        WrongBookReviewCountMode.ALL -> "鍏ㄩ儴 ${reviewCandidates.size}棰"
                                                         else -> item.label
                                                     }
                                                     ActionPillButton(
@@ -683,9 +683,9 @@ fun WrongBookScreen(
                                 ActionPillButton(
                                     icon = Icons.Rounded.PlayArrow,
                                     text = when {
-                                        reviewEntries.isEmpty() -> "鏆傛棤鍙涔犻鐩?
-                                        advancedReviewSettingsEnabled -> "寮€濮嬪涔?${reviewEntries.size} 棰?
-                                        else -> "鍒烽敊棰?
+                                        reviewEntries.isEmpty() -> "鏆傛棤鍙涔犻鐩"
+                                        advancedReviewSettingsEnabled -> "寮€濮嬪涔?${reviewEntries.size} 棰"
+                                        else -> "鍒烽敊棰"
                                     },
                                     primary = reviewEntries.isNotEmpty(),
                                     enabled = reviewEntries.isNotEmpty(),
@@ -714,9 +714,9 @@ fun WrongBookScreen(
                             if (reviewEntries.isEmpty()) {
                                 NoticeCard(
                                     text = when {
-                                        advancedReviewSettingsEnabled && selectedTypes.none { it in availableTypes } -> "璇疯嚦灏戦€夋嫨涓€绉嶆湁閿欓鐨勯鍨嬨€?
-                                        filter == WrongBookFilter.MASTERED -> "宸叉帉鎻￠涓嶄細杩涘叆鎵嬪姩澶嶄範銆傞渶瑕佸涔犳椂鍙厛鏍囦负鏈帉鎻°€?
-                                        else -> "褰撳墠绛涢€変笅娌℃湁闇€瑕佸涔犵殑閿欓銆?
+                                        advancedReviewSettingsEnabled && selectedTypes.none { it in availableTypes } -> "璇疯嚦灏戦€夋嫨涓€绉嶆湁閿欓鐨勯鍨嬨€"
+                                        filter == WrongBookFilter.MASTERED -> "宸叉帉鎻￠涓嶄細杩涘叆鎵嬪姩澶嶄範銆傞渶瑕佸涔犳椂鍙厛鏍囦负鏈帉鎻°€"
+                                        else -> "褰撳墠绛涢€変笅娌℃湁闇€瑕佸涔犵殑閿欓銆"
                                     }
                                 )
                             }
@@ -729,7 +729,7 @@ fun WrongBookScreen(
                 if (filteredEntries.isEmpty()) {
                     item {
                         EditorialDivider(label = "鍒楄〃")
-                        NoticeCard("褰撳墠绛涢€変笅娌℃湁閿欓銆?)
+                        NoticeCard("褰撳墠绛涢€変笅娌℃湁閿欓銆")
                     }
                 } else {
                     item {
@@ -773,7 +773,7 @@ private fun WrongBookScopeDialog(
             ) {
                 WrongBookScopeOption(
                     title = "鍏ㄩ儴棰樺簱",
-                    desc = "鍏?${wrongBook.size} 閬撻敊棰?,
+                    desc = "鍏?${wrongBook.size} 閬撻敊棰",
                     selected = selectedScopeKey == WRONG_BOOK_PAGE_SCOPE_ALL,
                     onClick = { onSelect(WRONG_BOOK_PAGE_SCOPE_ALL) }
                 )
@@ -789,7 +789,7 @@ private fun WrongBookScopeDialog(
                         val key = WRONG_BOOK_PAGE_SCOPE_BANK_PREFIX + bank.id
                         WrongBookScopeOption(
                             title = bank.name,
-                            desc = "閿欓 ${wrongCountByBank[bank.id] ?: 0} 棰?路 鍏?${bank.questions.size} 棰?,
+                            desc = "閿欓 ${wrongCountByBank[bank.id] ?: 0} 棰?路 鍏?${bank.questions.size} 棰",
                             selected = selectedScopeKey == key,
                             onClick = { onSelect(key) }
                         )
@@ -863,11 +863,11 @@ private fun WrongBookReviewCountDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("鑷畾涔夊崟娆″涔犳暟閲?) },
+        title = { Text("鑷畾涔夊崟娆″涔犳暟閲") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "璇疯緭鍏?1锝?maxCount 涔嬮棿鐨勯鏁般€?,
+                    text = "璇疯緭鍏?1锝?maxCount 涔嬮棿鐨勯鏁般€",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -916,7 +916,7 @@ private fun WrongBookSmartReviewSection(
     Spacer(Modifier.height(10.dp))
     ActionPillButton(
         icon = Icons.Rounded.PlayArrow,
-        text = if (total > 0) "寮€濮嬩粖鏃ュ涔? else "浠婃棩鏆傛棤鍒版湡",
+        text = if (total > 0) "寮€濮嬩粖鏃ュ涔" else "浠婃棩鏆傛棤鍒版湡",
         primary = total > 0,
         modifier = Modifier
             .fillMaxWidth(0.58f)
@@ -942,8 +942,8 @@ private fun WrongQuestionPreview(
 
     if (showRemoveConfirm) {
         ShirohaDangerConfirmDialog(
-            title = "纭绉诲嚭杩欓亾閿欓锛?,
-            message = "杩欎細浠庨敊棰樻湰涓Щ鍑烘湰棰橈紝骞舵竻闄よ繖閬撻褰撳墠鐨勯敊棰樺涔犵姸鎬併€傚師棰樺簱涓殑棰樼洰涓嶄細琚垹闄ゃ€?,
+            title = "纭绉诲嚭杩欓亾閿欓锛",
+            message = "杩欎細浠庨敊棰樻湰涓Щ鍑烘湰棰橈紝骞舵竻闄よ繖閬撻褰撳墠鐨勯敊棰樺涔犵姸鎬併€傚師棰樺簱涓殑棰樼洰涓嶄細琚垹闄ゃ€",
             confirmText = "纭绉诲嚭",
             onDismiss = { showRemoveConfirm = false },
             onConfirm = {
@@ -1107,7 +1107,7 @@ private fun WrongBookAnswerLine(
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = "$label锛?,
+            text = "$label锛",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -1248,7 +1248,7 @@ private fun WrongQuestionDetailDialog(
                         content = entry.aiAnalysis
                     )
                 } else {
-                    NoticeCard("鏆傛棤 AI 瑙ｆ瀽缂撳瓨銆?)
+                    NoticeCard("鏆傛棤 AI 瑙ｆ瀽缂撳瓨銆")
                 }
                 if (entry.errorReason.isNotBlank()) {
                     WrongBookExpandableSection(
@@ -1258,7 +1258,7 @@ private fun WrongQuestionDetailDialog(
                         content = entry.errorReason
                     )
                 } else {
-                    NoticeCard("灏氭湭濉啓閿欒鍘熷洜銆?)
+                    NoticeCard("灏氭湭濉啓閿欒鍘熷洜銆")
                 }
                 Text(
                     text = "閿?${entry.wrongCount} 娆?路 瀵?${entry.rightCount} 娆?路 鏈€杩戦敊璇?${formatTimestamp(entry.lastWrongAt)}",
@@ -1276,7 +1276,7 @@ private fun formatUserAnswerText(entry: WrongQuestionEntry): String {
     if (fromNew.isNotBlank()) return fromNew
     // 鍏煎鏃ф暟鎹細浣跨敤 lastAnswer
     val fromLegacy = entry.lastAnswer.joinToString(" / ").trim()
-    return fromLegacy.ifBlank { "鏈綔绛? }
+    return fromLegacy.ifBlank { "鏈綔绛" }
 }
 
 private fun formatCorrectAnswerText(entry: WrongQuestionEntry): String {
@@ -1286,7 +1286,7 @@ private fun formatCorrectAnswerText(entry: WrongQuestionEntry): String {
     return if (MultiBlankSupport.hasStructuredAnswers(entry.question)) {
         MultiBlankSupport.expectedAnswerText(entry.question.blankAnswers)
     } else {
-        entry.question.answer.joinToString(" / ").ifBlank { "鏈瘑鍒瓟妗? }
+        entry.question.answer.joinToString(" / ").ifBlank { "鏈瘑鍒瓟妗" }
     }
 }
 
@@ -1371,8 +1371,8 @@ private fun displayWrongStatus(status: String): String =
 private fun typeLabel(type: QuestionType): String = when (type) {
     QuestionType.SINGLE -> "鍗曢€夐"
     QuestionType.MULTIPLE -> "澶氶€夐"
-    QuestionType.JUDGE -> "鍒ゆ柇棰?
-    QuestionType.BLANK -> "濉┖棰?
+    QuestionType.JUDGE -> "鍒ゆ柇棰"
+    QuestionType.BLANK -> "濉┖棰"
     QuestionType.SHORT -> "绠€绛旈"
 }
 
@@ -1408,7 +1408,7 @@ private fun WrongBookManualAddDialog(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
-                    text = "閫夋嫨棰樺簱鍚庯紝浠庨搴撳垪琛ㄤ腑鐐归€夎鍔犲叆閿欓鏈殑棰樼洰銆?,
+                    text = "閫夋嫨棰樺簱鍚庯紝浠庨搴撳垪琛ㄤ腑鐐归€夎鍔犲叆閿欓鏈殑棰樼洰銆",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1481,14 +1481,14 @@ private fun WrongBookManualAddDialog(
                 // 棰樼洰 ID 杈撳叆锛堝悓鏃跺彲浣滀负鎵嬪姩杈撳叆锛?                OutlinedTextField(
                     value = questionId,
                     onValueChange = onQuestionIdChange,
-                    label = { Text("棰樼洰 ID锛堟墜鍔ㄨ緭鍏ユ垨浠庝笅鏂归€夋嫨锛?) },
+                    label = { Text("棰樼洰 ID锛堟墜鍔ㄨ緭鍏ユ垨浠庝笅鏂归€夋嫨锛") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 // 褰撳墠棰樺簱棰樼洰鍒楄〃锛堢簿绠€灞曠ず锛?                if (questionsInBank.isNotEmpty()) {
                     Text(
-                        text = "棰樺簱棰樼洰锛堢偣鍑诲嵆閫変腑锛?,
+                        text = "棰樺簱棰樼洰锛堢偣鍑诲嵆閫変腑锛",
                         style = MaterialTheme.typography.labelLarge,
                         color = ShirohaColors.TextSecondary,
                         fontWeight = FontWeight.SemiBold
@@ -1523,13 +1523,13 @@ private fun WrongBookManualAddDialog(
                     }
                     if (questionsInBank.size > 80) {
                         Text(
-                            text = "浠呭睍绀哄墠 80 棰橈紝鍓╀綑璇蜂娇鐢ㄤ笂鏂?ID 杈撳叆銆?,
+                            text = "浠呭睍绀哄墠 80 棰橈紝鍓╀綑璇蜂娇鐢ㄤ笂鏂?ID 杈撳叆銆",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 } else if (currentBank != null) {
-                    NoticeCard("鎵€閫夐搴撴殏鏃犻鐩€?)
+                    NoticeCard("鎵€閫夐搴撴殏鏃犻鐩€")
                 }
 
                 // 閿欒鍘熷洜
@@ -1548,7 +1548,7 @@ private fun WrongBookManualAddDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onConfirm) { Text("鍔犲叆閿欓鏈?) }
+            TextButton(onClick = onConfirm) { Text("鍔犲叆閿欓鏈") }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("鍙栨秷") }

@@ -1,4 +1,4 @@
-﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -91,7 +91,7 @@ fun AboutScreen(
             // === Hero 鍖?Shiroha 妯″紡鏃跺甫娴姩鎻掔敾 ===
             IllustrationHeroCard(
                 title = "Shiroha Quiz",
-                subtitle = "鎶婃瘡涓€娆＄粌涔?閮藉綋浣滀竴娆＄簿杩涖€?,
+                subtitle = "鎶婃瘡涓€娆＄粌涔?閮藉綋浣滀竴娆＄簿杩涖€",
                 imageRes = R.drawable.illus_me_settings,
                 modifier = Modifier.height(ShirohaDimens.HeroCardHeight),
                 imageSize = ShirohaDimens.HeroImageSize,
@@ -110,7 +110,7 @@ fun AboutScreen(
                 ) {
                     EditorialFigure(
                         value = appMeta.versionName,
-                        label = "鐗堟湰鍙?,
+                        label = "鐗堟湰鍙",
                         scale = scale,
                         modifier = Modifier.weight(1f)
                     )
@@ -128,15 +128,15 @@ fun AboutScreen(
                 ) {
                     EditorialFigure(
                         value = QuizRepository.banks.size.toString(),
-                        label = "棰樺簱鏁?,
-                        unit = "濂?,
+                        label = "棰樺簱鏁",
+                        unit = "濂",
                         scale = scale,
                         modifier = Modifier.weight(1f)
                     )
                     EditorialFigure(
                         value = QuizRepository.banks.sumOf { it.questions.size }.toString(),
                         label = "棰樼洰鎬绘暟",
-                        unit = "棰?,
+                        unit = "棰",
                         scale = scale,
                         modifier = Modifier.weight(1f)
                     )
@@ -146,16 +146,16 @@ fun AboutScreen(
             // === 椤圭洰绠€浠?闀挎枃鏈?Serif 姝ｆ枃 ===
             EditorialSection(
                 kicker = "Story",
-                title = "瀹冩槸浠€涔?,
+                title = "瀹冩槸浠€涔",
                 scale = scale
             ) {
                 AboutParagraph(
-                    text = "Shiroha Quiz 鏄竴涓潰鍚戞湰鍦伴搴撳鍏ャ€佺粌涔犮€佽€冭瘯銆侀敊棰樺涔犲拰瀛︿範璁板綍绠＄悊鐨勫埛棰樺伐鍏枫€傚師鐢熷畨鍗撶増鏈噸鐐逛紭鍖栫Щ鍔ㄧ鎿嶄綔浣撻獙銆侀搴撴牳瀵瑰拰鏈湴鏁版嵁绠＄悊銆?,
+                    text = "Shiroha Quiz 鏄竴涓潰鍚戞湰鍦伴搴撳鍏ャ€佺粌涔犮€佽€冭瘯銆侀敊棰樺涔犲拰瀛︿範璁板綍绠＄悊鐨勫埛棰樺伐鍏枫€傚師鐢熷畨鍗撶増鏈噸鐐逛紭鍖栫Щ鍔ㄧ鎿嶄綔浣撻獙銆侀搴撴牳瀵瑰拰鏈湴鏁版嵁绠＄悊銆",
                     uiScale = uiScale
                 )
                 EditorialDivider()
                 AboutParagraph(
-                    text = "鎴戜滑閲囩敤缂栬緫鏉傚織椋庤璁¤瑷€,鎶婃瘡涓€娆＄粌涔?褰撲綔涓€娆＄簿杩涖€傜背榛勫簳鑹查厤琛嚎澶ф暟瀛?闀挎椂闂撮槄璇绘洿鏌斿拰銆傛墍鏈夋暟鎹潎淇濆瓨鍦ㄦ湰鍦?浣犲彲浠ラ殢鏃跺鍑哄浠芥垨娓呴櫎銆?,
+                    text = "鎴戜滑閲囩敤缂栬緫鏉傚織椋庤璁¤瑷€,鎶婃瘡涓€娆＄粌涔?褰撲綔涓€娆＄簿杩涖€傜背榛勫簳鑹查厤琛嚎澶ф暟瀛?闀挎椂闂撮槄璇绘洿鏌斿拰銆傛墍鏈夋暟鎹潎淇濆瓨鍦ㄦ湰鍦?浣犲彲浠ラ殢鏃跺鍑哄浠芥垨娓呴櫎銆",
                     uiScale = uiScale
                 )
             }
@@ -167,7 +167,7 @@ fun AboutScreen(
                 scale = scale
             ) {
                 AboutParagraph(
-                    text = "鏆栫焊寮犲緞鍚戞笎鍙?+ 琛嚎澶ф暟瀛?+ 鍙戜笣涓嬪垝绾?钀ラ€犳潅蹇楀皝闈㈢骇鐨勬暟鎹劅;鍗＄墖杞婚噺鍖?鐣欑櫧浼樺厛,閬垮紑绱矇娓愬彉涓庨噸鎶曞奖銆係hiroha 妯″紡寮€鍚椂,閮ㄥ垎椤甸潰浼氭樉绀烘彃鐢讳笌寮€灞忓浘銆?,
+                    text = "鏆栫焊寮犲緞鍚戞笎鍙?+ 琛嚎澶ф暟瀛?+ 鍙戜笣涓嬪垝绾?钀ラ€犳潅蹇楀皝闈㈢骇鐨勬暟鎹劅;鍗＄墖杞婚噺鍖?鐣欑櫧浼樺厛,閬垮紑绱矇娓愬彉涓庨噸鎶曞奖銆係hiroha 妯″紡寮€鍚椂,閮ㄥ垎椤甸潰浼氭樉绀烘彃鐢讳笌寮€灞忓浘銆",
                     uiScale = uiScale
                 )
             }
@@ -181,35 +181,35 @@ fun AboutScreen(
                 AboutFeatureRow(
                     icon = Icons.Rounded.Folder,
                     title = "棰樺簱瀵煎叆",
-                    desc = "鏀寔 ZIP / JSON / 鏂囨湰瀵煎叆,AI 杈呭姪閲嶆瀯涓庢牳瀵广€?,
+                    desc = "鏀寔 ZIP / JSON / 鏂囨湰瀵煎叆,AI 杈呭姪閲嶆瀯涓庢牳瀵广€",
                     onClick = { uriHandler.openUri("https://github.com/reiqr/shiroha-quiz") }
                 )
                 EditorialDivider()
                 AboutFeatureRow(
                     icon = Icons.Rounded.School,
-                    title = "閿欓鏈?,
-                    desc = "鑷姩鏀跺綍閿欓,鏅鸿兘澶嶄範涓庢帉鎻″垽瀹氥€?,
+                    title = "閿欓鏈",
+                    desc = "鑷姩鏀跺綍閿欓,鏅鸿兘澶嶄範涓庢帉鎻″垽瀹氥€",
                     onClick = { uriHandler.openUri("https://github.com/reiqr/shiroha-quiz") }
                 )
                 EditorialDivider()
                 AboutFeatureRow(
                     icon = Icons.Rounded.Star,
                     title = "鏀惰棌",
-                    desc = "鏀惰棌閲嶇偣棰樼洰,闅忔椂缈荤湅涓庡洖椤俱€?,
+                    desc = "鏀惰棌閲嶇偣棰樼洰,闅忔椂缈荤湅涓庡洖椤俱€",
                     onClick = { uriHandler.openUri("https://github.com/reiqr/shiroha-quiz") }
                 )
                 EditorialDivider()
                 AboutFeatureRow(
                     icon = Icons.Rounded.AutoStories,
                     title = "杈瑰杈圭瓟",
-                    desc = "璇剧▼瀛︿範 + 鍗虫椂鍙嶉 + 妯℃嫙鑰冭瘯銆?,
+                    desc = "璇剧▼瀛︿範 + 鍗虫椂鍙嶉 + 妯℃嫙鑰冭瘯銆",
                     onClick = { uriHandler.openUri("https://github.com/reiqr/shiroha-quiz") }
                 )
                 EditorialDivider()
                 AboutFeatureRow(
                     icon = Icons.Rounded.Description,
                     title = "AI 瑙ｆ瀽",
-                    desc = "鍗曢 AI 鍒嗘瀽涓庢牳瀵?浜哄伐纭鍚庡啓鍏ャ€?,
+                    desc = "鍗曢 AI 鍒嗘瀽涓庢牳瀵?浜哄伐纭鍚庡啓鍏ャ€",
                     onClick = { uriHandler.openUri("https://github.com/reiqr/shiroha-quiz") }
                 )
             }
@@ -221,7 +221,7 @@ fun AboutScreen(
                 scale = scale
             ) {
                 AboutParagraph(
-                    text = "棰樺簱銆侀敊棰樻湰鍜屽涔犺褰曢粯璁や繚瀛樺湪鏈満銆傚彂甯冨寘涓嶅簲鍖呭惈鐢ㄦ埛鏈湴瀵煎叆鏁版嵁銆?,
+                    text = "棰樺簱銆侀敊棰樻湰鍜屽涔犺褰曢粯璁や繚瀛樺湪鏈満銆傚彂甯冨寘涓嶅簲鍖呭惈鐢ㄦ埛鏈湴瀵煎叆鏁版嵁銆",
                     uiScale = uiScale
                 )
                 EditorialDivider()
@@ -232,7 +232,7 @@ fun AboutScreen(
                 Spacer(Modifier.height(ShirohaSpacing.Sm))
                 ActionPillButton(
                     icon = Icons.AutoMirrored.Rounded.ArrowBack,
-                    text = "鎵撳紑 GitHub 椤圭洰椤?,
+                    text = "鎵撳紑 GitHub 椤圭洰椤",
                     primary = true,
                     modifier = Modifier.height(44.dp),
                     onClick = { uriHandler.openUri("https://github.com/reiqr/shiroha-quiz") }
@@ -311,7 +311,7 @@ private data class AppMeta(
 
 private fun resolveAppMeta(context: Context): AppMeta {
     val fallbackVersion = "1.0.0"
-    val fallbackBuild = "鈥?
+    val fallbackBuild = "鈥"
     return runCatching {
         val pm = context.packageManager
         val pkgInfo = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {

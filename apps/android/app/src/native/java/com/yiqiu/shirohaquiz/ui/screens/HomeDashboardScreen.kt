@@ -1,4 +1,4 @@
-﻿﻿﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+﻿package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -180,7 +180,7 @@ fun HomeDashboardScreen(
 
             // === 瓒嬪娍鍥?===
             EditorialSection(
-                kicker = "杩?14 澶?,
+                kicker = "杩?14 澶",
                 title = "瀛︿範瓒嬪娍",
                 scale = scale
             ) {
@@ -195,7 +195,7 @@ fun HomeDashboardScreen(
                 scale = scale
             ) {
                 if (stats.wrongBookByCategory.isEmpty()) {
-                    NoticeCard("褰撳墠娌℃湁閿欓鏁版嵁锛屽畬鎴愮粌涔犲悗浼氬湪杩欓噷缁熻銆?, warning = false)
+                    NoticeCard("褰撳墠娌℃湁閿欓鏁版嵁锛屽畬鎴愮粌涔犲悗浼氬湪杩欓噷缁熻銆", warning = false)
                 } else {
                     com.yiqiu.shirohaquiz.ui.screens.CategoryBarChart(
                         categories = stats.wrongBookByCategory.take(6)
@@ -250,8 +250,8 @@ private fun EditorialHeroSection(
     onGoExam: () -> Unit
 ) {
     IllustrationHeroCard(
-        title = "浠婃棩鐨勭粌涔?\n鏄庡ぉ浼氭劅璋綘銆?,
-        subtitle = "鎶婃瘡涓€娆＄瓟棰?閮藉綋浣滀竴娆＄簿杩涖€?,
+        title = "浠婃棩鐨勭粌涔?\n鏄庡ぉ浼氭劅璋綘銆",
+        subtitle = "鎶婃瘡涓€娆＄瓟棰?閮藉綋浣滀竴娆＄簿杩涖€",
         imageRes = com.yiqiu.shirohaquiz.R.drawable.illus_home_welcome,
         scale = scale
     ) {
@@ -259,7 +259,7 @@ private fun EditorialHeroSection(
         Row(horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Sm)) {
             ActionPillButton(
                 icon = Icons.Rounded.School,
-                text = "寮€濮嬬粌涔?,
+                text = "寮€濮嬬粌涔",
                 primary = true,
                 onClick = onGoStudy
             )
@@ -289,7 +289,7 @@ private fun EditorialFiguresSection(stats: StudyStatistics, scale: Float = 1f) {
                 scale = scale,
                 value = "${stats.totalQuestionsAnswered}",
                 label = "绱绛旈",
-                unit = "棰?
+                unit = "棰"
             )
             EditorialFigure(
                 modifier = Modifier.weight(1f),
@@ -306,14 +306,14 @@ private fun EditorialFiguresSection(stats: StudyStatistics, scale: Float = 1f) {
                 modifier = Modifier.weight(1f),
                 scale = scale,
                 value = "${(stats.overallAccuracy * 100).toInt()}",
-                label = "骞冲潎姝ｇ‘鐜?,
+                label = "骞冲潎姝ｇ‘鐜",
                 unit = "%"
             )
             EditorialFigure(
                 modifier = Modifier.weight(1f),
                 scale = scale,
                 value = "${stats.knowledgePointsStudied} / ${stats.totalKnowledgePoints}",
-                label = "宸插鐭ヨ瘑鐐?
+                label = "宸插鐭ヨ瘑鐐"
             )
         }
         Row(
@@ -325,14 +325,14 @@ private fun EditorialFiguresSection(stats: StudyStatistics, scale: Float = 1f) {
                 scale = scale,
                 value = "${stats.practiceCount}",
                 label = "缁冧範娆℃暟",
-                unit = "娆?
+                unit = "娆"
             )
             EditorialFigure(
                 modifier = Modifier.weight(1f),
                 scale = scale,
                 value = "${stats.examCount}",
                 label = "鑰冭瘯娆℃暟",
-                unit = "娆?
+                unit = "娆"
             )
         }
     }
@@ -364,14 +364,14 @@ private fun TodayLearningSection(
                 scale = scale,
                 value = "${todayPracticeCount}",
                 label = "浠婃棩缁冮",
-                unit = "棰?
+                unit = "棰"
             )
             EditorialFigure(
                 modifier = Modifier.weight(1f),
                 scale = scale,
                 value = "${pendingReviewCount}",
                 label = pendingReviewTitle,
-                unit = "棰?
+                unit = "棰"
             )
         }
         Spacer(Modifier.height(ShirohaSpacing.Sm))
@@ -411,7 +411,7 @@ private fun ShortcutGrid(
             DashboardShortcutCard(
                 modifier = Modifier.weight(1f),
                 icon = Icons.Rounded.Warning,
-                label = "閿欓鏈?,
+                label = "閿欓鏈",
                 value = "$wrongBookActiveCount",
                 desc = "澶嶄範閿欓",
                 onClick = onOpenWrongBook
@@ -419,7 +419,7 @@ private fun ShortcutGrid(
             DashboardShortcutCard(
                 modifier = Modifier.weight(1f),
                 icon = Icons.Rounded.Star,
-                label = "鏀惰棌澶?,
+                label = "鏀惰棌澶",
                 value = "$favoriteCount",
                 desc = "鏌ョ湅鏀惰棌",
                 onClick = onOpenFavorites
@@ -516,7 +516,7 @@ private fun AiAdviceCard(
 
     Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Md)) {
         Text(
-            text = "鍩轰簬浣犵殑绛旈鏁版嵁鐢熸垚涓撳睘瀛︿範寤鸿銆?,
+            text = "鍩轰簬浣犵殑绛旈鏁版嵁鐢熸垚涓撳睘瀛︿範寤鸿銆",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -524,7 +524,7 @@ private fun AiAdviceCard(
             is AdviceUiState.Idle -> {
                 ActionPillButton(
                     icon = Icons.Rounded.AutoAwesome,
-                    text = if (isAiConfigured) "鑾峰彇瀛︿範寤鸿" else "閰嶇疆 AI 鍚庤幏鍙栧缓璁?,
+                    text = if (isAiConfigured) "鑾峰彇瀛︿範寤鸿" else "閰嶇疆 AI 鍚庤幏鍙栧缓璁",
                     primary = true,
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
@@ -554,7 +554,7 @@ private fun AiAdviceCard(
             is AdviceUiState.Loading -> {
                 ActionPillButton(
                     icon = Icons.Rounded.AutoAwesome,
-                    text = "鐢熸垚涓€?,
+                    text = "鐢熸垚涓€",
                     primary = true,
                     enabled = false,
                     modifier = Modifier.fillMaxWidth(),
@@ -599,7 +599,7 @@ private fun AdviceContentBlock(advice: PersonalizedAdvice) {
     }
     if (advice.weakPoints.isNotEmpty()) {
         Text(
-            text = "钖勫急鐐?,
+            text = "钖勫急鐐",
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold
         )
@@ -816,8 +816,8 @@ private fun DailyTrendLegend() {
         horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        LegendDot(color = ShirohaColors.BrandPrimary, label = "绛旈閲?)
-        LegendDot(color = ShirohaColors.BrandSecondary, label = "姝ｇ‘鐜?)
+        LegendDot(color = ShirohaColors.BrandPrimary, label = "绛旈閲")
+        LegendDot(color = ShirohaColors.BrandSecondary, label = "姝ｇ‘鐜")
     }
 }
 
@@ -894,7 +894,7 @@ private fun buildRecordsSummary(stats: StudyStatistics): String {
         }
     return buildString {
         append("绱绛旈 ${stats.totalQuestionsAnswered} 棰橈紝绱姝ｇ‘ ${stats.totalCorrect} 棰橈紝")
-        append("骞冲潎姝ｇ‘鐜?${(stats.overallAccuracy * 100).toInt()}%銆?)
+        append("骞冲潎姝ｇ‘鐜?${(stats.overallAccuracy * 100).toInt()}%銆")
         if (recent.isNotEmpty()) {
             append("\n鏈€杩戣褰曪細\n")
             append(recent)
@@ -904,7 +904,7 @@ private fun buildRecordsSummary(stats: StudyStatistics): String {
 
 private fun buildWrongQuestionsSummary(): String {
     val wrongBook = QuizRepository.wrongBook
-    if (wrongBook.isEmpty()) return "鏆傛棤閿欓鏁版嵁銆?
+    if (wrongBook.isEmpty()) return "鏆傛棤閿欓鏁版嵁銆"
     val recent = wrongBook
         .sortedByDescending { it.updatedAt.takeIf { updated -> updated > 0 } ?: it.timestamp }
         .take(10)

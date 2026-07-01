@@ -1,4 +1,4 @@
-﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -131,7 +131,7 @@ fun QuestionSearchScreen(
             ShirohaHeader(
                 kicker = "Search",
                 title = "棰樼洰鎼滅储",
-                subtitle = "鎼滈骞层€侀€夐」銆佺瓟妗堟垨瑙ｆ瀽銆?,
+                subtitle = "鎼滈骞层€侀€夐」銆佺瓟妗堟垨瑙ｆ瀽銆",
                 scale = scale
             )
 
@@ -204,7 +204,7 @@ fun QuestionSearchScreen(
             // === 楂樼骇绛涢€?棰樺簱):EditorialSection 鍖呰９ ===
             EditorialSection(
                 kicker = "Filter",
-                title = "绛涢€?,
+                title = "绛涢€",
                 scale = scale
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Sm)) {
@@ -249,8 +249,8 @@ fun QuestionSearchScreen(
                     scale = scale
                 ) {
                     EmptyStateIllustration(
-                        title = "杈撳叆鍏抽敭璇嶅紑濮嬫悳绱?,
-                        message = "鍙互杈撳叆棰樺共鐗囨銆侀€夐」鍐呭銆佺瓟妗堟垨瑙ｆ瀽閲岀殑鍏抽敭璇嶃€?
+                        title = "杈撳叆鍏抽敭璇嶅紑濮嬫悳绱",
+                        message = "鍙互杈撳叆棰樺共鐗囨銆侀€夐」鍐呭銆佺瓟妗堟垨瑙ｆ瀽閲岀殑鍏抽敭璇嶃€"
                     )
                 }
 
@@ -261,13 +261,13 @@ fun QuestionSearchScreen(
                 ) {
                     EmptyStateIllustration(
                         title = "娌℃湁鎵惧埌鐩稿叧棰樼洰",
-                        message = "鍙互鎹竴涓叧閿瘝锛屾垨鍒囨崲鍒板叏閮ㄩ搴撴悳绱€?
+                        message = "鍙互鎹竴涓叧閿瘝锛屾垨鍒囨崲鍒板叏閮ㄩ搴撴悳绱€"
                     )
                 }
 
                 else -> EditorialSection(
                     kicker = "Results",
-                    title = "缁撴灉锛?{results.size}锛?,
+                    title = "缁撴灉锛?{results.size}锛",
                     scale = scale
                 ) {
                     results.forEachIndexed { index, result ->
@@ -355,7 +355,7 @@ private fun SearchScopeDialog(
                         val key = bank.scopeKey()
                         SearchScopeOption(
                             title = bank.name,
-                            desc = "${bank.questions.size} 棰?,
+                            desc = "${bank.questions.size} 棰",
                             selected = selectedScopeKey == key,
                             onClick = { onSelect(key) }
                         )
@@ -455,7 +455,7 @@ private fun QuestionSearchResultCard(
         }
         Spacer(Modifier.height(10.dp))
         Text(
-            text = LatexDisplayFormatter.format(question.question).ifBlank { "锛堢┖棰樺共锛? },
+            text = LatexDisplayFormatter.format(question.question).ifBlank { "锛堢┖棰樺共锛" },
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             maxLines = if (expanded) Int.MAX_VALUE else 3,
@@ -464,7 +464,7 @@ private fun QuestionSearchResultCard(
         Spacer(Modifier.height(8.dp))
         // 鍛戒腑瀛楁 Chip
         Text(
-            text = "鍛戒腑锛?{result.matchedFields.joinToString("銆?) { it.label }}",
+            text = "鍛戒腑锛?{result.matchedFields.joinToString("銆") { it.label }}",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.SemiBold
@@ -472,7 +472,7 @@ private fun QuestionSearchResultCard(
         val answerText = if (MultiBlankSupport.hasStructuredAnswers(question)) {
             MultiBlankSupport.expectedAnswerText(question.blankAnswers)
         } else {
-            question.answer.joinToString("銆?)
+            question.answer.joinToString("銆")
         }
         if (answerText.isNotBlank()) {
             Spacer(Modifier.height(8.dp))
@@ -494,7 +494,7 @@ private fun QuestionSearchResultCard(
             Spacer(Modifier.height(14.dp))
             ActionPillButton(
                 icon = Icons.Rounded.Visibility,
-                text = "鏌ョ湅鎵€鍦ㄩ搴?,
+                text = "鏌ョ湅鎵€鍦ㄩ搴",
                 primary = false,
                 modifier = Modifier.fillMaxWidth(),
                 fillWidthContent = true,
@@ -515,7 +515,7 @@ private fun QuestionSearchResultCard(
 
 @Composable
 private fun FullQuestionInfo(question: Question) {
-    SearchInfoBlock(label = "棰樺共", text = question.question.ifBlank { "锛堢┖棰樺共锛? })
+    SearchInfoBlock(label = "棰樺共", text = question.question.ifBlank { "锛堢┖棰樺共锛" })
     if (question.images.isNotEmpty()) {
         Spacer(Modifier.height(10.dp))
         QuestionImagesBlock(question.images, maxPreviewHeight = 260.dp, showMeta = true)
@@ -597,8 +597,8 @@ private fun QuizBank.scopeKey(): String = "$SCOPE_BANK_PREFIX$id"
 private fun QuestionType.label(): String = when (this) {
     QuestionType.SINGLE -> "鍗曢€夐"
     QuestionType.MULTIPLE -> "澶氶€夐"
-    QuestionType.JUDGE -> "鍒ゆ柇棰?
-    QuestionType.BLANK -> "濉┖棰?
+    QuestionType.JUDGE -> "鍒ゆ柇棰"
+    QuestionType.BLANK -> "濉┖棰"
     QuestionType.SHORT -> "绠€绛旈"
 }
 

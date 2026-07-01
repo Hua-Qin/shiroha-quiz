@@ -1,4 +1,4 @@
-﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -227,7 +227,7 @@ fun ExamScreen(
             if (activeBank == null || activeBank.questions.isEmpty() || availableExamCount == 0) {
                 EmptyStateIllustration(
                     title = "杩樻病鏈夊彲鐢ㄤ簬鑰冭瘯鐨勫瑙傞",
-                    message = "褰撳墠鑰冭瘯鍏堟敮鎸佸崟閫夐銆佸閫夐鍜屽垽鏂銆?,
+                    message = "褰撳墠鑰冭瘯鍏堟敮鎸佸崟閫夐銆佸閫夐鍜屽垽鏂銆",
                     imageRes = R.drawable.illus_rest_state_webp,
                     action = { Spacer(Modifier.height(14.dp)) }
                 )
@@ -377,7 +377,7 @@ private fun ExamScreenHeaderRow(
             ShirohaHeader(
                 kicker = "Exam",
                 title = "妯℃嫙鑰冭瘯",
-                subtitle = "鎸夎鍒欒鏃?瀹屾垚鍚庢煡鐪嬪緱鍒嗕笌绛旈璇︽儏銆?,
+                subtitle = "鎸夎鍒欒鏃?瀹屾垚鍚庢煡鐪嬪緱鍒嗕笌绛旈璇︽儏銆",
                 scale = scale
             )
             if (isActiveExamRunning) {
@@ -442,7 +442,7 @@ private fun ExamSetupPanel(
         count * (typeScoreTexts[type].orEmpty().toDoubleOrNull() ?: defaultTypeScore(type))
     }
     val groupSummary = if (groupMode == ExamGroupMode.RANDOM) {
-        "鑷姩浠庡瑙傞閲岄殢鏈烘娊棰?骞舵妸鏈満鎬诲垎鎶樼畻涓?100 鍒嗐€?
+        "鑷姩浠庡瑙傞閲岄殢鏈烘娊棰?骞舵妸鏈満鎬诲垎鎶樼畻涓?100 鍒嗐€"
     } else {
         if (customQuestionCount == 0) "鐐瑰嚮璁剧疆姣忕棰樺瀷鐨勯閲忓拰鍒嗗€笺€? else "棰勮 $customQuestionCount 棰?路 ${customTotalScore.trimScoreText()} 鍒?
     }
@@ -465,15 +465,15 @@ private fun ExamSetupPanel(
                     modifier = Modifier.weight(1f),
                     scale = scale,
                     value = "$totalQuestions",
-                    label = "棰樺簱鎬婚鏁?,
-                    unit = "棰?
+                    label = "棰樺簱鎬婚鏁",
+                    unit = "棰"
                 )
                 EditorialFigure(
                     modifier = Modifier.weight(1f),
                     scale = scale,
                     value = "$availableExamCount",
                     label = "鍙€冭瘯棰樻暟",
-                    unit = "棰?
+                    unit = "棰"
                 )
             }
             Spacer(Modifier.height(ShirohaSpacing.Sm))
@@ -498,7 +498,7 @@ private fun ExamSetupPanel(
                 val safeAvailable = availableExamCount.coerceAtLeast(1)
                 ActionPillButton(
                     icon = Icons.Rounded.PlayArrow,
-                    text = "鑷畾涔?,
+                    text = "鑷畾涔",
                     primary = selectedQuestionCountMode == "custom",
                     onClick = {
                         customQuestionCountText = selectedQuestionCount.coerceIn(1, safeAvailable).toString()
@@ -506,9 +506,9 @@ private fun ExamSetupPanel(
                     }
                 )
                 buildList {
-                    if (safeAvailable >= 50) add(Triple(50, "50 棰?, "50"))
-                    if (safeAvailable >= 100) add(Triple(100, "100 棰?, "100"))
-                    add(Triple(safeAvailable, "鍏ㄩ儴 $safeAvailable 棰?, "all"))
+                    if (safeAvailable >= 50) add(Triple(50, "50 棰", "50"))
+                    if (safeAvailable >= 100) add(Triple(100, "100 棰", "100"))
+                    add(Triple(safeAvailable, "鍏ㄩ儴 $safeAvailable 棰", "all"))
                 }
                     .distinctBy { it.first }
                     .forEach { (count, label, mode) ->
@@ -525,7 +525,7 @@ private fun ExamSetupPanel(
         // === 鏃堕暱 ===
         EditorialSection(
             kicker = "鏃堕暱",
-            title = "鑰冭瘯鍒嗛挓鏁?,
+            title = "鑰冭瘯鍒嗛挓鏁",
             scale = scale
         ) {
             FlowRow(
@@ -576,7 +576,7 @@ private fun ExamSetupPanel(
                 )
                 ActionPillButton(
                     icon = Icons.Rounded.CheckCircle,
-                    text = "鑷畾涔夌粍棰?,
+                    text = "鑷畾涔夌粍棰",
                     primary = groupMode == ExamGroupMode.CUSTOM,
                     modifier = Modifier.weight(1f).height(46.dp),
                     fillWidthContent = true,
@@ -591,7 +591,7 @@ private fun ExamSetupPanel(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (groupMode == ExamGroupMode.RANDOM) "鑷姩缁勯" else "鑷畾涔夌粍棰?,
+                        text = if (groupMode == ExamGroupMode.RANDOM) "鑷姩缁勯" else "鑷畾涔夌粍棰",
                         style = MaterialTheme.typography.bodyLarge.copy(fontSize = scaledQuestionFontSize),
                         fontWeight = FontWeight.SemiBold
                     )
@@ -634,14 +634,14 @@ private fun ExamSetupPanel(
     if (showGroupSettings) {
         AlertDialog(
             onDismissRequest = onCloseGroupSettings,
-            title = { Text("鑷畾涔夌粍棰?) },
+            title = { Text("鑷畾涔夌粍棰") },
             text = {
                 Column(
                     modifier = Modifier.heightIn(max = 460.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Text(
-                        text = "鎸夐鍨嬭缃娊鍙栨暟閲忓拰姣忛鍒嗗€笺€傛暟閲忎负 0 琛ㄧず涓嶈€冭棰樺瀷銆?,
+                        text = "鎸夐鍨嬭缃娊鍙栨暟閲忓拰姣忛鍒嗗€笺€傛暟閲忎负 0 琛ㄧず涓嶈€冭棰樺瀷銆",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -658,14 +658,14 @@ private fun ExamSetupPanel(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(typeLabel(type), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
-                                    Text("鍙敤 $available 棰?, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text("鍙敤 $available 棰", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                                 OutlinedTextField(
                                     value = typeCountTexts[type].orEmpty(),
                                     onValueChange = { onUpdateTypeCount(type, it) },
                                     modifier = Modifier.width(76.dp),
                                     singleLine = true,
-                                    label = { Text("棰?) },
+                                    label = { Text("棰") },
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next)
                                 )
                                 OutlinedTextField(
@@ -673,7 +673,7 @@ private fun ExamSetupPanel(
                                     onValueChange = { onUpdateTypeScore(type, it) },
                                     modifier = Modifier.width(76.dp),
                                     singleLine = true,
-                                    label = { Text("鍒?) },
+                                    label = { Text("鍒") },
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done)
                                 )
                             }
@@ -696,7 +696,7 @@ private fun ExamSetupPanel(
 
 /**
  * 缂栬緫鏉傚織椋庢椂闀胯鏁板櫒:Row(IconButton - 鏁板瓧 - IconButton + label)
- * 鏇夸唬鍘?OutlinedTextField,瑙嗚涓婃洿"缂栬緫椋?
+ * 鏇夸唬鍘?OutlinedTextField,瑙嗚涓婃洿"缂栬緫椋"
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -723,7 +723,7 @@ private fun EditorialDurationCounter(
             scale = 1f,
             value = valueText,
             label = "鑷畾涔夋椂闂?鍒嗛挓)",
-            unit = "鍒?
+            unit = "鍒"
         )
         CounterIconButton(
             icon = Icons.Rounded.Add,
@@ -874,7 +874,7 @@ private fun ActiveExamPanel(
         // === 杩涘害淇℃伅:EditorialFigure 脳4 ===
         EditorialSection(
             kicker = "Progress",
-            title = "鑰冭瘯杩涜涓?,
+            title = "鑰冭瘯杩涜涓",
             scale = scale
         ) {
             Row(
@@ -886,14 +886,14 @@ private fun ActiveExamPanel(
                     scale = scale,
                     value = "${currentIndex + 1}",
                     label = "褰撳墠棰樺彿",
-                    unit = "棰?
+                    unit = "棰"
                 )
                 EditorialFigure(
                     modifier = Modifier.weight(1f),
                     scale = scale,
                     value = "$totalQuestions",
-                    label = "鎬婚鏁?,
-                    unit = "棰?
+                    label = "鎬婚鏁",
+                    unit = "棰"
                 )
             }
             Row(
@@ -949,7 +949,7 @@ private fun ActiveExamPanel(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "宸插睍寮€鑰冭瘯鐘舵€併€傜偣鍑汇€屾敹璧风姸鎬佹爮銆嶅洖鍒扮簿绠€妯″紡銆?,
+                        text = "宸插睍寮€鑰冭瘯鐘舵€併€傜偣鍑汇€屾敹璧风姸鎬佹爮銆嶅洖鍒扮簿绠€妯″紡銆",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f)
@@ -1045,7 +1045,7 @@ private fun ActiveExamPanel(
                             onValueChange = QuizRepository::updateExamTextAnswer,
                             modifier = Modifier.fillMaxWidth(),
                             label = { Text("浣犵殑绛旀") },
-                            placeholder = { Text("璇疯緭鍏ュ～绌哄唴瀹?) },
+                            placeholder = { Text("璇疯緭鍏ュ～绌哄唴瀹") },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Text,
@@ -1056,7 +1056,7 @@ private fun ActiveExamPanel(
                 }
 
                 QuestionType.SHORT -> {
-                    NoticeCard("杩欓亾棰樺睘浜庣畝绛旈銆傚綋鍓嶈€冭瘯妯″紡鏆備笉鑷姩鍒ゅ垎銆?)
+                    NoticeCard("杩欓亾棰樺睘浜庣畝绛旈銆傚綋鍓嶈€冭瘯妯″紡鏆備笉鑷姩鍒ゅ垎銆")
                 }
             }
 
@@ -1067,7 +1067,7 @@ private fun ActiveExamPanel(
             ) {
                 ActionPillButton(
                     Icons.AutoMirrored.Rounded.ArrowBack,
-                    "涓婁竴棰?,
+                    "涓婁竴棰",
                     primary = false,
                     modifier = Modifier
                         .weight(1f)
@@ -1077,7 +1077,7 @@ private fun ActiveExamPanel(
                 )
                 ActionPillButton(
                     Icons.AutoMirrored.Rounded.ArrowForward,
-                    "涓嬩竴棰?,
+                    "涓嬩竴棰",
                     primary = false,
                     modifier = Modifier
                         .weight(1f)
@@ -1257,7 +1257,7 @@ private fun ExamAnswerCardDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("绛旈鍗?) },
+        title = { Text("绛旈鍗") },
         text = {
             Column(
                 modifier = Modifier.heightIn(max = 460.dp),
@@ -1327,16 +1327,16 @@ private fun ConfirmExitExamDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("纭畾瑕侀€€鍑哄悧锛?) },
+        title = { Text("纭畾瑕侀€€鍑哄悧锛") },
         text = {
             Text(
-                text = "缁撴潫鏈満鍚庯紝鏈満鑰冭瘯杩涘害鍜屽凡閫夌瓟妗堝皢涓嶄細淇濈暀銆?,
+                text = "缁撴潫鏈満鍚庯紝鏈満鑰冭瘯杩涘害鍜屽凡閫夌瓟妗堝皢涓嶄細淇濈暀銆",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
         confirmButton = {
-            TextButton(onClick = onConfirmExit) { Text("纭畾閫€鍑?) }
+            TextButton(onClick = onConfirmExit) { Text("纭畾閫€鍑") }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("缁х画鑰冭瘯") }
@@ -1353,10 +1353,10 @@ private fun ConfirmSubmitExamDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("杩樻湁鏈瓟棰?) },
+        title = { Text("杩樻湁鏈瓟棰") },
         text = {
             Text(
-                text = "褰撳墠杩樻湁 $unansweredCount 閬撻鏈綔绛斻€傜‘璁や氦鍗峰悗锛屾湭绛旈浼氭寜閿欒澶勭悊銆?,
+                text = "褰撳墠杩樻湁 $unansweredCount 閬撻鏈綔绛斻€傜‘璁や氦鍗峰悗锛屾湭绛旈浼氭寜閿欒澶勭悊銆",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -1366,7 +1366,7 @@ private fun ConfirmSubmitExamDialog(
         },
         dismissButton = {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(onClick = onGoAnswerCard) { Text("鏌ョ湅绛旈鍗?) }
+                TextButton(onClick = onGoAnswerCard) { Text("鏌ョ湅绛旈鍗") }
                 TextButton(onClick = onDismiss) { Text("缁х画绛旈") }
             }
         }
@@ -1389,7 +1389,7 @@ private fun FinishedExamPanel(
 
     Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)) {
         if (examSummary.autoSubmitted) {
-            NoticeCard("鏈満鑰冭瘯鍥犱负鍊掕鏃剁粨鏉熻€岃嚜鍔ㄤ氦鍗枫€?, warning = false)
+            NoticeCard("鏈満鑰冭瘯鍥犱负鍊掕鏃剁粨鏉熻€岃嚜鍔ㄤ氦鍗枫€", warning = false)
         }
 
         // === 4 涓?EditorialFigure:鎬诲垎 / 绛斿 / 绛旈敊 / 鐢ㄦ椂 ===
@@ -1406,15 +1406,15 @@ private fun FinishedExamPanel(
                     modifier = Modifier.weight(1f),
                     scale = scale,
                     value = "${examSummary.total}",
-                    label = "鎬婚鏁?,
-                    unit = "棰?
+                    label = "鎬婚鏁",
+                    unit = "棰"
                 )
                 EditorialFigure(
                     modifier = Modifier.weight(1f),
                     scale = scale,
                     value = "${examSummary.correct}",
                     label = "绛斿",
-                    unit = "棰?
+                    unit = "棰"
                 )
             }
             Row(
@@ -1426,7 +1426,7 @@ private fun FinishedExamPanel(
                     scale = scale,
                     value = "$wrongCount",
                     label = "绛旈敊",
-                    unit = "棰?
+                    unit = "棰"
                 )
                 EditorialFigure(
                     modifier = Modifier.weight(1f),
@@ -1445,7 +1445,7 @@ private fun FinishedExamPanel(
                         modifier = Modifier.weight(1f),
                         scale = scale,
                         value = "${examAccuracy(examSummary)}",
-                        label = "姝ｇ‘鐜?,
+                        label = "姝ｇ‘鐜",
                         unit = "%"
                     )
                     EditorialFigure(
@@ -1453,7 +1453,7 @@ private fun FinishedExamPanel(
                         scale = scale,
                         value = "${examSummary.earnedScore.trimScoreText()}",
                         label = "寰楀垎(鎬诲垎 ${examSummary.totalScore.trimScoreText()})",
-                        unit = "鍒?
+                        unit = "鍒"
                     )
                 }
             }
@@ -1484,7 +1484,7 @@ private fun FinishedExamPanel(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "绗?${index + 1} 棰?,
+                                text = "绗?${index + 1} 棰",
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -1494,10 +1494,10 @@ private fun FinishedExamPanel(
                         com.yiqiu.shirohaquiz.ui.components.EditorialDivider()
                     }
                     Spacer(Modifier.height(ShirohaSpacing.Sm))
-                    NoticeCard("鐐瑰嚮浠讳竴閿欓锛屽彲杩涘叆绛旈璁板綍鏌ョ湅瀹屾暣閿欓鍐呭銆?, warning = false)
+                    NoticeCard("鐐瑰嚮浠讳竴閿欓锛屽彲杩涘叆绛旈璁板綍鏌ョ湅瀹屾暣閿欓鍐呭銆", warning = false)
                 }
             } else {
-                NoticeCard("鏈満娌℃湁閿欓锛岃〃鐜颁笉閿欍€?, warning = false)
+                NoticeCard("鏈満娌℃湁閿欓锛岃〃鐜颁笉閿欍€", warning = false)
             }
         }
 
@@ -1508,7 +1508,7 @@ private fun FinishedExamPanel(
         ) {
             ActionPillButton(
                 Icons.Rounded.RestartAlt,
-                "鍐嶆潵涓€鍦?,
+                "鍐嶆潵涓€鍦",
                 primary = true,
                 modifier = Modifier
                     .weight(1f)
@@ -1619,7 +1619,7 @@ private fun CustomQuestionCountDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "璇疯緭鍏?1锝?maxCount 涔嬮棿鐨勯鏁般€?,
+                    text = "璇疯緭鍏?1锝?maxCount 涔嬮棿鐨勯鏁般€",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1716,7 +1716,7 @@ private fun examAccuracy(summary: ExamSummary): Int {
 private fun typeLabel(type: QuestionType): String = when (type) {
     QuestionType.SINGLE -> "鍗曢€夐"
     QuestionType.MULTIPLE -> "澶氶€夐"
-    QuestionType.JUDGE -> "鍒ゆ柇棰?
-    QuestionType.BLANK -> "濉┖棰?
+    QuestionType.JUDGE -> "鍒ゆ柇棰"
+    QuestionType.BLANK -> "濉┖棰"
     QuestionType.SHORT -> "绠€绛旈"
 }

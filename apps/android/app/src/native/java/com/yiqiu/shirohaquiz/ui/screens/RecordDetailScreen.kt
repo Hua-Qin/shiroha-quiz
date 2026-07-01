@@ -1,4 +1,4 @@
-﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -94,13 +94,13 @@ fun RecordDetailScreen(
                         ShirohaHeader(
                             kicker = "Record Detail",
                             title = "璁板綍璇︽儏",
-                            subtitle = "娌℃湁鎵惧埌杩欐潯瀛︿範璁板綍銆?,
+                            subtitle = "娌℃湁鎵惧埌杩欐潯瀛︿範璁板綍銆",
                             scale = scale
                         )
                     }
                 }
                 item {
-                    GlassCard { NoticeCard("娌℃湁鎵惧埌杩欐潯瀛︿範璁板綍銆?, warning = true) }
+                    GlassCard { NoticeCard("娌℃湁鎵惧埌杩欐潯瀛︿範璁板綍銆", warning = true) }
                 }
                 item {
                     ActionPillButton(
@@ -122,8 +122,8 @@ fun RecordDetailScreen(
 
         if (pendingDelete) {
             ShirohaDangerConfirmDialog(
-                title = "鍒犻櫎杩欐潯瀛︿範璁板綍锛?,
-                message = "鍒犻櫎鍚庢棤娉曟仮澶嶏紝浣嗕笉浼氬奖鍝嶉搴撱€侀敊棰樻湰鍜屾敹钘忓す銆?,
+                title = "鍒犻櫎杩欐潯瀛︿範璁板綍锛",
+                message = "鍒犻櫎鍚庢棤娉曟仮澶嶏紝浣嗕笉浼氬奖鍝嶉搴撱€侀敊棰樻湰鍜屾敹钘忓す銆",
                 confirmText = "鍒犻櫎",
                 onDismiss = { pendingDelete = false },
                 onConfirm = {
@@ -167,7 +167,7 @@ fun RecordDetailScreen(
             item {
                 EditorialSection(
                     kicker = "Info",
-                    title = "鍏冧俊鎭?,
+                    title = "鍏冧俊鎭",
                     scale = scale
                 ) {
                     RecordSummaryCard(record = record)
@@ -177,7 +177,7 @@ fun RecordDetailScreen(
             if (record.questionResults.isEmpty()) {
                 item {
                     GlassCard {
-                        NoticeCard("杩欐槸涓€鏉℃棫璁板綍锛屽綋鏃舵病鏈変繚瀛橀€愰璇︽儏锛屽彧鑳芥煡鐪嬫憳瑕併€?)
+                        NoticeCard("杩欐槸涓€鏉℃棫璁板綍锛屽綋鏃舵病鏈変繚瀛橀€愰璇︽儏锛屽彧鑳芥煡鐪嬫憳瑕併€")
                     }
                 }
             } else {
@@ -209,7 +209,7 @@ fun RecordDetailScreen(
 
                 if (indexedResults.isEmpty()) {
                     item {
-                        GlassCard { NoticeCard("杩欐潯璁板綍閲屾病鏈夐敊棰樸€?) }
+                        GlassCard { NoticeCard("杩欐潯璁板綍閲屾病鏈夐敊棰樸€") }
                     }
                 } else {
                     items(
@@ -236,7 +236,7 @@ fun RecordDetailScreen(
                                                 bank = bank,
                                                 question = result.question,
                                                 userAnswer = result.userAnswer,
-                                                source = "璇︽儏椤垫墜鍔ㄦ坊鍔?,
+                                                source = "璇︽儏椤垫墜鍔ㄦ坊鍔",
                                                 addedManually = true
                                             )
                                             wrongAddedResultId = result.question.id
@@ -293,15 +293,15 @@ private fun RecordSummaryFigures(record: StudyRecord, scale: Float) {
                 modifier = Modifier.weight(1f),
                 scale = scale,
                 value = record.total.toString(),
-                label = "鎬婚鏁?,
-                unit = "棰?
+                label = "鎬婚鏁",
+                unit = "棰"
             )
             EditorialFigure(
                 modifier = Modifier.weight(1f),
                 scale = scale,
                 value = record.correct.toString(),
                 label = "绛斿",
-                unit = "棰?
+                unit = "棰"
             )
         }
         Row(
@@ -313,13 +313,13 @@ private fun RecordSummaryFigures(record: StudyRecord, scale: Float) {
                 scale = scale,
                 value = wrong.toString(),
                 label = "绛旈敊",
-                unit = "棰?
+                unit = "棰"
             )
             EditorialFigure(
                 modifier = Modifier.weight(1f),
                 scale = scale,
                 value = accuracy.toString(),
-                label = "姝ｇ‘鐜?,
+                label = "姝ｇ‘鐜",
                 unit = "%"
             )
         }
@@ -330,7 +330,7 @@ private fun RecordSummaryFigures(record: StudyRecord, scale: Float) {
             EditorialFigure(
                 modifier = Modifier.weight(1f),
                 scale = scale,
-                value = record.durationSeconds?.let { formatDuration(it) } ?: "鈥?,
+                value = record.durationSeconds?.let { formatDuration(it) } ?: "鈥",
                 label = "鐢ㄦ椂"
             )
             if (record.totalScore != null && record.earnedScore != null) {
@@ -339,13 +339,13 @@ private fun RecordSummaryFigures(record: StudyRecord, scale: Float) {
                     scale = scale,
                     value = "${record.earnedScore.trimScore()}/${record.totalScore.trimScore()}",
                     label = "寰楀垎",
-                    unit = "鍒?
+                    unit = "鍒"
                 )
             } else {
                 EditorialFigure(
                     modifier = Modifier.weight(1f),
                     scale = scale,
-                    value = "鈥?,
+                    value = "鈥",
                     label = "寰楀垎"
                 )
             }
@@ -378,7 +378,7 @@ private fun RecordSummaryCard(
         )
         InfoLine("棰樺簱", record.bankName)
         InfoLine("妯″紡", record.source)
-        InfoLine("寮€濮嬫椂闂?, formatRecordTime(startedAt))
+        InfoLine("寮€濮嬫椂闂", formatRecordTime(startedAt))
         InfoLine("缁撴潫鏃堕棿", formatRecordTime(record.timestamp))
         if (record.autoSubmitted) {
             InfoLine("浜ゅ嵎鏂瑰紡", "鑷姩浜ゅ嵎")
@@ -425,7 +425,7 @@ private fun WrongQuestionActionRow(
     ) {
         ActionPillButton(
             icon = if (justAdded) Icons.Rounded.CheckCircle else Icons.Rounded.Warning,
-            text = if (justAdded) "宸插姞鍏ラ敊棰樻湰" else "鍔犲叆閿欓鏈?,
+            text = if (justAdded) "宸插姞鍏ラ敊棰樻湰" else "鍔犲叆閿欓鏈",
             primary = !justAdded,
             onClick = { if (!justAdded) onAddToWrongBook() }
         )
@@ -445,7 +445,7 @@ private fun QuestionResultCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                StatusChip("绗?$index 棰?, selected = true)
+                StatusChip("绗?$index 棰", selected = true)
                 StatusChip(typeLabelForRecord(question.type))
             }
             StatusChip(if (result.correct) "姝ｇ‘" else "閿欒", selected = result.correct)
@@ -501,7 +501,7 @@ private fun QuestionResultCard(
             text = if (structuredBlank) {
                 "浣犵殑绛旀锛歕n${MultiBlankSupport.userAnswerText(shownUserBlankAnswers)}"
             } else {
-                "浣犵殑绛旀锛?{result.userAnswer.joinToString(" / ").ifBlank { "鏈綔绛? }}"
+                "浣犵殑绛旀锛?{result.userAnswer.joinToString(" / ").ifBlank { "鏈綔绛" }}"
             },
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -510,14 +510,14 @@ private fun QuestionResultCard(
             text = if (structuredBlank) {
                 "姝ｇ‘绛旀锛歕n${result.answerText.ifBlank { MultiBlankSupport.expectedAnswerText(question.blankAnswers) }}"
             } else {
-                "姝ｇ‘绛旀锛?{result.answerText.ifBlank { question.answer.joinToString(" / ").ifBlank { "鏈瘑鍒瓟妗? } }}"
+                "姝ｇ‘绛旀锛?{result.answerText.ifBlank { question.answer.joinToString(" / ").ifBlank { "鏈瘑鍒瓟妗" } }}"
             },
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         if (result.maxScore != null && result.earnedScore != null) {
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "寰楀垎锛?{result.earnedScore.trimScore()} / ${result.maxScore.trimScore()} 鍒?,
+                text = "寰楀垎锛?{result.earnedScore.trimScore()} / ${result.maxScore.trimScore()} 鍒",
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -535,8 +535,8 @@ private fun QuestionResultCard(
 private fun typeLabelForRecord(type: QuestionType): String = when (type) {
     QuestionType.SINGLE -> "鍗曢€夐"
     QuestionType.MULTIPLE -> "澶氶€夐"
-    QuestionType.JUDGE -> "鍒ゆ柇棰?
-    QuestionType.BLANK -> "濉┖棰?
+    QuestionType.JUDGE -> "鍒ゆ柇棰"
+    QuestionType.BLANK -> "濉┖棰"
     QuestionType.SHORT -> "绠€绛旈"
 }
 

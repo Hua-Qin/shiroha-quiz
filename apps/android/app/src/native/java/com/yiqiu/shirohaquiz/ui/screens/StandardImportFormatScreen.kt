@@ -1,4 +1,4 @@
-﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -62,7 +62,7 @@ fun StandardImportFormatScreen(
             ShirohaHeader(
                 kicker = "Format",
                 title = "鏍囧噯瀵煎叆鏍煎紡",
-                subtitle = "鎸夎繖涓牸寮忔暣鐞嗛搴擄紝璇嗗埆浼氭洿绋冲畾銆?,
+                subtitle = "鎸夎繖涓牸寮忔暣鐞嗛搴擄紝璇嗗埆浼氭洿绋冲畾銆",
                 scale = scale
             )
 
@@ -74,13 +74,13 @@ fun StandardImportFormatScreen(
             ) {
                 IllustrationHeroCard(
                     title = "鎶婇搴撴暣鐞嗘垚鏍囧噯鏍煎紡",
-                    subtitle = "棰樺彿銆侀€夐」銆佺瓟妗堝拰瑙ｆ瀽娓呮櫚瀵归綈,璇嗗埆浼氶潪甯哥ǔ瀹氥€?,
+                    subtitle = "棰樺彿銆侀€夐」銆佺瓟妗堝拰瑙ｆ瀽娓呮櫚瀵归綈,璇嗗埆浼氶潪甯哥ǔ瀹氥€",
                     imageRes = R.drawable.illus_import_hint_webp,
                     scale = scale
                 ) {
                     Spacer(Modifier.height(ShirohaSpacing.Md))
                     Text(
-                        text = "鏍囧噯鏍煎紡 = 棰樺彿 路 棰樺共 路 閫夐」 路 绛旀 路 瑙ｆ瀽銆傛瘡琛屼竴涓瓧娈?灞傛鍒嗘槑銆?,
+                        text = "鏍囧噯鏍煎紡 = 棰樺彿 路 棰樺共 路 閫夐」 路 绛旀 路 瑙ｆ瀽銆傛瘡琛屼竴涓瓧娈?灞傛鍒嗘槑銆",
                         style = MaterialTheme.typography.bodySmall,
                         color = ShirohaColors.TextSecondary
                     )
@@ -95,7 +95,7 @@ fun StandardImportFormatScreen(
             ) {
                 FormatSection(
                     title = "涓€銆佸崟鏂囦欢鏍囧噯鏍煎紡",
-                    body = "姣忛亾棰樺缓璁寘鍚鍙枫€侀骞层€侀€夐」銆佺瓟妗堝拰瑙ｆ瀽銆傞鍙峰彲浠ョ敤 1.銆?銆侊紙1锛?绛夊舰寮忥紝浣嗗悓涓€浠介搴撳敖閲忕粺涓€銆?,
+                    body = "姣忛亾棰樺缓璁寘鍚鍙枫€侀骞层€侀€夐」銆佺瓟妗堝拰瑙ｆ瀽銆傞鍙峰彲浠ョ敤 1.銆?銆侊紙1锛?绛夊舰寮忥紝浣嗗悓涓€浠介搴撳敖閲忕粺涓€銆",
                     sample = """
 1. 涓嬪垪鍝竴椤规槸鑹ソ瀛︿範涔犳儻锛?
 A. 璇惧墠棰勪範
@@ -133,7 +133,7 @@ D. 鍗曠嫭鍒楀嚭绛旀
 
                 FormatSection(
                     title = "鍥涖€佸弻鏂囦欢瀵煎叆鏍煎紡",
-                    body = "棰樼洰鏂囦欢鍙斁棰樺共鍜岄€夐」锛岀瓟妗堟枃浠舵寜棰樺彿鍒楀嚭绛旀銆傞鍙烽渶瑕佸拰棰樼洰鏂囦欢瀵瑰簲銆?,
+                    body = "棰樼洰鏂囦欢鍙斁棰樺共鍜岄€夐」锛岀瓟妗堟枃浠舵寜棰樺彿鍒楀嚭绛旀銆傞鍙烽渶瑕佸拰棰樼洰鏂囦欢瀵瑰簲銆",
                     sample = """
 棰樼洰鏂囦欢锛?
 1. 绀轰緥棰樺共涓€鈥︹€?
@@ -154,13 +154,13 @@ C. 閫夐」涓?
 
                 FormatSection(
                     title = "浜斻€佸噺灏戣瘑鍒敊璇殑寤鸿",
-                    body = "灏介噺閬垮厤鎶婂涓鐩尋鍦ㄤ竴琛岋紱閫夐」鍓嶄繚鐣?A. B. C. D.锛涚瓟妗堝尯鍜岃В鏋愬尯淇濇寔娓呮櫚銆傚鏉傛暣鍗风湡棰樺彲浠ュ厛瀵煎叆锛屽啀杩涘叆鏍稿椤典慨姝ｃ€?,
+                    body = "灏介噺閬垮厤鎶婂涓鐩尋鍦ㄤ竴琛岋紱閫夐」鍓嶄繚鐣?A. B. C. D.锛涚瓟妗堝尯鍜岃В鏋愬尯淇濇寔娓呮櫚銆傚鏉傛暣鍗风湡棰樺彲浠ュ厛瀵煎叆锛屽啀杩涘叆鏍稿椤典慨姝ｃ€",
                     sample = null
                 )
 
                 FormatSection(
                     title = "鍏€佸鏉傛牸寮忓彲鍏堢敤 AI 娓呮礂",
-                    body = "濡傛灉鏉ユ簮鏉愭枡鍖呭惈澶嶅埗閿欒銆佺瓟妗堥泦涓€佽В鏋愭贩鎺掋€佹壂鎻忔枃鏈垨鏁村嵎璇存槑锛屽缓璁厛鍙戠粰甯歌 AI / LLM 娓呮礂鎴愭爣鍑嗘牸寮忥紝鍐嶅鍏?App銆傛竻娲楀彧璐熻矗鏁寸悊鏍煎紡锛屼笉璐熻矗瑙ｉ銆?,
+                    body = "濡傛灉鏉ユ簮鏉愭枡鍖呭惈澶嶅埗閿欒銆佺瓟妗堥泦涓€佽В鏋愭贩鎺掋€佹壂鎻忔枃鏈垨鏁村嵎璇存槑锛屽缓璁厛鍙戠粰甯歌 AI / LLM 娓呮礂鎴愭爣鍑嗘牸寮忥紝鍐嶅鍏?App銆傛竻娲楀彧璐熻矗鏁寸悊鏍煎紡锛屼笉璐熻矗瑙ｉ銆",
                     sample = """
 璇锋妸涓嬮潰鐨勯搴撴枃鏈暣鐞嗘垚 Shiroha Quiz 鍙ǔ瀹氬鍏ョ殑鏍囧噯鏍煎紡銆?
 

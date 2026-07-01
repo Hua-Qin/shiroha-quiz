@@ -1,4 +1,4 @@
-﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -365,7 +365,7 @@ fun PracticeScreen(
 
         if (practiceCandidateQuestions.isEmpty()) {
             GlassCard {
-                NoticeCard("杩樻病鏈夊彲缁冧範棰樼洰銆傝鍏堝湪瀵煎叆椤靛垱寤洪搴撱€?)
+                NoticeCard("杩樻病鏈夊彲缁冧範棰樼洰銆傝鍏堝湪瀵煎叆椤靛垱寤洪搴撱€")
             }
             return
         }
@@ -460,7 +460,7 @@ fun PracticeScreen(
         }
 
         if (question == null) {
-            GlassCard { NoticeCard("褰撳墠缁冧範娌℃湁鍙樉绀虹殑棰樼洰锛岃閲嶆柊寮€濮嬬粌涔犮€?) }
+            GlassCard { NoticeCard("褰撳墠缁冧範娌℃湁鍙樉绀虹殑棰樼洰锛岃閲嶆柊寮€濮嬬粌涔犮€") }
             return
         }
 
@@ -625,7 +625,7 @@ fun PracticeScreen(
         var isSingleQuestionAiLoading by remember(currentSessionKey) { mutableStateOf(false) }
         val runSingleQuestionAiAnalysis = {
             if (!QuizRepository.isAiConfigured()) {
-                singleQuestionAiError = "璇峰厛鍦?鎴戠殑 鈫?AI 璁剧疆 涓～鍐?API 鍦板潃銆丄PI Key 鍜屾ā鍨嬪悕绉般€?
+                singleQuestionAiError = "璇峰厛鍦?鎴戠殑 鈫?AI 璁剧疆 涓～鍐?API 鍦板潃銆丄PI Key 鍜屾ā鍨嬪悕绉般€"
                 singleQuestionAiAnalysis = null
             } else if (!isSingleQuestionAiLoading) {
                 isSingleQuestionAiLoading = true
@@ -651,7 +651,7 @@ fun PracticeScreen(
                         singleQuestionAiError = null
                     }.onFailure { error ->
                         singleQuestionAiAnalysis = null
-                        singleQuestionAiError = error.message ?: "AI 鍒嗘瀽澶辫触锛岃妫€鏌ユ帴鍙ｉ厤缃垨缃戠粶銆?
+                        singleQuestionAiError = error.message ?: "AI 鍒嗘瀽澶辫触锛岃妫€鏌ユ帴鍙ｉ厤缃垨缃戠粶銆"
                     }
                     isSingleQuestionAiLoading = false
                 }
@@ -813,7 +813,7 @@ fun PracticeScreen(
 
                 QuestionType.BLANK -> {
                     if (isReciteMode) {
-                        NoticeCard("鑳岄妯″紡涓嬬洿鎺ユ煡鐪嬪弬鑰冪瓟妗堝拰瑙ｆ瀽銆?)
+                        NoticeCard("鑳岄妯″紡涓嬬洿鎺ユ煡鐪嬪弬鑰冪瓟妗堝拰瑙ｆ瀽銆")
                     } else if (MultiBlankSupport.hasStructuredAnswers(question)) {
                         MultiBlankAnswerInputs(
                             blankCount = question.blankAnswers.size,
@@ -833,7 +833,7 @@ fun PracticeScreen(
 
                 QuestionType.SHORT -> {
                     if (isReciteMode) {
-                        NoticeCard("鑳岄妯″紡涓嬬洿鎺ユ煡鐪嬪弬鑰冪瓟妗堝拰瑙ｆ瀽銆?)
+                        NoticeCard("鑳岄妯″紡涓嬬洿鎺ユ煡鐪嬪弬鑰冪瓟妗堝拰瑙ｆ瀽銆")
                     } else {
                         SubjectiveAnswerEditor(
                             type = question.type,
@@ -884,7 +884,7 @@ fun PracticeScreen(
                     )
                     ActionPillButton(
                         Icons.Rounded.CheckCircle,
-                        if (isSubmitted) "宸叉彁浜? else "鎻愪氦绛旀",
+                        if (isSubmitted) "宸叉彁浜" else "鎻愪氦绛旀",
                         primary = !isSubmitted,
                         modifier = Modifier
                             .weight(1f)
@@ -905,7 +905,7 @@ fun PracticeScreen(
             ) {
                 ActionPillButton(
                     Icons.AutoMirrored.Rounded.ArrowBack,
-                    "涓婁竴棰?,
+                    "涓婁竴棰",
                     primary = false,
                     modifier = Modifier
                         .weight(1f)
@@ -917,10 +917,10 @@ fun PracticeScreen(
                 ActionPillButton(
                     Icons.AutoMirrored.Rounded.ArrowForward,
                     when {
-                        isResolvingUnsubmitted && nextUnsubmittedIndex != null -> "涓嬩竴閬撴湭鎻愪氦锛?unsubmittedCount锛?
+                        isResolvingUnsubmitted && nextUnsubmittedIndex != null -> "涓嬩竴閬撴湭鎻愪氦锛?unsubmittedCount锛"
                         isResolvingUnsubmitted -> "褰撳墠棰樻湭鎻愪氦"
-                        shouldOfferUnsubmittedCompletion -> "琛ョ瓟鏈彁浜わ紙$unsubmittedCount锛?
-                        else -> "涓嬩竴棰?
+                        shouldOfferUnsubmittedCompletion -> "琛ョ瓟鏈彁浜わ紙$unsubmittedCount锛"
+                        else -> "涓嬩竴棰"
                     },
                     primary = false,
                     modifier = Modifier
@@ -960,7 +960,7 @@ fun PracticeScreen(
                 Spacer(Modifier.height(10.dp))
                 ActionPillButton(
                     Icons.Rounded.PlayArrow,
-                    if (canStartNextBatchGroup) "杩涘叆涓嬩竴缁? else "瀹屾垚缁冧範",
+                    if (canStartNextBatchGroup) "杩涘叆涓嬩竴缁" else "瀹屾垚缁冧範",
                     primary = true,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1021,13 +1021,13 @@ fun PracticeScreen(
                     QuestionType.SINGLE,
                     QuestionType.MULTIPLE -> practiceAnswersForDisplay(question.answer, displayAnswerMap)
                         .joinToString(" / ")
-                        .ifBlank { "鏈瘑鍒瓟妗? }
+                        .ifBlank { "鏈瘑鍒瓟妗" }
                     QuestionType.BLANK -> effectiveResult?.answerText ?: if (MultiBlankSupport.hasStructuredAnswers(question)) {
                         MultiBlankSupport.expectedAnswerText(question.blankAnswers)
                     } else {
-                        question.answer.joinToString(" / ").ifBlank { "鏈瘑鍒瓟妗? }
+                        question.answer.joinToString(" / ").ifBlank { "鏈瘑鍒瓟妗" }
                     }
-                    else -> effectiveResult?.answerText ?: question.answer.joinToString(" / ").ifBlank { "鏈瘑鍒瓟妗? }
+                    else -> effectiveResult?.answerText ?: question.answer.joinToString(" / ").ifBlank { "鏈瘑鍒瓟妗" }
                 }
                 Spacer(Modifier.height(16.dp))
                 if (!isReciteMode && effectiveResult != null) {
@@ -1038,7 +1038,7 @@ fun PracticeScreen(
                     }
                     Spacer(Modifier.height(8.dp))
                 }
-                val answerLabel = if (question.type == QuestionType.SHORT) "鍙傝€冪瓟妗? else "姝ｇ‘绛旀"
+                val answerLabel = if (question.type == QuestionType.SHORT) "鍙傝€冪瓟妗" else "姝ｇ‘绛旀"
                 NoticeCard("$answerLabel锛?answerText", warning = false)
                 Spacer(Modifier.height(8.dp))
                 Text(
@@ -1101,7 +1101,7 @@ fun PracticeScreen(
             horizontalArrangement = Arrangement.End
         ) {
             QuizSessionExitIconButton(
-                contentDescription = "閫€鍑虹粌涔?,
+                contentDescription = "閫€鍑虹粌涔",
                 onClick = { showExitPracticeConfirm = true }
             )
         }
@@ -1125,12 +1125,12 @@ fun PracticeQuickEditScreen(
     ) {
         ShirohaHeader(
             kicker = "Quick Edit",
-            title = "蹇€熺紪杈戦鐩?,
-            subtitle = "淇褰撳墠缁冧範棰樺悗锛屽彲鐩存帴杩斿洖缁х画鍒烽銆?
+            title = "蹇€熺紪杈戦鐩",
+            subtitle = "淇褰撳墠缁冧範棰樺悗锛屽彲鐩存帴杩斿洖缁х画鍒烽銆"
         )
 
         if (question == null) {
-            GlassCard { NoticeCard("褰撳墠娌℃湁鍙紪杈戠殑缁冧範棰樸€?) }
+            GlassCard { NoticeCard("褰撳墠娌℃湁鍙紪杈戠殑缁冧範棰樸€") }
             ActionPillButton(
                 icon = Icons.AutoMirrored.Rounded.ArrowBack,
                 text = "杩斿洖缁冧範",
@@ -1158,7 +1158,7 @@ fun PracticeQuickEditScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                StatusChip("绗?${question.number.ifBlank { "-" }} 棰?)
+                StatusChip("绗?${question.number.ifBlank { "-" }} 棰")
                 StatusChip(typeLabel(question.type))
                 StatusChip("淇濈暀棰樺瀷")
             }
@@ -1177,7 +1177,7 @@ fun PracticeQuickEditScreen(
 
             if (question.images.isNotEmpty()) {
                 Spacer(Modifier.height(10.dp))
-                NoticeCard("鍥剧墖棰樺浘鏆備笉鍦ㄥ揩閫熺紪杈戜腑淇敼锛屼繚瀛樺悗浼氱户缁繚鐣欏師棰樺浘鐗囥€?)
+                NoticeCard("鍥剧墖棰樺浘鏆備笉鍦ㄥ揩閫熺紪杈戜腑淇敼锛屼繚瀛樺悗浼氱户缁繚鐣欏師棰樺浘鐗囥€")
             }
 
             if (isObjective) {
@@ -1224,7 +1224,7 @@ fun PracticeQuickEditScreen(
                     )
                     ActionPillButton(
                         icon = Icons.Rounded.DeleteOutline,
-                        text = "鍒犻櫎鏈€鍚?,
+                        text = "鍒犻櫎鏈€鍚",
                         primary = false,
                         modifier = Modifier
                             .weight(1f)
@@ -1254,7 +1254,7 @@ fun PracticeQuickEditScreen(
                     onDisable = {
                         answerText = MultiBlankSupport.compatibilityAnswer(blankAnswerDrafts).firstOrNull().orEmpty()
                         blankAnswerDrafts = emptyList()
-                        savedNotice = "宸查€€鍑哄绌烘ā寮忥紝淇濆瓨鍚庢寜鏃х増鏁翠綋绛旀澶勭悊銆?
+                        savedNotice = "宸查€€鍑哄绌烘ā寮忥紝淇濆瓨鍚庢寜鏃х増鏁翠綋绛旀澶勭悊銆"
                     }
                 )
             } else {
@@ -1264,7 +1264,7 @@ fun PracticeQuickEditScreen(
                         answerText = it
                         savedNotice = ""
                     },
-                    label = { Text(if (isObjective) "绛旀锛屼緥濡?A 鎴?A/B" else "鍙傝€冪瓟妗?) },
+                    label = { Text(if (isObjective) "绛旀锛屼緥濡?A 鎴?A/B" else "鍙傝€冪瓟妗") },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = if (isObjective) 1 else 2,
                     keyboardOptions = KeyboardOptions(
@@ -1280,7 +1280,7 @@ fun PracticeQuickEditScreen(
                         primary = false,
                         onClick = {
                             blankAnswerDrafts = MultiBlankSupport.initialGroups(questionText, parseQuickEditAnswer(answerText, question.type, emptyList()))
-                            savedNotice = "璇锋寜棰樼┖椤哄簭濉啓姣忎竴绌虹瓟妗堛€?
+                            savedNotice = "璇锋寜棰樼┖椤哄簭濉啓姣忎竴绌虹瓟妗堛€"
                         }
                     )
                 }
@@ -1309,7 +1309,7 @@ fun PracticeQuickEditScreen(
                 currentAnalysis = analysisText,
                 onApplyAnalysis = { value ->
                     analysisText = value
-                    savedNotice = "AI 寤鸿瑙ｆ瀽宸插啓鍏ョ紪杈戞锛屼繚瀛樺悗鎵嶄細鏇存柊棰樺簱銆?
+                    savedNotice = "AI 寤鸿瑙ｆ瀽宸插啓鍏ョ紪杈戞锛屼繚瀛樺悗鎵嶄細鏇存柊棰樺簱銆"
                 }
             )
 
@@ -1351,10 +1351,10 @@ fun PracticeQuickEditScreen(
                         analysis = analysisText.trim()
                     )
                     if (QuizRepository.updateCurrentPracticeQuestion(updatedQuestion)) {
-                        savedNotice = "宸蹭繚瀛樹慨鏀癸紝褰撳墠缁冧範棰樺凡鍒锋柊銆?
+                        savedNotice = "宸蹭繚瀛樹慨鏀癸紝褰撳墠缁冧範棰樺凡鍒锋柊銆"
                         onBack()
                     } else {
-                        savedNotice = "淇濆瓨澶辫触锛氭湭鎵惧埌杩欓亾棰樼殑婧愰搴撱€?
+                        savedNotice = "淇濆瓨澶辫触锛氭湭鎵惧埌杩欓亾棰樼殑婧愰搴撱€"
                     }
                 }
             )
@@ -1391,7 +1391,7 @@ private fun PracticeEditorialFiguresRow(
         EditorialFigure(
             value = currentPosition.toString(),
             label = if (isBatchPractice) "缁勫唴浣嶇疆" else "褰撳墠棰樺彿",
-            unit = "/ $totalQuestions 棰?,
+            unit = "/ $totalQuestions 棰",
             scale = scale,
             modifier = Modifier.weight(1f)
         )
@@ -1464,7 +1464,7 @@ private fun PracticeSetupPanel(
                 )
                 Spacer(Modifier.height(2.dp))
                 Text(
-                    text = "$scopeSummary 路 閫夎寖鍥村悗寮€濮?,
+                    text = "$scopeSummary 路 閫夎寖鍥村悗寮€濮",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -1473,7 +1473,7 @@ private fun PracticeSetupPanel(
             }
             ActionPillButton(
                 icon = Icons.Rounded.PlayArrow,
-                text = "寮€濮嬬粌涔?,
+                text = "寮€濮嬬粌涔",
                 primary = selectedAvailable > 0,
                 modifier = Modifier.height(46.dp),
                 onClick = { if (selectedAvailable > 0) onStartPractice() }
@@ -1537,7 +1537,7 @@ private fun PracticeSetupPanel(
                 )
                 ActionPillButton(
                     icon = Icons.AutoMirrored.Rounded.TextSnippet,
-                    text = "浠庡ご寮€濮?,
+                    text = "浠庡ご寮€濮",
                     primary = sequentialStartMode == QuizRepository.SEQUENTIAL_START_FIRST,
                     modifier = Modifier
                         .weight(1f)
@@ -1547,7 +1547,7 @@ private fun PracticeSetupPanel(
                 )
                 ActionPillButton(
                     icon = Icons.Rounded.EditNote,
-                    text = "鑷€夐鍙?,
+                    text = "鑷€夐鍙",
                     primary = sequentialStartMode == QuizRepository.SEQUENTIAL_START_CUSTOM,
                     modifier = Modifier
                         .weight(1f)
@@ -1617,7 +1617,7 @@ private fun PracticeSetupPanel(
                     val safeMaxGroupSize = selectedQuestionCount.coerceAtLeast(1)
                     ActionPillButton(
                         icon = Icons.Rounded.PlayArrow,
-                        text = "10棰?,
+                        text = "10棰",
                         primary = selectedBatchGroupSizeMode == "10",
                         modifier = Modifier.height(44.dp),
                         enabled = safeMaxGroupSize >= 10,
@@ -1625,7 +1625,7 @@ private fun PracticeSetupPanel(
                     )
                     ActionPillButton(
                         icon = Icons.Rounded.PlayArrow,
-                        text = "20棰?,
+                        text = "20棰",
                         primary = selectedBatchGroupSizeMode == "20",
                         modifier = Modifier.height(44.dp),
                         enabled = safeMaxGroupSize >= 20,
@@ -1633,7 +1633,7 @@ private fun PracticeSetupPanel(
                     )
                     ActionPillButton(
                         icon = Icons.Rounded.PlayArrow,
-                        text = "鑷畾涔?,
+                        text = "鑷畾涔",
                         primary = selectedBatchGroupSizeMode == "custom",
                         modifier = Modifier.height(44.dp),
                         onClick = {
@@ -1644,7 +1644,7 @@ private fun PracticeSetupPanel(
                 }
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "褰撳墠姣忕粍 ${selectedBatchGroupSize.coerceIn(1, selectedQuestionCount.coerceAtLeast(1))} 棰橈紝鎻愪氦鏈粍鍚庡啀杩涘叆涓嬩竴缁勩€?,
+                    text = "褰撳墠姣忕粍 ${selectedBatchGroupSize.coerceIn(1, selectedQuestionCount.coerceAtLeast(1))} 棰橈紝鎻愪氦鏈粍鍚庡啀杩涘叆涓嬩竴缁勩€",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -1698,7 +1698,7 @@ private fun PracticeSetupPanel(
         ) {
             Text("棰橀噺", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Text(
-                text = "鍙敤 $selectedAvailable 棰?,
+                text = "鍙敤 $selectedAvailable 棰",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
@@ -1712,7 +1712,7 @@ private fun PracticeSetupPanel(
                 val halfCount = (safeAvailable / 2).coerceAtLeast(1)
                 ActionPillButton(
                     icon = Icons.Rounded.PlayArrow,
-                    text = "鑷畾涔?,
+                    text = "鑷畾涔",
                     primary = selectedQuestionCountMode == "custom",
                     modifier = Modifier.height(44.dp),
                     onClick = {
@@ -1721,10 +1721,10 @@ private fun PracticeSetupPanel(
                     }
                 )
                 buildList {
-                    if (safeAvailable >= 50) add(Triple(50, "50 棰?, "50"))
-                    if (safeAvailable >= 100) add(Triple(100, "100 棰?, "100"))
-                    if (safeAvailable > 1) add(Triple(halfCount, "涓€鍗?$halfCount 棰?, "half"))
-                    add(Triple(safeAvailable, "鍏ㄩ儴 $safeAvailable 棰?, "all"))
+                    if (safeAvailable >= 50) add(Triple(50, "50 棰", "50"))
+                    if (safeAvailable >= 100) add(Triple(100, "100 棰", "100"))
+                    if (safeAvailable > 1) add(Triple(halfCount, "涓€鍗?$halfCount 棰", "half"))
+                    add(Triple(safeAvailable, "鍏ㄩ儴 $safeAvailable 棰", "all"))
                 }
                     .distinctBy { it.first }
                     .forEach { (count, label, mode) ->
@@ -1741,9 +1741,9 @@ private fun PracticeSetupPanel(
         if (selectedAvailable <= 0) {
             Spacer(Modifier.height(10.dp))
             val emptyTip = if (totalQuestions > 0) {
-                "褰撳墠绛涢€夎寖鍥村唴娌℃湁鍙粌涔犻鐩€傝嫢棰樼洰宸茶鏂╅锛屽彲鍒伴搴撹鎯呯殑鏂╅鏈仮澶嶅悗缁х画缁冧範銆?
+                "褰撳墠绛涢€夎寖鍥村唴娌℃湁鍙粌涔犻鐩€傝嫢棰樼洰宸茶鏂╅锛屽彲鍒伴搴撹鎯呯殑鏂╅鏈仮澶嶅悗缁х画缁冧範銆"
             } else {
-                "褰撳墠绛涢€夋病鏈夊彲缁冧範棰樼洰锛岃鑷冲皯閫夋嫨涓€绉嶆湁棰樼洰鐨勯鍨嬨€?
+                "褰撳墠绛涢€夋病鏈夊彲缁冧範棰樼洰锛岃鑷冲皯閫夋嫨涓€绉嶆湁棰樼洰鐨勯鍨嬨€"
             }
             NoticeCard(emptyTip, warning = true)
         }
@@ -1751,7 +1751,7 @@ private fun PracticeSetupPanel(
 
     if (showCustomSequentialStartDialog) {
         CustomQuestionCountDialog(
-            title = "鑷€夐『搴忚捣鐐?,
+            title = "鑷€夐『搴忚捣鐐",
             value = customSequentialStartText,
             maxCount = selectedAvailable.coerceAtLeast(1),
             onValueChange = { customSequentialStartText = it },
@@ -1764,7 +1764,7 @@ private fun PracticeSetupPanel(
     }
     if (showCustomCountDialog) {
         CustomQuestionCountDialog(
-            title = "鑷畾涔夌粌涔犻閲?,
+            title = "鑷畾涔夌粌涔犻閲",
             value = customQuestionCountText,
             maxCount = selectedAvailable.coerceAtLeast(1),
             onValueChange = { customQuestionCountText = it },
@@ -1777,7 +1777,7 @@ private fun PracticeSetupPanel(
     }
     if (showCustomBatchGroupDialog) {
         CustomQuestionCountDialog(
-            title = "鑷畾涔夋瘡缁勯鏁?,
+            title = "鑷畾涔夋瘡缁勯鏁",
             value = customBatchGroupText,
             maxCount = selectedQuestionCount.coerceAtLeast(1),
             onValueChange = { customBatchGroupText = it },
@@ -1820,7 +1820,7 @@ private fun CompactPracticeSetupHero() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 PracticeSetupStepCard(index = "1", text = "閫夊ソ鍙傛暟", selected = true)
-                PracticeSetupStepCard(index = "2", text = "寮€濮嬬粌涔?, selected = false)
+                PracticeSetupStepCard(index = "2", text = "寮€濮嬬粌涔", selected = false)
                 PracticeSetupStepCard(index = "3", text = "璁板綍缁撴灉", selected = false)
             }
             if (QuizRepository.shirohaModeEnabled) {
@@ -1921,7 +1921,7 @@ private fun QuickEditQuestionIconButton(
     ) {
         Icon(
             imageVector = Icons.Rounded.EditNote,
-            contentDescription = "蹇€熺紪杈戝綋鍓嶉鐩?,
+            contentDescription = "蹇€熺紪杈戝綋鍓嶉鐩",
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(22.dp)
         )
@@ -1948,7 +1948,7 @@ private fun SlashQuestionRoundButton(
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
-                text = "鏂?,
+                text = "鏂",
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.SemiBold,
                 style = MaterialTheme.typography.labelMedium,
@@ -2066,7 +2066,7 @@ private fun PracticeCompletionCard(
         ) {
             ActionPillButton(
                 icon = Icons.Rounded.PlayArrow,
-                text = "鍐嶇粌涓€缁?,
+                text = "鍐嶇粌涓€缁",
                 primary = true,
                 modifier = Modifier
                     .weight(1f)
@@ -2165,13 +2165,13 @@ private fun SubjectiveSubmittedCapsule() {
         ) {
             Icon(
                 imageVector = Icons.Rounded.EditNote,
-                contentDescription = "宸叉彁浜や綔绛?,
+                contentDescription = "宸叉彁浜や綔绛",
                 modifier = Modifier.size(15.dp),
                 tint = accent
             )
             Spacer(Modifier.width(5.dp))
             Text(
-                text = "宸叉彁浜や綔绛?,
+                text = "宸叉彁浜や綔绛",
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = accent
@@ -2272,7 +2272,7 @@ private fun PracticeProgressCard(
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        text = "绗?$batchGroupNumber / $batchGroupCount 缁?,
+                        text = "绗?$batchGroupNumber / $batchGroupCount 缁",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -2304,11 +2304,11 @@ private fun PracticeProgressCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (onOpenAnswerSheet != null) {
-                    PracticePanelCapsule(text = "绛旈鍗?, onClick = onOpenAnswerSheet)
+                    PracticePanelCapsule(text = "绛旈鍗", onClick = onOpenAnswerSheet)
                 }
                 if (onToggleWrongOnly != null) {
                     PracticePanelCapsule(
-                        text = if (wrongOnly) "鐪嬪叏閮? else "鍙湅閿欓",
+                        text = if (wrongOnly) "鐪嬪叏閮" else "鍙湅閿欓",
                         enabled = wrongCount > 0,
                         onClick = onToggleWrongOnly
                     )
@@ -2581,10 +2581,10 @@ private fun UnsubmittedPracticeConfirmDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("杩樻湁 $unansweredCount 棰樻湭鎻愪氦") },
-        text = { Text("鍙互杩斿洖琛ョ瓟锛屾垨灏嗘湭鎻愪氦棰樻寜鏈綔绛斿鐞嗗悗瀹屾垚缁冧範銆?) },
+        text = { Text("鍙互杩斿洖琛ョ瓟锛屾垨灏嗘湭鎻愪氦棰樻寜鏈綔绛斿鐞嗗悗瀹屾垚缁冧範銆") },
         confirmButton = {
             TextButton(onClick = onComplete) {
-                Text("鎸夋湭浣滅瓟澶勭悊骞跺畬鎴?)
+                Text("鎸夋湭浣滅瓟澶勭悊骞跺畬鎴")
             }
         },
         dismissButton = {
@@ -2608,9 +2608,9 @@ private fun PracticeExitConfirmDialog(
         text = {
             Text(
                 text = if (canSaveProgress) {
-                    "淇濆瓨閫€鍑哄悗锛屼笅娆″彲浠庡綋鍓嶄綅缃户缁€傜洿鎺ラ€€鍑轰笉浼氭洿鏂伴『搴忚繘搴︺€?
+                    "淇濆瓨閫€鍑哄悗锛屼笅娆″彲浠庡綋鍓嶄綅缃户缁€傜洿鎺ラ€€鍑轰笉浼氭洿鏂伴『搴忚繘搴︺€"
                 } else {
-                    "閫€鍑哄悗灏嗙粨鏉熷綋鍓嶇粌涔犮€?
+                    "閫€鍑哄悗灏嗙粨鏉熷綋鍓嶇粌涔犮€"
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -2618,16 +2618,16 @@ private fun PracticeExitConfirmDialog(
         },
         confirmButton = {
             if (canSaveProgress) {
-                TextButton(onClick = onSaveAndExit) { Text("淇濆瓨閫€鍑?) }
+                TextButton(onClick = onSaveAndExit) { Text("淇濆瓨閫€鍑") }
             } else {
-                TextButton(onClick = onDirectExit) { Text("閫€鍑?) }
+                TextButton(onClick = onDirectExit) { Text("閫€鍑") }
             }
         },
         dismissButton = {
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 TextButton(onClick = onDismiss) { Text("鍙栨秷") }
                 if (canSaveProgress) {
-                    TextButton(onClick = onDirectExit) { Text("鐩存帴閫€鍑?) }
+                    TextButton(onClick = onDirectExit) { Text("鐩存帴閫€鍑") }
                 }
             }
         }
@@ -2642,13 +2642,13 @@ private fun BatchSubmitConfirmDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("鎻愪氦鏈粍锛?) },
+        title = { Text("鎻愪氦鏈粍锛") },
         text = {
             Text(
                 text = if (unansweredCount > 0) {
-                    "杩樻湁 $unansweredCount 棰樻湭浣滅瓟锛屾彁浜ゅ悗浼氭寜閿欒澶勭悊銆傜‘瀹氫粛鐒舵彁浜ゅ悧锛?
+                    "杩樻湁 $unansweredCount 棰樻湭浣滅瓟锛屾彁浜ゅ悗浼氭寜閿欒澶勭悊銆傜‘瀹氫粛鐒舵彁浜ゅ悧锛"
                 } else {
-                    "鎻愪氦鍚庡皢缁熶竴鍒ゅ垎锛屽苟杩涘叆瑙ｆ瀽澶嶇洏銆?
+                    "鎻愪氦鍚庡皢缁熶竴鍒ゅ垎锛屽苟杩涘叆瑙ｆ瀽澶嶇洏銆"
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -2675,7 +2675,7 @@ private fun CustomQuestionCountDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "璇疯緭鍏?1锝?maxCount 涔嬮棿鐨勯鏁般€?,
+                    text = "璇疯緭鍏?1锝?maxCount 涔嬮棿鐨勯鏁般€",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -2739,7 +2739,7 @@ private fun SingleQuestionAiAnalysisPanel(
         ActionPillButton(
             icon = Icons.Rounded.AutoAwesome,
             text = when {
-                loading -> "AI 鍒嗘瀽涓?
+                loading -> "AI 鍒嗘瀽涓"
                 analysis != null -> "閲嶆柊鍒嗘瀽鏈"
                 else -> "AI 鍒嗘瀽鏈"
             },
@@ -2752,7 +2752,7 @@ private fun SingleQuestionAiAnalysisPanel(
             onClick = onAnalyze
         )
         if (loading) {
-            NoticeCard("AI 姝ｅ湪鍒嗘瀽褰撳墠棰樼洰锛岃绋嶅€欍€?, warning = false)
+            NoticeCard("AI 姝ｅ湪鍒嗘瀽褰撳墠棰樼洰锛岃绋嶅€欍€", warning = false)
         }
         error?.takeIf { it.isNotBlank() }?.let { message ->
             NoticeCard("AI 鍒嗘瀽澶辫触锛?message", warning = true)
@@ -2781,7 +2781,7 @@ private fun SingleQuestionAiResultCard(result: AiSingleQuestionAnalysis) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "AI 鍙傝€冨垎鏋?,
+                    text = "AI 鍙傝€冨垎鏋",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -2795,14 +2795,14 @@ private fun SingleQuestionAiResultCard(result: AiSingleQuestionAnalysis) {
             )
             result.matchesLocalAnswer?.let { matched ->
                 Text(
-                    text = if (matched) "涓庨搴撶瓟妗堬細涓€鑷? else "涓庨搴撶瓟妗堬細鍙兘涓嶄竴鑷达紝寤鸿浜哄伐纭",
+                    text = if (matched) "涓庨搴撶瓟妗堬細涓€鑷" else "涓庨搴撶瓟妗堬細鍙兘涓嶄竴鑷达紝寤鸿浜哄伐纭",
                     style = MaterialTheme.typography.bodySmall,
                     color = if (matched) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
                 )
             }
             if (result.needsReview) {
                 Text(
-                    text = "闇€瑕佷汉宸ョ‘璁?,
+                    text = "闇€瑕佷汉宸ョ‘璁",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.SemiBold
@@ -2821,7 +2821,7 @@ private fun SingleQuestionAiResultCard(result: AiSingleQuestionAnalysis) {
                 )
             }
             Text(
-                text = "AI 缁撴灉浠呬緵鍙傝€冿紝涓嶄細鑷姩淇敼棰樺簱绛旀鎴栬В鏋愩€?,
+                text = "AI 缁撴灉浠呬緵鍙傝€冿紝涓嶄細鑷姩淇敼棰樺簱绛旀鎴栬В鏋愩€",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -2831,9 +2831,9 @@ private fun SingleQuestionAiResultCard(result: AiSingleQuestionAnalysis) {
 
 private fun aiConfidenceLabel(confidence: String): String {
     return when (confidence.trim().uppercase()) {
-        "HIGH" -> "鍙俊搴?楂?
-        "LOW" -> "鍙俊搴?浣?
-        else -> "鍙俊搴?涓?
+        "HIGH" -> "鍙俊搴?楂"
+        "LOW" -> "鍙俊搴?浣"
+        else -> "鍙俊搴?涓"
     }
 }
 
@@ -2946,7 +2946,7 @@ private fun parseQuickEditAnswer(raw: String, type: QuestionType, options: List<
         QuestionType.JUDGE -> {
             val upper = trimmed.uppercase()
             val normalized = when (upper) {
-                "姝ｇ‘", "瀵?, "鏄?, "TRUE", "T", "鈭? -> "A"
+                "姝ｇ‘", "瀵?, "鏄?, "TRUE", "T", "鈭" -> "A"
                 "閿欒", "閿?, "鍚?, "FALSE", "F", "脳", "X" -> "B"
                 else -> upper
             }
@@ -2972,17 +2972,17 @@ private fun parseQuickEditAnswer(raw: String, type: QuestionType, options: List<
 
 
 private fun compactTypeLabel(type: QuestionType): String = when (type) {
-    QuestionType.SINGLE -> "鍗曢€?
-    QuestionType.MULTIPLE -> "澶氶€?
+    QuestionType.SINGLE -> "鍗曢€"
+    QuestionType.MULTIPLE -> "澶氶€"
     QuestionType.JUDGE -> "鍒ゆ柇"
     QuestionType.BLANK -> "濉┖"
-    QuestionType.SHORT -> "绠€绛?
+    QuestionType.SHORT -> "绠€绛"
 }
 
 private fun typeLabel(type: QuestionType): String = when (type) {
     QuestionType.SINGLE -> "鍗曢€夐"
     QuestionType.MULTIPLE -> "澶氶€夐"
-    QuestionType.JUDGE -> "鍒ゆ柇棰?
-    QuestionType.BLANK -> "濉┖棰?
+    QuestionType.JUDGE -> "鍒ゆ柇棰"
+    QuestionType.BLANK -> "濉┖棰"
     QuestionType.SHORT -> "绠€绛旈"
 }

@@ -1,4 +1,4 @@
-﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -120,8 +120,8 @@ fun RecordsScreen(
 
     pendingDeleteRecord?.let { targetRecord ->
         ShirohaDangerConfirmDialog(
-            title = "鍒犻櫎杩欐潯瀛︿範璁板綍锛?,
-            message = "鍒犻櫎鍚庢棤娉曟仮澶嶏紝浣嗕笉浼氬奖鍝嶉搴撱€侀敊棰樻湰鍜屾敹钘忓す銆?,
+            title = "鍒犻櫎杩欐潯瀛︿範璁板綍锛",
+            message = "鍒犻櫎鍚庢棤娉曟仮澶嶏紝浣嗕笉浼氬奖鍝嶉搴撱€侀敊棰樻湰鍜屾敹钘忓す銆",
             confirmText = "鍒犻櫎",
             onDismiss = { pendingDeleteRecord = null },
             onConfirm = {
@@ -155,9 +155,9 @@ fun RecordsScreen(
                         kicker = "History",
                         title = "瀛︿範璁板綍",
                         subtitle = if (records.isEmpty()) {
-                            "瀹屾垚缁冧範鎴栬€冭瘯鍚庯紝璁板綍浼氳嚜鍔ㄥ嚭鐜板湪杩欓噷銆?
+                            "瀹屾垚缁冧範鎴栬€冭瘯鍚庯紝璁板綍浼氳嚜鍔ㄥ嚭鐜板湪杩欓噷銆"
                         } else {
-                            "鍏?${records.size} 鏉″涔犺褰曘€?
+                            "鍏?${records.size} 鏉″涔犺褰曘€"
                         },
                         scale = scale
                     )
@@ -171,8 +171,8 @@ fun RecordsScreen(
                         verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
                     ) {
                         EmptyStateIllustration(
-                            title = "杩欓噷杩樻病鏈夊涔犺褰?,
-                            message = "瀹屾垚缁冧範鎴栬€冭瘯鍚庯紝璁板綍浼氳嚜鍔ㄥ嚭鐜板湪杩欓噷銆?,
+                            title = "杩欓噷杩樻病鏈夊涔犺褰",
+                            message = "瀹屾垚缁冧範鎴栬€冭瘯鍚庯紝璁板綍浼氳嚜鍔ㄥ嚭鐜板湪杩欓噷銆",
                             imageRes = R.drawable.illus_rest_state_webp,
                             action = { Spacer(Modifier.height((12 * uiScale).dp)) }
                         )
@@ -196,7 +196,7 @@ fun RecordsScreen(
                     ) {
                         IllustrationHeroCard(
                             title = "瀛︿範璁板綍浼氬湪杩欓噷鎱㈡參绉疮",
-                            subtitle = "缁冧範鍜岃€冭瘯閮戒細鏀跺綍鍒拌繖閲屻€?,
+                            subtitle = "缁冧範鍜岃€冭瘯閮戒細鏀跺綍鍒拌繖閲屻€",
                             imageRes = R.drawable.illus_rest_state_webp,
                             imageSize = 88.dp,
                             scale = scale
@@ -215,7 +215,7 @@ fun RecordsScreen(
 
                         EditorialSection(
                             kicker = "Filter",
-                            title = "绛涢€?,
+                            title = "绛涢€",
                             scale = scale
                         ) {
                             RecordsFilterBlock(
@@ -234,7 +234,7 @@ fun RecordsScreen(
                         ) {
                             if (visibleRecords.isEmpty()) {
                                 GlassCard {
-                                    NoticeCard("璇ラ搴撴殏鏃犲涔犺褰曘€傚彲浠ュ垏鎹㈠埌鍏朵粬棰樺簱鎴栧叏閮ㄨ褰曘€?)
+                                    NoticeCard("璇ラ搴撴殏鏃犲涔犺褰曘€傚彲浠ュ垏鎹㈠埌鍏朵粬棰樺簱鎴栧叏閮ㄨ褰曘€")
                                 }
                             }
                         }
@@ -281,7 +281,7 @@ private fun RecordsOverviewFigures(
                 scale = scale,
                 value = totalCount.toString(),
                 label = "鎬昏褰曟暟",
-                unit = "鏉?
+                unit = "鏉"
             )
             EditorialFigure(
                 modifier = Modifier.weight(1f),
@@ -291,15 +291,15 @@ private fun RecordsOverviewFigures(
                 } else {
                     totalMinutes.toString()
                 },
-                label = "鎬荤敤鏃?,
-                unit = if (totalMinutes >= 60) "" else "鍒?
+                label = "鎬荤敤鏃",
+                unit = if (totalMinutes >= 60) "" else "鍒"
             )
         }
         EditorialFigure(
             modifier = Modifier.fillMaxWidth(),
             scale = scale,
             value = averageScore.toString(),
-            label = "骞冲潎姝ｇ‘鐜?,
+            label = "骞冲潎姝ｇ‘鐜",
             unit = "%"
         )
     }
@@ -345,8 +345,8 @@ private fun RecordsFilterBlock(
                     Text(
                         text = selectedBank?.let { bank ->
                             val groupName = bank.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }
-                            "$groupName 路 鏄剧ず ${visibleRecords.size} / ${records.size} 鏉?
-                        } ?: "褰撳墠鏄剧ず鍏ㄩ儴 ${records.size} 鏉″涔犺褰?,
+                            "$groupName 路 鏄剧ず ${visibleRecords.size} / ${records.size} 鏉"
+                        } ?: "褰撳墠鏄剧ず鍏ㄩ儴 ${records.size} 鏉″涔犺褰",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -363,7 +363,7 @@ private fun RecordsFilterBlock(
         }
         if (selectedBank != null) {
             Text(
-                text = "鍖呮嫭灞炰簬璇ラ搴撶殑璁板綍锛屼互鍙婅法棰樺簱缁冧範涓寘鍚棰樺簱棰樼洰鐨勮褰曘€?,
+                text = "鍖呮嫭灞炰簬璇ラ搴撶殑璁板綍锛屼互鍙婅法棰樺簱缁冧範涓寘鍚棰樺簱棰樼洰鐨勮褰曘€",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -397,7 +397,7 @@ private fun RecordScopeDialog(
             ) {
                 RecordScopeOption(
                     title = "鍏ㄩ儴璁板綍",
-                    desc = "鍏?${records.size} 鏉″涔犺褰?,
+                    desc = "鍏?${records.size} 鏉″涔犺褰",
                     selected = selectedScopeKey == RECORD_SCOPE_ALL,
                     onClick = { onSelect(RECORD_SCOPE_ALL) }
                 )
@@ -417,7 +417,7 @@ private fun RecordScopeDialog(
                         }
                         RecordScopeOption(
                             title = bank.name,
-                            desc = "$count 鏉＄浉鍏宠褰?路 鍏?${bank.questions.size} 棰?,
+                            desc = "$count 鏉＄浉鍏宠褰?路 鍏?${bank.questions.size} 棰",
                             selected = selectedScopeKey == key,
                             onClick = { onSelect(key) }
                         )
@@ -596,7 +596,7 @@ private fun RecordCard(
             )
             Text(
                 text = if (isExam && record.totalScore != null && record.earnedScore != null) {
-                    "${record.earnedScore.trimScore()} / ${record.totalScore.trimScore()} 鍒?
+                    "${record.earnedScore.trimScore()} / ${record.totalScore.trimScore()} 鍒"
                 } else {
                     "姝ｇ‘鐜?$accuracy%"
                 },
@@ -638,7 +638,7 @@ private fun meaningfulRecordTitle(record: StudyRecord): String? {
 
 private fun recordFooterText(record: StudyRecord): String {
     val duration = record.durationSeconds?.let { "鐢ㄦ椂 ${formatDuration(it)}" }
-    val detail = if (record.questionResults.isNotEmpty()) "鐐瑰嚮鏌ョ湅璇︽儏" else "浠呬繚鐣欐憳瑕?
+    val detail = if (record.questionResults.isNotEmpty()) "鐐瑰嚮鏌ョ湅璇︽儏" else "浠呬繚鐣欐憳瑕"
     return listOfNotNull(duration, detail).joinToString(" 路 ")
 }
 

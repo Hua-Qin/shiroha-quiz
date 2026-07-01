@@ -1,4 +1,4 @@
-﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -91,7 +91,7 @@ fun StudyCourseScreen(
             ShirohaHeader(
                 kicker = "Course",
                 title = course.courseName,
-                subtitle = course.description.ifBlank { "鍏?${sections.size} 涓珷鑺? },
+                subtitle = course.description.ifBlank { "鍏?${sections.size} 涓珷鑺" },
                 scale = scale
             )
 
@@ -99,7 +99,7 @@ fun StudyCourseScreen(
             if (course.description.isNotBlank() || course.createdAt > 0L) {
                 EditorialSection(
                     kicker = "Overview",
-                    title = "璇剧▼绠€浠?,
+                    title = "璇剧▼绠€浠",
                     scale = scale
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Sm)) {
@@ -144,7 +144,7 @@ fun StudyCourseScreen(
                             modifier = Modifier.weight(1f),
                             scale = scale,
                             value = "${summary.practicedSections}",
-                            label = "宸茬粌涔?
+                            label = "宸茬粌涔"
                         )
                     }
                     Row(
@@ -155,15 +155,15 @@ fun StudyCourseScreen(
                             modifier = Modifier.weight(1f),
                             scale = scale,
                             value = "${summary.masteredSections}",
-                            label = "宸叉帉鎻?,
-                            unit = "鑺?
+                            label = "宸叉帉鎻",
+                            unit = "鑺"
                         )
                         EditorialFigure(
                             modifier = Modifier.weight(1f),
                             scale = scale,
                             value = "${summary.totalQuestions}",
-                            label = "鎬婚鏁?,
-                            unit = "棰?
+                            label = "鎬婚鏁",
+                            unit = "棰"
                         )
                     }
                     Row(
@@ -175,8 +175,8 @@ fun StudyCourseScreen(
                             scale = scale,
                             value = if (summary.practicedSections > 0) {
                                 "${(summary.averageAccuracy * 100).toInt()}"
-                            } else "鈥?,
-                            label = "姝ｇ‘鐜?,
+                            } else "鈥",
+                            label = "姝ｇ‘鐜",
                             unit = if (summary.practicedSections > 0) "%" else ""
                         )
                     }
@@ -288,13 +288,13 @@ private fun SectionCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 StatusChip(text = difficultyLabel(section.difficulty), selected = false)
-                StatusChip(text = "$questionCount 棰?, selected = false)
+                StatusChip(text = "$questionCount 棰", selected = false)
                 StatusChip(text = mastery.label, selected = mastery == MasteryLevel.MASTERED)
             }
             if (progress.practiced) {
                 Spacer(modifier = Modifier.height(ShirohaSpacing.Sm))
                 Text(
-                    text = "鏈€杩戞纭巼 ${(progress.lastAccuracy * 100).toInt()}%锛堟渶浣?${(progress.bestAccuracy * 100).toInt()}%锛?,
+                    text = "鏈€杩戞纭巼 ${(progress.lastAccuracy * 100).toInt()}%锛堟渶浣?${(progress.bestAccuracy * 100).toInt()}%锛",
                     style = MaterialTheme.typography.labelSmall,
                     color = masteryColor(mastery)
                 )
@@ -303,7 +303,7 @@ private fun SectionCard(
             // 杩涘叆绔犺妭鎸夐挳
             ActionPillButton(
                 icon = Icons.Rounded.PlayArrow,
-                text = "寮€濮嬪涔?,
+                text = "寮€濮嬪涔",
                 primary = true,
                 enabled = true,
                 onClick = onClick,
@@ -320,7 +320,7 @@ private fun EmptyCourseView(onBack: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "璇剧▼涓嶅瓨鍦?, style = MaterialTheme.typography.titleMedium)
+        Text(text = "璇剧▼涓嶅瓨鍦", style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.height(ShirohaSpacing.Md))
         Text(text = "鐐瑰嚮杩斿洖", modifier = Modifier.shirohaNoRippleClickable(onClick = onBack))
     }

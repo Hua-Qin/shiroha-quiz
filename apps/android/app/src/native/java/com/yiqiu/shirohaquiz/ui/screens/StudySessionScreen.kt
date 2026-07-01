@@ -1,4 +1,4 @@
-﻿﻿﻿﻿package com.yiqiu.shirohaquiz.ui.screens
+﻿package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -68,7 +68,7 @@ import com.yiqiu.shirohaquiz.ui.theme.screenClassFor
 
 /**
  * 瀛︿範浼氳瘽闃舵鐘舵€佹満锛? *  - LEARN锛氶槄璇婚樁娈碉紝浠呭睍绀烘枃绔犲紡瀛︿範鍐呭锛屼笉鏄剧ず浠讳綍棰樼洰
- *  - QUIZ 锛氱瓟棰橀樁娈碉紝涓嶆樉绀哄涔犲唴瀹癸紙鍙€氳繃"鏌ョ湅鐭ヨ瘑鐐?鎵撳紑鍗婂睆瑕嗙洊灞傦級
+ *  - QUIZ 锛氱瓟棰橀樁娈碉紝涓嶆樉绀哄涔犲唴瀹癸紙鍙€氳繃"鏌ョ湅鐭ヨ瘑鐐"鎵撳紑鍗婂睆瑕嗙洊灞傦級
  *  - DONE 锛氱粌涔犲畬鎴愶紝灞曠ず鎬荤粨
  */
 private enum class StudySessionPhase { LEARN, QUIZ, DONE }
@@ -76,7 +76,7 @@ private enum class StudySessionPhase { LEARN, QUIZ, DONE }
 /**
  * 瀛︿範浼氳瘽椤碉細涓ら樁娈靛垎绂伙紙鏆栬壊缂栬緫鏉傚織椋庨噸鍐欙級
  *
- * 闃舵 1锛圠EARN锛夛細闃呰鏂囩珷 鈫?銆屾垜宸插瀹岋紝寮€濮嬬粌涔犮€? * 闃舵 2锛圦UIZ锛夛細绾瓟棰?鈫?椤舵爮鍙墦寮€"鏌ョ湅鐭ヨ瘑鐐?鍙瑕嗙洊灞? * 闃舵 3锛圖ONE锛夛細鎬荤粨鍗★紙EditorialFigure 脳N 澶ф暟瀛楋級鈫?閲嶆柊缁冧範 / 涓嬩竴绔犺妭 / 杩斿洖
+ * 闃舵 1锛圠EARN锛夛細闃呰鏂囩珷 鈫?銆屾垜宸插瀹岋紝寮€濮嬬粌涔犮€? * 闃舵 2锛圦UIZ锛夛細绾瓟棰?鈫?椤舵爮鍙墦寮€"鏌ョ湅鐭ヨ瘑鐐?鍙瑕嗙洊灞? * 闃舵 3锛圖ONE锛夛細鎬荤粨鍗★紙EditorialFigure 脳N 澶ф暟瀛楋級鈫"閲嶆柊缁冧範 / 涓嬩竴绔犺妭 / 杩斿洖
  *
  * 甯冨眬鑷笂鑰屼笅锛? *  1. ShirohaHeader锛坘icker=璇剧▼鍚?/ title=褰撳墠闃舵 / subtitle=闃舵鎻忚堪锛? *  2. 闃舵杩涘害鏉?EditorialSection + 3 涓?EditorialFigure锛圠EARN / QUIZ / DONE锛? *  3. 鍐呭鍖烘寜 phase 鍒囨崲锛歀EARN锛圓rticleReader锛? QUIZ锛堥鐩級/ DONE锛堢粨鏋?EditorialFigure 脳N锛? */
 @Composable
@@ -104,7 +104,7 @@ fun StudySessionScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "绔犺妭涓嶅瓨鍦?,
+                    text = "绔犺妭涓嶅瓨鍦",
                     style = if (scale == 1f) {
                         ShirohaTypography.headlineSmall
                     } else {
@@ -171,7 +171,7 @@ fun StudySessionScreen(
                 title = section.sectionTitle.ifBlank { section.id },
                 subtitle = when (phase) {
                     StudySessionPhase.LEARN -> "闃舵 1 / 闃呰瀛︿範鍐呭"
-                    StudySessionPhase.QUIZ -> "闃舵 2 / 瀹屾垚缁冧範棰?
+                    StudySessionPhase.QUIZ -> "闃舵 2 / 瀹屾垚缁冧範棰"
                     StudySessionPhase.DONE -> "闃舵 3 / 缁冧範鎬荤粨"
                 },
                 scale = scale
@@ -245,7 +245,7 @@ fun StudySessionScreen(
                                 val record = com.yiqiu.shirohaquiz.state.StudyRecord(
                                     id = "study_${q.id}_${System.currentTimeMillis()}",
                                     bankId = bank?.id,
-                                    bankName = bank?.name ?: "鏈懡鍚嶉搴?,
+                                    bankName = bank?.name ?: "鏈懡鍚嶉搴",
                                     source = "杈瑰杈圭瓟",
                                     title = q.question.take(24),
                                     total = 1,
@@ -256,7 +256,7 @@ fun StudySessionScreen(
                                             question = q,
                                             userAnswer = selectedAnswer,
                                             correct = isCorrect,
-                                            answerText = q.answer.joinToString(" / ").ifBlank { "鏈瘑鍒瓟妗? },
+                                            answerText = q.answer.joinToString(" / ").ifBlank { "鏈瘑鍒瓟妗" },
                                             autoScored = true,
                                             sourceBankId = bank?.id,
                                             sourceBankName = bank?.name
@@ -329,7 +329,7 @@ fun StudySessionScreen(
         }
     }
 
-    // 绛旈闃舵"鏌ョ湅鐭ヨ瘑鐐?鍗婂睆 Dialog锛堝彧璇?ArticleReader锛?    if (showKnowledgeDialog) {
+    // 绛旈闃舵"鏌ョ湅鐭ヨ瘑鐐?鍗婂睆 Dialog锛堝彧璇?ArticleReader锛"    if (showKnowledgeDialog) {
         AlertDialog(
             onDismissRequest = { showKnowledgeDialog = false },
             confirmButton = {
@@ -345,7 +345,7 @@ fun StudySessionScreen(
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = section.sectionTitle.ifBlank { "鐭ヨ瘑鐐? },
+                        text = section.sectionTitle.ifBlank { "鐭ヨ瘑鐐" },
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.weight(1f)
@@ -405,7 +405,7 @@ private fun LearnPhase(
             NoticeCard(text = "鏈珷鏆傛棤棰樼洰锛屽彲鐐瑰嚮涓嬫柟鎸夐挳杩斿洖", warning = false)
             ActionPillButton(
                 icon = Icons.Rounded.CheckCircle,
-                text = "鏍囪涓哄凡瀛︿範骞惰繑鍥?,
+                text = "鏍囪涓哄凡瀛︿範骞惰繑鍥",
                 primary = true,
                 fillWidthContent = true,
                 onClick = onBack
@@ -439,7 +439,7 @@ private fun QuizPhase(
         verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Lg)
     ) {
         if (questions.isEmpty()) {
-            NoticeCard(text = "鏈珷鏆傛棤棰樼洰锛屾棤娉曡繘鍏ョ粌涔?, warning = false)
+            NoticeCard(text = "鏈珷鏆傛棤棰樼洰锛屾棤娉曡繘鍏ョ粌涔", warning = false)
             ActionPillButton(
                 icon = Icons.Rounded.ArrowBack,
                 text = "杩斿洖瀛︿範",
@@ -454,11 +454,11 @@ private fun QuizPhase(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            StatusChip(text = "绗?${currentIdx + 1} / ${questions.size} 棰?, selected = true)
+            StatusChip(text = "绗?${currentIdx + 1} / ${questions.size} 棰", selected = true)
             Spacer(modifier = Modifier.weight(1f))
             ActionPillButton(
                 icon = Icons.Rounded.PlayArrow,
-                text = "鏌ョ湅鐭ヨ瘑鐐?,
+                text = "鏌ョ湅鐭ヨ瘑鐐",
                 primary = false,
                 onClick = onShowKnowledge
             )
@@ -521,7 +521,7 @@ private fun DonePhase(
                     modifier = Modifier.weight(1f),
                     scale = scale,
                     value = "$percent",
-                    label = "姝ｇ‘鐜?,
+                    label = "姝ｇ‘鐜",
                     unit = "%"
                 )
                 EditorialFigure(
@@ -529,7 +529,7 @@ private fun DonePhase(
                     scale = scale,
                     value = "$correct",
                     label = "绛斿",
-                    unit = "棰?
+                    unit = "棰"
                 )
             }
             Row(
@@ -541,14 +541,14 @@ private fun DonePhase(
                     scale = scale,
                     value = "$wrong",
                     label = "绛旈敊",
-                    unit = "棰?
+                    unit = "棰"
                 )
                 EditorialFigure(
                     modifier = Modifier.weight(1f),
                     scale = scale,
                     value = "$total",
-                    label = "鎬婚鏁?,
-                    unit = "棰?
+                    label = "鎬婚鏁",
+                    unit = "棰"
                 )
             }
         }
@@ -585,7 +585,7 @@ private fun DonePhase(
         // 鎿嶄綔鎸夐挳
         ActionPillButton(
             icon = Icons.Rounded.PlayArrow,
-            text = "閲嶆柊瀛︿範骞剁粌涔?,
+            text = "閲嶆柊瀛︿範骞剁粌涔",
             primary = false,
             fillWidthContent = true,
             onClick = onRetry
@@ -629,13 +629,13 @@ private fun PhaseIndicatorRow(phase: StudySessionPhase, scale: Float = 1f) {
             label = "LEARN",
             unit = when (phase) {
                 StudySessionPhase.LEARN -> "闃呰"
-                else -> "鉁?
+                else -> "鉁"
             }
         )
         EditorialFigure(
             modifier = Modifier.weight(1f),
             scale = scale,
-            value = if (phase == StudySessionPhase.QUIZ) "2" else if (phase == StudySessionPhase.DONE) "鉁? else "路",
+            value = if (phase == StudySessionPhase.QUIZ) "2" else if (phase == StudySessionPhase.DONE) "鉁" else "路",
             label = "QUIZ",
             unit = if (phase == StudySessionPhase.QUIZ) "绛旈" else ""
         )
@@ -675,9 +675,9 @@ private fun QuestionPracticeBlock(
             QuestionType.JUDGE -> {
                 val ans = question.answer.firstOrNull().orEmpty().trim()
                 when {
-                    ans.contains("閿?) || ans.equals("false", true) ||
-                        ans.equals("脳", true) || ans.equals("f", true) -> listOf("閿?)
-                    else -> listOf("瀵?)
+                    ans.contains("閿") || ans.equals("false", true) ||
+                        ans.equals("脳", true) || ans.equals("f", true) -> listOf("閿")
+                    else -> listOf("瀵")
                 }
             }
             else -> question.answer
@@ -692,7 +692,7 @@ private fun QuestionPracticeBlock(
     ) {
         Column(modifier = Modifier.padding(ShirohaSpacing.Lg)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                StatusChip(text = "绗?$questionNumber / $totalQuestions 棰?, selected = true)
+                StatusChip(text = "绗?$questionNumber / $totalQuestions 棰", selected = true)
                 Spacer(modifier = Modifier.weight(1f))
                 StatusChip(text = typeLabel(question.type.name), selected = false)
             }
@@ -774,7 +774,7 @@ private fun QuestionPracticeBlock(
                     )
                     Spacer(modifier = Modifier.height(ShirohaSpacing.Sm))
                     Text(
-                        text = "鍙傝€冪瓟妗堬細${question.answer.joinToString("锛?)}",
+                        text = "鍙傝€冪瓟妗堬細${question.answer.joinToString("锛")}",
                         style = MaterialTheme.typography.bodySmall,
                         color = ShirohaColors.TextSecondary
                     )
@@ -802,7 +802,7 @@ private fun QuestionPracticeBlock(
             } else {
                 ActionPillButton(
                     icon = Icons.Rounded.ArrowForward,
-                    text = if (currentIsLast(questionNumber, totalQuestions)) "瀹屾垚缁冧範" else "涓嬩竴棰?,
+                    text = if (currentIsLast(questionNumber, totalQuestions)) "瀹屾垚缁冧範" else "涓嬩竴棰",
                     primary = true,
                     fillWidthContent = true,
                     onClick = onNext
@@ -874,11 +874,11 @@ private fun OptionButton(
 }
 
 private fun typeLabel(type: String): String = when (type) {
-    "SINGLE" -> "鍗曢€?
-    "MULTIPLE" -> "澶氶€?
+    "SINGLE" -> "鍗曢€"
+    "MULTIPLE" -> "澶氶€"
     "JUDGE" -> "鍒ゆ柇"
     "BLANK" -> "濉┖"
-    "SHORT" -> "绠€绛?
+    "SHORT" -> "绠€绛"
     else -> type
 }
 
