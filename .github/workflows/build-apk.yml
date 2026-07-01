@@ -1,4 +1,4 @@
-name: Build APK
+name: Android CI
 
 on:
   push:
@@ -9,7 +9,8 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: Android CI
+    runs-on: windows-latest
     permissions:
       contents: read
     steps:
@@ -27,28 +28,26 @@ jobs:
 
       - name: Generate signing keystore
         working-directory: apps/android
+        shell: pwsh
         run: |
-          if [ ! -f keystore.properties ]; then
-            echo "keystore.properties not found, generating a CI signing key..."
-            keytool -genkeypair -v \
-              -keystore ci-release.keystore \
-              -alias ci-release \
-              -keyalg RSA -keysize 2048 -validity 10000 \
-              -storepass android -keypass android \
+          if (-not (Test-Path keystore.properties)) {
+            Write-Host "keystore.properties not found, generating a CI signing key..."
+            keytool -genkeypair -v `
+              -keystore ci-release.keystore `
+              -alias ci-release `
+              -keyalg RSA -keysize 2048 -validity 10000 `
+              -storepass android -keypass android `
               -dname "CN=CI, OU=CI, O=ShirohaQuiz, L=CI, S=CI, C=US"
-            printf 'storeFile=ci-release.keystore\nstorePassword=android\nkeyAlias=ci-release\nkeyPassword=android\n' > keystore.properties
-            echo "CI signing key generated."
-          else
-            echo "keystore.properties found, using existing config."
-          fi
-
-      - name: Grant execute permission for gradlew
-        working-directory: apps/android
-        run: chmod +x ./gradlew
+            "storeFile=ci-release.keystore`nstorePassword=android`nkeyAlias=ci-release`nkeyPassword=android" | Out-File -FilePath keystore.properties -Encoding ascii
+            Write-Host "CI signing key generated."
+          } else {
+            Write-Host "keystore.properties found, using existing config."
+          }
 
       - name: Build native release APK
         working-directory: apps/android
-        run: ./gradlew assembleNativeRelease --no-daemon --stacktrace
+        shell: pwsh
+        run: .\gradlew.bat assembleNativeRelease --no-daemon --stacktrace
 
       - name: Upload native APK
         uses: actions/upload-artifact@v4
