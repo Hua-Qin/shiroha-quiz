@@ -2236,8 +2236,8 @@ private fun PracticeProgressCard(
     expanded: Boolean,
     reciteMode: Boolean = false,
     reciteIndex: Int = 0,
-    onOpenAnswerSheet: (() -> Unit)",
-    onToggleWrongOnly: (() -> Unit)",
+    onOpenAnswerSheet: (() -> Unit),
+    onToggleWrongOnly: (() -> Unit),
     onToggle: () -> Unit
 ) {
     val accuracy = if (scoredAnswered == 0) 0 else correct * 100 / scoredAnswered
