@@ -91,7 +91,7 @@ fun AboutScreen(
             // === Hero 鍖$Shiroha 妯″紡鏃跺甫娴姩鎻掔敾 ===
             IllustrationHeroCard(
                 title = "Shiroha Quiz",
-                subtitle = "鎶婃瘡涓€娆＄粌涔$閮藉綋浣滀竴娆＄簿杩涖€",
+                subtitle = "鎶婃瘡涓€娆＄粌涔?閮藉綋浣滀竴娆＄簿杩涖€",
                 imageRes = R.drawable.illus_me_settings,
                 modifier = Modifier.height(ShirohaDimens.HeroCardHeight),
                 imageSize = ShirohaDimens.HeroImageSize,
@@ -155,7 +155,7 @@ fun AboutScreen(
                 )
                 EditorialDivider()
                 AboutParagraph(
-                    text = "鎴戜滑閲囩敤缂栬緫鏉傚織椋庤璁¤瑷€,鎶婃瘡涓€娆＄粌涔$褰撲綔涓€娆＄簿杩涖€傜背榛勫簳鑹查厤琛嚎澶ф暟瀛$闀挎椂闂撮槄璇绘洿鏌斿拰銆傛墍鏈夋暟鎹潎淇濆瓨鍦ㄦ湰鍦$浣犲彲浠ラ殢鏃跺鍑哄浠芥垨娓呴櫎銆",
+                    text = "鎴戜滑閲囩敤缂栬緫鏉傚織椋庤璁¤瑷€,鎶婃瘡涓€娆＄粌涔?褰撲綔涓€娆＄簿杩涖€傜背榛勫簳鑹查厤琛嚎澶ф暟瀛?闀挎椂闂撮槄璇绘洿鏌斿拰銆傛墍鏈夋暟鎹潎淇濆瓨鍦ㄦ湰鍦?浣犲彲浠ラ殢鏃跺鍑哄浠芥垨娓呴櫎銆",
                     uiScale = uiScale
                 )
             }
@@ -167,7 +167,7 @@ fun AboutScreen(
                 scale = scale
             ) {
                 AboutParagraph(
-                    text = "鏆栫焊寮犲緞鍚戞笎鍙"+ 琛嚎澶ф暟瀛"+ 鍙戜笣涓嬪垝绾$钀ラ€犳潅蹇楀皝闈㈢骇鐨勬暟鎹劅;鍗＄墖杞婚噺鍖$鐣欑櫧浼樺厛,閬垮紑绱矇娓愬彉涓庨噸鎶曞奖銆係hiroha 妯″紡寮€鍚椂,閮ㄥ垎椤甸潰浼氭樉绀烘彃鐢讳笌寮€灞忓浘銆",
+                    text = "鏆栫焊寮犲緞鍚戞笎鍙"+ 琛嚎澶ф暟瀛"+ 鍙戜笣涓嬪垝绾?钀ラ€犳潅蹇楀皝闈㈢骇鐨勬暟鎹劅;鍗＄墖杞婚噺鍖?鐣欑櫧浼樺厛,閬垮紑绱矇娓愬彉涓庨噸鎶曞奖銆係hiroha 妯″紡寮€鍚椂,閮ㄥ垎椤甸潰浼氭樉绀烘彃鐢讳笌寮€灞忓浘銆",
                     uiScale = uiScale
                 )
             }
@@ -209,7 +209,7 @@ fun AboutScreen(
                 AboutFeatureRow(
                     icon = Icons.Rounded.Description,
                     title = "AI 瑙ｆ瀽",
-                    desc = "鍗曢 AI 鍒嗘瀽涓庢牳瀵$浜哄伐纭鍚庡啓鍏ャ€",
+                    desc = "鍗曢 AI 鍒嗘瀽涓庢牳瀵?浜哄伐纭鍚庡啓鍏ャ€",
                     onClick = { uriHandler.openUri("https://github.com/reiqr/shiroha-quiz") }
                 )
             }

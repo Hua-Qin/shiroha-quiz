@@ -240,8 +240,8 @@ fun HomeDashboardScreen(
 }
 
 
- * 棣栭〉 hero 鍖"琛嚎澶ф爣棰"+ 鍓枃 + Shiroha 娴姩鎻掔敾(鍙$Shiroha 妯″紡鎺у埗)
- * Shiroha 妯″紡鍏抽棴鏃"鐗堝績灞呬腑,鏃犳彃鐢汇€"
+ * 棣栭〉 hero 鍖?琛嚎澶ф爣棰"+ 鍓枃 + Shiroha 娴姩鎻掔敾(鍙$Shiroha 妯″紡鎺у埗)
+ * Shiroha 妯″紡鍏抽棴鏃?鐗堝績灞呬腑,鏃犳彃鐢汇€"
  */
 @Composable
 private fun EditorialHeroSection(
@@ -251,7 +251,7 @@ private fun EditorialHeroSection(
 ) {
     IllustrationHeroCard(
         title = "浠婃棩鐨勭粌涔?\n鏄庡ぉ浼氭劅璋綘銆",
-        subtitle = "鎶婃瘡涓€娆＄瓟棰$閮藉綋浣滀竴娆＄簿杩涖€",
+        subtitle = "鎶婃瘡涓€娆＄瓟棰?閮藉綋浣滀竴娆＄簿杩涖€",
         imageRes = com.yiqiu.shirohaquiz.R.drawable.illus_home_welcome,
         scale = scale
     ) {

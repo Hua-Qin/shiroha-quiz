@@ -269,7 +269,7 @@ fun BankListScreen(
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
-                                text = "${banksInGroup.size} 涓搴$路 $totalQuestions 棰",
+                                text = "${banksInGroup.size} 涓搴?路 $totalQuestions 棰",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

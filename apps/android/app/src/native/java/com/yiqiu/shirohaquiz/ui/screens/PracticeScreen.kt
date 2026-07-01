@@ -625,7 +625,7 @@ fun PracticeScreen(
         var isSingleQuestionAiLoading by remember(currentSessionKey) { mutableStateOf(false) }
         val runSingleQuestionAiAnalysis = {
             if (!QuizRepository.isAiConfigured()) {
-                singleQuestionAiError = "璇峰厛鍦$鎴戠殑 鈫$AI 璁剧疆 涓～鍐$API 鍦板潃銆丄PI Key 鍜屾ā鍨嬪悕绉般€"
+                singleQuestionAiError = "璇峰厛鍦?鎴戠殑 鈫?AI 璁剧疆 涓～鍐$API 鍦板潃銆丄PI Key 鍜屾ā鍨嬪悕绉般€"
                 singleQuestionAiAnalysis = null
             } else if (!isSingleQuestionAiLoading) {
                 isSingleQuestionAiLoading = true
@@ -736,7 +736,7 @@ fun PracticeScreen(
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     CompactPracticeChip(
-                        if (isBatchPractice) "绗?$batchGroupNumber 缁$路 ${QuizRepository.practiceIndex - batchGroupStart + 1} / $batchGroupTotal 棰" else "绗?${QuizRepository.practiceIndex + 1} / ${practiceQuestions.size} 棰",
+                        if (isBatchPractice) "绗?$batchGroupNumber 缁?路 ${QuizRepository.practiceIndex - batchGroupStart + 1} / $batchGroupTotal 棰" else "绗?${QuizRepository.practiceIndex + 1} / ${practiceQuestions.size} 棰",
                         selected = true
                     )
                     CompactPracticeChip(typeLabel(question.type))
@@ -1158,7 +1158,7 @@ fun PracticeQuickEditScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                StatusChip("绗"${question.number.ifBlank { "-" }} 棰")
+                StatusChip("绗?${question.number.ifBlank { "-" }} 棰")
                 StatusChip(typeLabel(question.type))
                 StatusChip("淇濈暀棰樺瀷")
             }
@@ -2048,9 +2048,9 @@ private fun PracticeCompletionCard(
                 )
                 Text(
                     text = if (scoredAnswered == answered) {
-                        "鍏?$total 棰$路 宸叉彁浜?$answered 棰$路 姝ｇ‘ $correct 棰$路 姝ｇ‘鐜?$accuracy%"
+                        "鍏?$total 棰?路 宸叉彁浜?$answered 棰?路 姝ｇ‘ $correct 棰?路 姝ｇ‘鐜?$accuracy%"
                     } else {
-                        "鍏?$total 棰$路 宸叉彁浜?$answered 棰$路 鑷姩鍒ゅ垎 $scoredAnswered 棰$路 姝ｇ‘鐜?$accuracy%"
+                        "鍏?$total 棰?路 宸叉彁浜?$answered 棰?路 鑷姩鍒ゅ垎 $scoredAnswered 棰?路 姝ｇ‘鐜?$accuracy%"
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -2258,7 +2258,7 @@ private fun PracticeProgressCard(
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        text = "娴忚 ${reciteIndex.coerceIn(1, total.coerceAtLeast(1))} / $total 棰$路 涓嶈鍏ユ纭巼",
+                        text = "娴忚 ${reciteIndex.coerceIn(1, total.coerceAtLeast(1))} / $total 棰?路 涓嶈鍏ユ纭巼",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
@@ -2287,9 +2287,9 @@ private fun PracticeProgressCard(
                         Spacer(Modifier.height(2.dp))
                         Text(
                             text = if (scoredAnswered == answered) {
-                                "宸叉彁浜?$answered / $total 棰$路 姝ｇ‘鐜?$accuracy%"
+                                "宸叉彁浜?$answered / $total 棰?路 姝ｇ‘鐜?$accuracy%"
                             } else {
-                                "宸叉彁浜?$answered / $total 棰$路 鑷姩鍒ゅ垎 $scoredAnswered 棰$路 姝ｇ‘鐜?$accuracy%"
+                                "宸叉彁浜?$answered / $total 棰?路 鑷姩鍒ゅ垎 $scoredAnswered 棰?路 姝ｇ‘鐜?$accuracy%"
                             },
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -2831,15 +2831,15 @@ private fun SingleQuestionAiResultCard(result: AiSingleQuestionAnalysis) {
 
 private fun aiConfidenceLabel(confidence: String): String {
     return when (confidence.trim().uppercase()) {
-        "HIGH" -> "鍙俊搴"楂"
-        "LOW" -> "鍙俊搴$浣"
-        else -> "鍙俊搴$涓"
+        "HIGH" -> "鍙俊搴?楂"
+        "LOW" -> "鍙俊搴?浣"
+        else -> "鍙俊搴?涓"
     }
 }
 
 private fun formatAnalysisForDisplay(analysis: String): String {
     return analysis.trim()
-        .replace(Regex("\\s*(?=([A-G锛$锛)椤筟锛$锛?])"), "\n")
+        .replace(Regex("\\s*(?=([A-G锛?锛)椤筟锛?锛?])"), "\n")
         .replace(Regex("\n{3,}"), "\n\n")
         .trim()
 }

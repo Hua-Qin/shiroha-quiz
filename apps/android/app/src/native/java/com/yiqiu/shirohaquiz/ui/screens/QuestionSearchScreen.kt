@@ -446,7 +446,7 @@ private fun QuestionSearchResultCard(
                 )
                 // 鍒楄〃椤?棰樺彿 + 棰樺共棰勮
                 Text(
-                    text = "绗?${result.questionIndex} 棰$路 ${question.type.label()}",
+                    text = "绗?${result.questionIndex} 棰?路 ${question.type.label()}",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )

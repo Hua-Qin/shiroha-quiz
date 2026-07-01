@@ -432,7 +432,7 @@ private fun FavoriteScopeDialog(
                         val key = FAVORITE_SCOPE_BANK_PREFIX + bank.id
                         FavoriteScopeOption(
                             title = bank.name,
-                            desc = "鏀惰棌 ${favoriteCountByBank[bank.id] ?: 0} 棰$路 鍏?${bank.questions.size} 棰",
+                            desc = "鏀惰棌 ${favoriteCountByBank[bank.id] ?: 0} 棰?路 鍏?${bank.questions.size} 棰",
                             selected = selectedScopeKey == key,
                             onClick = { onSelect(key) }
                         )

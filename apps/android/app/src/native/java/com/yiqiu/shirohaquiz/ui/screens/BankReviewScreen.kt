@@ -800,7 +800,7 @@ private fun ReviewFilteredJumpList(
             ) {
                 Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
                     Text(
-                        text = "绗?${index + 1} 棰$路 ${typeLabel(question.type)} 路 绛旀锛${answerDisplayText(question)}",
+                        text = "绗?${index + 1} 棰?路 ${typeLabel(question.type)} 路 绛旀锛${answerDisplayText(question)}",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary

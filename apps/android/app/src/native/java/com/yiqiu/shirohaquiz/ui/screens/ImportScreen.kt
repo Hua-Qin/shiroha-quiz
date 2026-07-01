@@ -380,7 +380,7 @@ fun ImportScreen(
                 withContext(Dispatchers.Default) {
                     val jsonPreview = if (!dualSnapshot) QuizRepository.parseImportJsonPreview(rawSnapshot) else null
                     if (jsonPreview != null && jsonPreview.banks.size > 1) {
-                        throw IllegalArgumentException("${jsonPreview.message} 璇峰湪 鎴戠殑 鈫$鏁版嵁绠＄悊 鈫$瀵煎叆棰樺簱 涓鍏ュ棰樺簱 JSON / 澶囦唤鍖呫€")
+                        throw IllegalArgumentException("${jsonPreview.message} 璇峰湪 鎴戠殑 鈫?鏁版嵁绠＄悊 鈫?瀵煎叆棰樺簱 涓鍏ュ棰樺簱 JSON / 澶囦唤鍖呫€")
                     }
                     val jsonBank = jsonPreview?.banks?.singleOrNull()
                     val parsedResult = if (jsonBank != null) {
@@ -496,7 +496,7 @@ fun ImportScreen(
                     }
                     syncEditableQuestions(nextQuestions, baseWarnings)
                     aiReviewSuggestions = aiReviewSuggestions.filterNot { it.questionId == suggestion.questionId }
-                    statusText = "宸查噰绾$1 鏉$AI 鏍稿寤鸿锛屼繚瀛橀搴撳墠浠嶅彲缁х画浜哄伐璋冩暣銆"
+                    statusText = "宸查噰绾$1 鏉?AI 鏍稿寤鸿锛屼繚瀛橀搴撳墠浠嶅彲缁х画浜哄伐璋冩暣銆"
                     isStatusWarn = false
                 }
             },
@@ -565,7 +565,7 @@ fun ImportScreen(
                     }
                     syncEditableQuestions(nextQuestions, baseWarnings)
                     aiReviewSuggestions = aiReviewSuggestions.filterNot { it.questionId == suggestion.questionId }
-                    statusText = "宸查噰绾$1 鏉$AI 鏍稿寤鸿锛屼繚瀛橀搴撳墠浠嶅彲缁х画浜哄伐璋冩暣銆"
+                    statusText = "宸查噰绾$1 鏉?AI 鏍稿寤鸿锛屼繚瀛橀搴撳墠浠嶅彲缁х画浜哄伐璋冩暣銆"
                     isStatusWarn = false
                 }
             },
@@ -1039,12 +1039,12 @@ fun ImportScreen(
                             onClick = {
                                 if (!QuizRepository.isAiConfigured()) {
                                     showAiConfigPrompt = true
-                                    statusText = "AI 閲嶆瀯锛氳鍏堝湪涓汉鍋忓ソ 鈫$AI 璁剧疆涓厤缃帴鍙ｃ€"
+                                    statusText = "AI 閲嶆瀯锛氳鍏堝湪涓汉鍋忓ソ 鈫?AI 璁剧疆涓厤缃帴鍙ｃ€"
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
                                 if (!QuizRepository.aiRefactorEnabled) {
-                                    statusText = "AI 閲嶆瀯鏈惎鐢紝璇峰厛鍦ㄤ釜浜哄亸濂$鈫$AI 璁剧疆涓紑鍚€"
+                                    statusText = "AI 閲嶆瀯鏈惎鐢紝璇峰厛鍦ㄤ釜浜哄亸濂?鈫?AI 璁剧疆涓紑鍚€"
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
@@ -1057,7 +1057,7 @@ fun ImportScreen(
                                 }
                                 val sourceLength = sourceText.length + answerSourceText.length
                                 if (sourceLength > QuizRepository.aiRefactorMaxChars) {
-                                    statusText = "AI 閲嶆瀯锛氬師鏂囩害 ${sourceLength} 瀛楋紝瓒呰繃褰撳墠涓婇檺 ${QuizRepository.aiRefactorMaxChars} 瀛椼€傝鍦$AI 璁剧疆涓皟澶т笂闄愶紝鎴栨媶鍒嗛搴撳悗澶勭悊銆"
+                                    statusText = "AI 閲嶆瀯锛氬師鏂囩害 ${sourceLength} 瀛楋紝瓒呰繃褰撳墠涓婇檺 ${QuizRepository.aiRefactorMaxChars} 瀛椼€傝鍦?AI 璁剧疆涓皟澶т笂闄愶紝鎴栨媶鍒嗛搴撳悗澶勭悊銆"
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
@@ -1131,7 +1131,7 @@ fun ImportScreen(
                                             aiAnalyzedQuestionIds = emptyList()
                                             aiAnalysisAppliedQuestionIds = emptyList()
                                             aiReviewSuggestions = emptyList()
-                                            statusText = "AI 閲嶆瀯瀹屾垚锛氬凡娓呮礂鍘熸枃骞堕噸鏂版湰鍦拌В鏋愶紝鐢"$beforeCount 棰樺緱鍒?${refactoredQuestions.size} 棰樸€傝鍏堜汉宸ユ牳瀵癸紝鍐嶇户缁$AI 鏍稿鎴$AI 瑙ｆ瀽銆"
+                                            statusText = "AI 閲嶆瀯瀹屾垚锛氬凡娓呮礂鍘熸枃骞堕噸鏂版湰鍦拌В鏋愶紝鐢?$beforeCount 棰樺緱鍒?${refactoredQuestions.size} 棰樸€傝鍏堜汉宸ユ牳瀵癸紝鍐嶇户缁?AI 鏍稿鎴?AI 瑙ｆ瀽銆"
                                             isStatusWarn = nextWarnings.isNotEmpty()
                                         } else if (directQuestions.isNotEmpty()) {
                                             val refactoredQuestions = directQuestions
@@ -1156,7 +1156,7 @@ fun ImportScreen(
                                             aiAnalyzedQuestionIds = emptyList()
                                             aiAnalysisAppliedQuestionIds = emptyList()
                                             aiReviewSuggestions = emptyList()
-                                            statusText = "AI 閲嶆瀯瀹屾垚锛氱敱 $beforeCount 棰橀噸鏁翠负 ${refactoredQuestions.size} 棰樸€傝鍏堜汉宸ユ牳瀵癸紝鍐嶇户缁$AI 鏍稿鎴$AI 瑙ｆ瀽銆"
+                                            statusText = "AI 閲嶆瀯瀹屾垚锛氱敱 $beforeCount 棰橀噸鏁翠负 ${refactoredQuestions.size} 棰樸€傝鍏堜汉宸ユ牳瀵癸紝鍐嶇户缁?AI 鏍稿鎴?AI 瑙ｆ瀽銆"
                                             isStatusWarn = nextWarnings.isNotEmpty()
                                         } else if (reparsedResult != null) {
                                             statusText = "AI 閲嶆瀯宸茶繑鍥炴竻娲楁枃鏈紝浣嗘湰鍦伴噸瑙ｆ瀽鏈緱鍒板彲鐢ㄩ鐩紝褰撳墠寰呮牳瀵圭粨鏋滄湭鏀瑰姩銆"
@@ -1183,12 +1183,12 @@ fun ImportScreen(
                             onClick = {
                                 if (!QuizRepository.isAiConfigured()) {
                                     showAiConfigPrompt = true
-                                    statusText = "AI 鏍稿锛氳鍏堝湪涓汉鍋忓ソ 鈫$AI 璁剧疆涓厤缃帴鍙ｃ€"
+                                    statusText = "AI 鏍稿锛氳鍏堝湪涓汉鍋忓ソ 鈫?AI 璁剧疆涓厤缃帴鍙ｃ€"
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
                                 if (!QuizRepository.aiReviewEnabled) {
-                                    statusText = "AI 鏍稿鏈惎鐢紝璇峰厛鍦ㄤ釜浜哄亸濂$鈫$AI 璁剧疆涓紑鍚€"
+                                    statusText = "AI 鏍稿鏈惎鐢紝璇峰厛鍦ㄤ釜浜哄亸濂?鈫?AI 璁剧疆涓紑鍚€"
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
@@ -1244,7 +1244,7 @@ fun ImportScreen(
                                             "AI 鏍稿瀹屾垚锛氭湰鎵规湭鍙戠幇閲嶇偣闂锛屽凡澶勭悊 ${processedAfter}/${baseReviewQuestions.size} 棰樸€"
                                         } else {
                                             "AI 鏍稿瀹屾垚锛氭湰鎵圭敓鎴?${aiWarnings.size} 鏉″缓璁紝宸插鐞?${processedAfter}/${baseReviewQuestions.size} 棰樸€"
-                                        } + if (processedAfter < baseReviewQuestions.size) " 鍙户缁偣鍑$AI 鏍稿澶勭悊涓嬩竴鎵广€" else " 褰撳墠鑼冨洿宸插鐞嗗畬銆"
+                                        } + if (processedAfter < baseReviewQuestions.size) " 鍙户缁偣鍑?AI 鏍稿澶勭悊涓嬩竴鎵广€" else " 褰撳墠鑼冨洿宸插鐞嗗畬銆"
                                         isStatusWarn = aiWarnings.isNotEmpty()
                                     }.onFailure { error ->
                                         statusText = "AI 鏍稿澶辫触锛${error.message ?: "璇锋鏌ユ帴鍙ｉ厤缃"}"
@@ -1264,12 +1264,12 @@ fun ImportScreen(
                             onClick = {
                                 if (!QuizRepository.isAiConfigured()) {
                                     showAiConfigPrompt = true
-                                    statusText = "AI 瑙ｆ瀽锛氳鍏堝湪涓汉鍋忓ソ 鈫$AI 璁剧疆涓厤缃帴鍙ｃ€"
+                                    statusText = "AI 瑙ｆ瀽锛氳鍏堝湪涓汉鍋忓ソ 鈫?AI 璁剧疆涓厤缃帴鍙ｃ€"
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
                                 if (!QuizRepository.aiAnalysisEnabled) {
-                                    statusText = "AI 瑙ｆ瀽鏈惎鐢紝璇峰厛鍦ㄤ釜浜哄亸濂$鈫$AI 璁剧疆涓紑鍚€"
+                                    statusText = "AI 瑙ｆ瀽鏈惎鐢紝璇峰厛鍦ㄤ釜浜哄亸濂?鈫?AI 璁剧疆涓紑鍚€"
                                     isStatusWarn = true
                                     return@ActionPillButton
                                 }
@@ -1344,7 +1344,7 @@ fun ImportScreen(
                                         } else {
                                             ""
                                         } + if (remainingAnalysisCount > 0) {
-                                            " 浠嶆湁绾?${remainingAnalysisCount} 閬撶己瑙ｆ瀽棰橈紝鍙户缁偣鍑$AI 瑙ｆ瀽澶勭悊涓嬩竴鎵广€"
+                                            " 浠嶆湁绾?${remainingAnalysisCount} 閬撶己瑙ｆ瀽棰橈紝鍙户缁偣鍑?AI 瑙ｆ瀽澶勭悊涓嬩竴鎵广€"
                                         } else {
                                             " 褰撳墠鑼冨洿宸插鐞嗗畬銆"
                                         }
@@ -1563,7 +1563,7 @@ fun ImportScreen(
             ) {
                 if (QuizRepository.banks.isEmpty()) {
                     Text(
-                        text = "鏆傛棤宸插鍏ラ搴$瀹屾垚棣栨瀵煎叆鍚庝細鍦ㄨ繖閲屽垪鍑恒€",
+                        text = "鏆傛棤宸插鍏ラ搴?瀹屾垚棣栨瀵煎叆鍚庝細鍦ㄨ繖閲屽垪鍑恒€",
                         style = MaterialTheme.typography.bodyMedium,
                         color = ShirohaColors.TextSecondary
                     )
@@ -1599,7 +1599,7 @@ fun ImportScreen(
                         }
                         if (QuizRepository.banks.size > 5) {
                             Text(
-                                text = "鍙︽湁 ${QuizRepository.banks.size - 5} 涓搴$璇峰埌棰樺簱绠＄悊鏌ョ湅瀹屾暣鍒楄〃銆",
+                                text = "鍙︽湁 ${QuizRepository.banks.size - 5} 涓搴?璇峰埌棰樺簱绠＄悊鏌ョ湅瀹屾暣鍒楄〃銆",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = ShirohaColors.TextSecondary
                             )
@@ -1613,8 +1613,8 @@ fun ImportScreen(
     if (showAiConfigPrompt) {
         AlertDialog(
             onDismissRequest = { showAiConfigPrompt = false },
-            title = { Text("闇€瑕侀厤缃$AI 鎺ュ彛") },
-            text = { Text("璇峰厛鍦$鎴戠殑 鈫$AI 璁剧疆 涓厤缃帴鍙ｃ€") },
+            title = { Text("闇€瑕侀厤缃?AI 鎺ュ彛") },
+            text = { Text("璇峰厛鍦?鎴戠殑 鈫?AI 璁剧疆 涓厤缃帴鍙ｃ€") },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -2039,7 +2039,7 @@ private fun NativeImportSummary(
             if (imageQuestionCount > 0) StatusChip("鍥剧墖棰橈細$imageQuestionCount", selected = true)
             StatusChip("纭敊璇細$hardCount", selected = hardCount == 0)
             StatusChip("鎻愮ず锛$softCount", selected = softCount == 0)
-            StatusChip("缂$鐭В鏋愶細$missingAnalysisCount", selected = missingAnalysisCount == 0)
+            StatusChip("缂?鐭В鏋愶細$missingAnalysisCount", selected = missingAnalysisCount == 0)
             if (aiReviewedCount > 0) StatusChip("AI宸叉牳瀵癸細$aiReviewedCount", selected = true)
             if (aiReviewSuggestionCount > 0) StatusChip("AI寤鸿锛$aiReviewSuggestionCount", selected = true)
             if (aiApplicableCount > 0) StatusChip("鍙噰绾筹細$aiApplicableCount", selected = true)
@@ -2484,7 +2484,7 @@ private fun ReviewQuestionEditScreen(
         ShirohaHeader(
             kicker = "Edit",
             title = "缂栬緫棰樼洰",
-            subtitle = "绗?${questionIndex + 1} / $totalCount 棰$路 ${typeLabel(question.type)} 路 绛旀锛${answerDisplayText(question)}"
+            subtitle = "绗?${questionIndex + 1} / $totalCount 棰?路 ${typeLabel(question.type)} 路 绛旀锛${answerDisplayText(question)}"
         )
 
         GlassCard {
@@ -2832,7 +2832,7 @@ private fun ReviewQuestionEditorContent(
             )
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "鍗曢€"A锛屽閫$ABC锛屽垽鏂$姝ｇ‘/閿欒锛涘绌哄～绌哄彲閫愮┖閰嶇疆涓荤瓟妗堜笌澶囬€夌瓟妗堛€",
+                text = "鍗曢€"A锛屽閫?ABC锛屽垽鏂?姝ｇ‘/閿欒锛涘绌哄～绌哄彲閫愮┖閰嶇疆涓荤瓟妗堜笌澶囬€夌瓟妗堛€",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -3066,7 +3066,7 @@ private fun importPreviewQuestionTags(
     aiAnalysisAppliedQuestionIds: List<String>
 ): String {
     val tags = mutableListOf<String>()
-    if (shouldApplyAiAnalysis(question)) tags += "缂$鐭В鏋"
+    if (shouldApplyAiAnalysis(question)) tags += "缂?鐭В鏋"
     if (question.id in aiReviewedQuestionIds.toSet()) tags += "AI宸叉牳瀵"
     if (question.id in aiReviewedQuestionIds.toSet() && aiSuggestions.isEmpty()) tags += "鏈彂鐜伴噸鐐归棶棰"
     if (question.id in aiAnalyzedQuestionIds.toSet()) tags += "AI宸插皾璇曡В鏋"
@@ -3849,11 +3849,11 @@ private fun sampleImportText(): String = """
 1. 瀹夊叏甯界殑涓昏浣滅敤鏄紙A锛"A. 淇濇姢澶撮儴
 B. 瑁呴グ浣滅敤
 C. 澧炲姞閲嶉噺
-D. 鏃犲疄闄呬綔鐢$绛旀锛欰
+D. 鏃犲疄闄呬綔鐢?绛旀锛欰
 瑙ｆ瀽锛氬畨鍏ㄥ附鐢ㄤ簬鍑忚交鍧犺惤鐗╁拰纰版挒瀵瑰ご閮ㄩ€犳垚鐨勪激瀹炽€"
 2. 闆ㄥぉ椹鹃┒鏃跺簲娉ㄦ剰鍝簺浜嬮」锛圓B锛"A. 闄嶄綆杞﹂€$B. 鍔犲ぇ璺熻溅璺濈
 C. 鎬ユ墦鏂瑰悜
-D. 绱ф€ュ埗鍔$绛旀锛欰B
+D. 绱ф€ュ埗鍔?绛旀锛欰B
 瑙ｆ瀽锛氶洦澶╄矾婊戯紝搴斿钩绋虫帶鍒惰溅杈嗗苟鐣欒冻瀹夊叏璺濈銆"
 3. 鍥藉瀹夊叏鐢熶骇鏂归拡鏄€滃畨鍏ㄧ涓€锛岄闃蹭负涓烩€濄€傦紙瀵癸級
 绛旀锛氬

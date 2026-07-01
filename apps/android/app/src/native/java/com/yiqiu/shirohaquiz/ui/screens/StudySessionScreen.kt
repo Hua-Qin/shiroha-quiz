@@ -68,7 +68,7 @@ import com.yiqiu.shirohaquiz.ui.theme.screenClassFor
 
 /**
  * 瀛︿範浼氳瘽闃舵鐘舵€佹満锛? *  - LEARN锛氶槄璇婚樁娈碉紝浠呭睍绀烘枃绔犲紡瀛︿範鍐呭锛屼笉鏄剧ず浠讳綍棰樼洰
- *  - QUIZ 锛氱瓟棰橀樁娈碉紝涓嶆樉绀哄涔犲唴瀹癸紙鍙€氳繃"鏌ョ湅鐭ヨ瘑鐐"鎵撳紑鍗婂睆瑕嗙洊灞傦級
+ *  - QUIZ 锛氱瓟棰橀樁娈碉紝涓嶆樉绀哄涔犲唴瀹癸紙鍙€氳繃?鏌ョ湅鐭ヨ瘑鐐?鎵撳紑鍗婂睆瑕嗙洊灞傦級
  *  - DONE 锛氱粌涔犲畬鎴愶紝灞曠ず鎬荤粨
  */
 private enum class StudySessionPhase { LEARN, QUIZ, DONE }
@@ -76,7 +76,7 @@ private enum class StudySessionPhase { LEARN, QUIZ, DONE }
 /**
  * 瀛︿範浼氳瘽椤碉細涓ら樁娈靛垎绂伙紙鏆栬壊缂栬緫鏉傚織椋庨噸鍐欙級
  *
- * 闃舵 1锛圠EARN锛夛細闃呰鏂囩珷 鈫?銆屾垜宸插瀹岋紝寮€濮嬬粌涔犮€? * 闃舵 2锛圦UIZ锛夛細绾瓟棰?鈫?椤舵爮鍙墦寮€"鏌ョ湅鐭ヨ瘑鐐?鍙瑕嗙洊灞? * 闃舵 3锛圖ONE锛夛細鎬荤粨鍗★紙EditorialFigure 脳N 澶ф暟瀛楋級鈫"閲嶆柊缁冧範 / 涓嬩竴绔犺妭 / 杩斿洖
+ * 闃舵 1锛圠EARN锛夛細闃呰鏂囩珷 鈫?銆屾垜宸插瀹岋紝寮€濮嬬粌涔犮€? * 闃舵 2锛圦UIZ锛夛細绾瓟棰?鈫?椤舵爮鍙墦寮€"鏌ョ湅鐭ヨ瘑鐐?鍙瑕嗙洊灞? * 闃舵 3锛圖ONE锛夛細鎬荤粨鍗★紙EditorialFigure 脳N 澶ф暟瀛楋級鈫?閲嶆柊缁冧範 / 涓嬩竴绔犺妭 / 杩斿洖
  *
  * 甯冨眬鑷笂鑰屼笅锛? *  1. ShirohaHeader锛坘icker=璇剧▼鍚?/ title=褰撳墠闃舵 / subtitle=闃舵鎻忚堪锛? *  2. 闃舵杩涘害鏉?EditorialSection + 3 涓?EditorialFigure锛圠EARN / QUIZ / DONE锛? *  3. 鍐呭鍖烘寜 phase 鍒囨崲锛歀EARN锛圓rticleReader锛? QUIZ锛堥鐩級/ DONE锛堢粨鏋$EditorialFigure 脳N锛? */
 @Composable
@@ -784,7 +784,7 @@ private fun QuestionPracticeBlock(
             if (submitted && question.analysis.isNotBlank()) {
                 Spacer(modifier = Modifier.height(ShirohaSpacing.Md))
                 NoticeCard(
-                    text = (if (isCorrect == true) "鉁$鍥炵瓟姝ｇ‘" else "鉁$鍥炵瓟閿欒") + "\n\n瑙ｆ瀽锛${question.analysis}",
+                    text = (if (isCorrect == true) "鉁?鍥炵瓟姝ｇ‘" else "鉁?鍥炵瓟閿欒") + "\n\n瑙ｆ瀽锛${question.analysis}",
                     warning = isCorrect != true
                 )
             }

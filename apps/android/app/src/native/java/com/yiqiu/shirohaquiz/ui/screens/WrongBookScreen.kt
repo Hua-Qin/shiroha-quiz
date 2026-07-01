@@ -789,7 +789,7 @@ private fun WrongBookScopeDialog(
                         val key = WRONG_BOOK_PAGE_SCOPE_BANK_PREFIX + bank.id
                         WrongBookScopeOption(
                             title = bank.name,
-                            desc = "閿欓 ${wrongCountByBank[bank.id] ?: 0} 棰$路 鍏?${bank.questions.size} 棰",
+                            desc = "閿欓 ${wrongCountByBank[bank.id] ?: 0} 棰?路 鍏?${bank.questions.size} 棰",
                             selected = selectedScopeKey == key,
                             onClick = { onSelect(key) }
                         )
@@ -1044,7 +1044,7 @@ private fun WrongQuestionPreview(
         }
         Spacer(Modifier.height((8 * uiScale).dp))
         Text(
-            text = "閿?${entry.wrongCount} 娆$路 瀵?${entry.rightCount} 娆$路 鏈€杩戦敊璇?${formatTimestamp(entry.lastWrongAt)}",
+            text = "閿?${entry.wrongCount} 娆?路 瀵?${entry.rightCount} 娆?路 鏈€杩戦敊璇?${formatTimestamp(entry.lastWrongAt)}",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -1261,7 +1261,7 @@ private fun WrongQuestionDetailDialog(
                     NoticeCard("灏氭湭濉啓閿欒鍘熷洜銆")
                 }
                 Text(
-                    text = "閿?${entry.wrongCount} 娆$路 瀵?${entry.rightCount} 娆$路 鏈€杩戦敊璇?${formatTimestamp(entry.lastWrongAt)}",
+                    text = "閿?${entry.wrongCount} 娆?路 瀵?${entry.rightCount} 娆?路 鏈€杩戦敊璇?${formatTimestamp(entry.lastWrongAt)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1438,7 +1438,7 @@ private fun WrongBookManualAddDialog(
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Text(
-                                    text = currentBank?.let { "${it.questions.size} 棰$路 ${it.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }}" }
+                                    text = currentBank?.let { "${it.questions.size} 棰?路 ${it.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }}" }
                                         ?: "灏氭湭閫夋嫨",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1462,7 +1462,7 @@ private fun WrongBookManualAddDialog(
                                         Column {
                                             Text(bank.name, style = MaterialTheme.typography.bodyMedium)
                                             Text(
-                                                text = "${bank.questions.size} 棰$路 ${bank.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }}",
+                                                text = "${bank.questions.size} 棰?路 ${bank.groupName.ifBlank { DEFAULT_BANK_GROUP_NAME }}",
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
