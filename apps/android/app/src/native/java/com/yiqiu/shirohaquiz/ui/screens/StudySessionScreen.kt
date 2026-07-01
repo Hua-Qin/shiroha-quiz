@@ -1,4 +1,4 @@
-﻿package com.yiqiu.shirohaquiz.ui.screens
+package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -78,7 +78,7 @@ private enum class StudySessionPhase { LEARN, QUIZ, DONE }
  *
  * 闃舵 1锛圠EARN锛夛細闃呰鏂囩珷 鈫?銆屾垜宸插瀹岋紝寮€濮嬬粌涔犮€? * 闃舵 2锛圦UIZ锛夛細绾瓟棰?鈫?椤舵爮鍙墦寮€"鏌ョ湅鐭ヨ瘑鐐?鍙瑕嗙洊灞? * 闃舵 3锛圖ONE锛夛細鎬荤粨鍗★紙EditorialFigure 脳N 澶ф暟瀛楋級鈫"閲嶆柊缁冧範 / 涓嬩竴绔犺妭 / 杩斿洖
  *
- * 甯冨眬鑷笂鑰屼笅锛? *  1. ShirohaHeader锛坘icker=璇剧▼鍚?/ title=褰撳墠闃舵 / subtitle=闃舵鎻忚堪锛? *  2. 闃舵杩涘害鏉?EditorialSection + 3 涓?EditorialFigure锛圠EARN / QUIZ / DONE锛? *  3. 鍐呭鍖烘寜 phase 鍒囨崲锛歀EARN锛圓rticleReader锛? QUIZ锛堥鐩級/ DONE锛堢粨鏋?EditorialFigure 脳N锛? */
+ * 甯冨眬鑷笂鑰屼笅锛? *  1. ShirohaHeader锛坘icker=璇剧▼鍚?/ title=褰撳墠闃舵 / subtitle=闃舵鎻忚堪锛? *  2. 闃舵杩涘害鏉?EditorialSection + 3 涓?EditorialFigure锛圠EARN / QUIZ / DONE锛? *  3. 鍐呭鍖烘寜 phase 鍒囨崲锛歀EARN锛圓rticleReader锛? QUIZ锛堥鐩級/ DONE锛堢粨鏋$EditorialFigure 脳N锛? */
 @Composable
 fun StudySessionScreen(
     courseId: String,
@@ -241,7 +241,7 @@ fun StudySessionScreen(
                                     }
                                 }
 
-                                // 2) 鍐欏叆 studyRecord锛堥€愰璁板綍锛?                                // recordPracticeResult 褰撳墠鏄?private锛涙敼涓虹洿鎺ユ瀯閫?StudyRecord 鍐欏叆 studyRecords 鍒楄〃
+                                // 2) 鍐欏叆 studyRecord锛堥€愰璁板綍锛?                                // recordPracticeResult 褰撳墠鏄?private锛涙敼涓虹洿鎺ユ瀯閫$StudyRecord 鍐欏叆 studyRecords 鍒楄〃
                                 val record = com.yiqiu.shirohaquiz.state.StudyRecord(
                                     id = "study_${q.id}_${System.currentTimeMillis()}",
                                     bankId = bank?.id,
@@ -329,7 +329,7 @@ fun StudySessionScreen(
         }
     }
 
-    // 绛旈闃舵"鏌ョ湅鐭ヨ瘑鐐?鍗婂睆 Dialog锛堝彧璇?ArticleReader锛"    if (showKnowledgeDialog) {
+    // 绛旈闃舵"鏌ョ湅鐭ヨ瘑鐐?鍗婂睆 Dialog锛堝彧璇$ArticleReader锛"    if (showKnowledgeDialog) {
         AlertDialog(
             onDismissRequest = { showKnowledgeDialog = false },
             confirmButton = {
@@ -375,7 +375,7 @@ fun StudySessionScreen(
 
 /**
  * LEARN 闃舵锛氶槄璇昏鍥撅紙浠呮枃绔犲唴瀹癸紝涓嶆樉绀轰换浣曢鐩級
- * 鍐呴儴鐢?BoxWithConstraints 閲嶆柊璁＄畻 scale锛屼繚鐣欏閮ㄧ鍚嶄笉鍙樸€? */
+ * 鍐呴儴鐢$BoxWithConstraints 閲嶆柊璁＄畻 scale锛屼繚鐣欏閮ㄧ鍚嶄笉鍙樸€? */
 @Composable
 private fun LearnPhase(
     section: KnowledgeSection,
@@ -416,7 +416,7 @@ private fun LearnPhase(
 
 /**
  * QUIZ 闃舵锛氱瓟棰樿鍥撅紙涓嶆贩鎺掑涔犲唴瀹癸級
- * 鍐呴儴鐢?BoxWithConstraints 閲嶆柊璁＄畻 scale锛屼繚鐣欏閮ㄧ鍚嶄笉鍙樸€? */
+ * 鍐呴儴鐢$BoxWithConstraints 閲嶆柊璁＄畻 scale锛屼繚鐣欏閮ㄧ鍚嶄笉鍙樸€? */
 @Composable
 private fun QuizPhase(
     questions: List<Question>,
@@ -481,7 +481,7 @@ private fun QuizPhase(
 
 /**
  * DONE 闃舵锛氭€荤粨瑙嗗浘锛圗ditorialFigure 脳N 澶ф暟瀛楀憟鐜帮級
- * 鍐呴儴鐢?BoxWithConstraints 閲嶆柊璁＄畻 scale锛屼繚鐣欏閮ㄧ鍚嶄笉鍙樸€? */
+ * 鍐呴儴鐢$BoxWithConstraints 閲嶆柊璁＄畻 scale锛屼繚鐣欏閮ㄧ鍚嶄笉鍙樸€? */
 @Composable
 private fun DonePhase(
     total: Int,
@@ -612,7 +612,7 @@ private fun DonePhase(
 }
 
 /**
- * 闃舵杩涘害鏉★細3 涓?EditorialFigure 涓€琛岋紙LEARN / QUIZ / DONE锛? * 鐙珛浜庨樁娈靛唴瀹规粴鍔紝纭繚鐢ㄦ埛鍦ㄤ换浣曢樁娈甸兘鐪嬪埌褰撳墠浣嶇疆
+ * 闃舵杩涘害鏉★細3 涓$EditorialFigure 涓€琛岋紙LEARN / QUIZ / DONE锛? * 鐙珛浜庨樁娈靛唴瀹规粴鍔紝纭繚鐢ㄦ埛鍦ㄤ换浣曢樁娈甸兘鐪嬪埌褰撳墠浣嶇疆
  */
 @Composable
 private fun PhaseIndicatorRow(phase: StudySessionPhase, scale: Float = 1f) {
@@ -768,7 +768,7 @@ private fun QuestionPracticeBlock(
                 }
                 QuestionType.SHORT -> {
                     Text(
-                        text = "绠€绛旈锛?{question.question}",
+                        text = "绠€绛旈锛${question.question}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = ShirohaColors.TextPrimary
                     )
@@ -784,7 +784,7 @@ private fun QuestionPracticeBlock(
             if (submitted && question.analysis.isNotBlank()) {
                 Spacer(modifier = Modifier.height(ShirohaSpacing.Md))
                 NoticeCard(
-                    text = (if (isCorrect == true) "鉁?鍥炵瓟姝ｇ‘" else "鉁?鍥炵瓟閿欒") + "\n\n瑙ｆ瀽锛?{question.analysis}",
+                    text = (if (isCorrect == true) "鉁?鍥炵瓟姝ｇ‘" else "鉁?鍥炵瓟閿欒") + "\n\n瑙ｆ瀽锛${question.analysis}",
                     warning = isCorrect != true
                 )
             }

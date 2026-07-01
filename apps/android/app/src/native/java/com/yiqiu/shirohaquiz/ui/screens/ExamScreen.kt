@@ -696,7 +696,7 @@ private fun ExamSetupPanel(
 
 /**
  * 缂栬緫鏉傚織椋庢椂闀胯鏁板櫒:Row(IconButton - 鏁板瓧 - IconButton + label)
- * 鏇夸唬鍘?OutlinedTextField,瑙嗚涓婃洿"缂栬緫椋"
+ * 鏇夸唬鍘$OutlinedTextField,瑙嗚涓婃洿"缂栬緫椋"
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -995,7 +995,7 @@ private fun ActiveExamPanel(
                 }
             }
             Spacer(Modifier.height(18.dp))
-            // 棰樺共:Serif 澶ф爣棰?headlineSmall 脳 scale)
+            // 棰樺共:Serif 澶ф爣棰$headlineSmall 脳 scale)
             Text(
                 text = LatexDisplayFormatter.format(examQuestion.question),
                 style = stemStyle,
@@ -1541,7 +1541,7 @@ private fun FinishedExamPanel(
 }
 
 /**
- * 绠€鍗曞垽瀹氬閿?涓?QuizRepository 鍐呯疆鍒ゅ垎淇濇寔涓€鑷?瀹屽叏 equal 蹇界暐澶у皬鍐?
+ * 绠€鍗曞垽瀹氬閿?涓$QuizRepository 鍐呯疆鍒ゅ垎淇濇寔涓€鑷?瀹屽叏 equal 蹇界暐澶у皬鍐?
  */
 private fun isAnswerCorrect(question: Question, userAnswer: List<String>): Boolean {
     if (userAnswer.isEmpty()) return false
@@ -1619,7 +1619,7 @@ private fun CustomQuestionCountDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "璇疯緭鍏?1锝?maxCount 涔嬮棿鐨勯鏁般€",
+                    text = "璇疯緭鍏?1锝$maxCount 涔嬮棿鐨勯鏁般€",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

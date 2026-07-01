@@ -1,4 +1,4 @@
-﻿package com.yiqiu.shirohaquiz.ui.screens
+package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -158,14 +158,14 @@ fun HomeDashboardScreen(
                 .padding(horizontal = ShirohaSpacing.Xl, vertical = ShirohaSpacing.Lg),
             verticalArrangement = Arrangement.spacedBy(ShirohaSpacing.Xxl)
         ) {
-            // === Hero 鍖?Shiroha 妯″紡鏃跺甫娴姩鎻掔敾 ===
+            // === Hero 鍖$Shiroha 妯″紡鏃跺甫娴姩鎻掔敾 ===
             EditorialHeroSection(
                 scale = scale,
                 onGoStudy = onGoStudy,
                 onGoExam = onGoExam
             )
 
-            // === 缂栬緫寮忔暟鎹尯:6 涓?EditorialFigure ===
+            // === 缂栬緫寮忔暟鎹尯:6 涓$EditorialFigure ===
             EditorialFiguresSection(stats = stats, scale = scale)
 
             // === 浠婃棩瀛︿範 ===
@@ -240,7 +240,7 @@ fun HomeDashboardScreen(
 }
 
 
- * 棣栭〉 hero 鍖?琛嚎澶ф爣棰?+ 鍓枃 + Shiroha 娴姩鎻掔敾(鍙?Shiroha 妯″紡鎺у埗)
+ * 棣栭〉 hero 鍖?琛嚎澶ф爣棰?+ 鍓枃 + Shiroha 娴姩鎻掔敾(鍙$Shiroha 妯″紡鎺у埗)
  * Shiroha 妯″紡鍏抽棴鏃?鐗堝績灞呬腑,鏃犳彃鐢汇€?
  */
 @Composable
@@ -573,7 +573,7 @@ private fun AiAdviceCard(
                 )
             }
             is AdviceUiState.Failed -> {
-                NoticeCard("鐢熸垚澶辫触锛?{state.message}", warning = true)
+                NoticeCard("鐢熸垚澶辫触锛${state.message}", warning = true)
                 Spacer(Modifier.height(ShirohaSpacing.Md))
                 ActionPillButton(
                     icon = Icons.Rounded.AutoAwesome,
@@ -623,7 +623,7 @@ private fun AdviceContentBlock(advice: PersonalizedAdvice) {
         advice.suggestions.forEach { item ->
             Column(modifier = Modifier.padding(top = 4.dp)) {
                 Text(
-                    text = "銆?{item.priority}銆?{item.title}",
+                    text = "銆${item.priority}銆${item.title}",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -889,7 +889,7 @@ private fun buildRecordsSummary(stats: StudyStatistics): String {
             val accuracy = if (record.total > 0) {
                 (record.correct * 100.0 / record.total).toInt()
             } else 0
-            "$date ${record.source} 銆?{record.bankName.ifBlank { record.title }}銆?" +
+            "$date ${record.source} 銆${record.bankName.ifBlank { record.title }}銆?" +
                 "${record.correct}/${record.total} 姝ｇ‘鐜?$accuracy%"
         }
     return buildString {
@@ -910,6 +910,6 @@ private fun buildWrongQuestionsSummary(): String {
         .take(10)
     return recent.joinToString("\n") { entry ->
         val cat = entry.question.category?.ifBlank { "鏈垎绫? } ?: "鏈垎绫?
-        "鍒嗙被 $cat锛?{entry.question.question.take(60)}"
+        "鍒嗙被 $cat锛${entry.question.question.take(60)}"
     }
 }

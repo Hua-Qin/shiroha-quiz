@@ -565,14 +565,14 @@ private fun FavoriteQuestionPreview(
             }
             Spacer(Modifier.height(10.dp))
             Text(
-                text = "姝ｇ‘绛旀锛?{entry.question.answer.joinToString(" / ").ifBlank { "鏈瘑鍒瓟妗" }}",
+                text = "姝ｇ‘绛旀锛${entry.question.answer.joinToString(" / ").ifBlank { "鏈瘑鍒瓟妗" }}",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium.copy(fontSize = bodyFontSize)
             )
             if (entry.question.analysis.isNotBlank()) {
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = "瑙ｆ瀽锛?{entry.question.analysis}",
+                    text = "瑙ｆ瀽锛${entry.question.analysis}",
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = smallFontSize),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

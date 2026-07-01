@@ -625,7 +625,7 @@ fun PracticeScreen(
         var isSingleQuestionAiLoading by remember(currentSessionKey) { mutableStateOf(false) }
         val runSingleQuestionAiAnalysis = {
             if (!QuizRepository.isAiConfigured()) {
-                singleQuestionAiError = "璇峰厛鍦?鎴戠殑 鈫?AI 璁剧疆 涓～鍐?API 鍦板潃銆丄PI Key 鍜屾ā鍨嬪悕绉般€"
+                singleQuestionAiError = "璇峰厛鍦?鎴戠殑 鈫?AI 璁剧疆 涓～鍐$API 鍦板潃銆丄PI Key 鍜屾ā鍨嬪悕绉般€"
                 singleQuestionAiAnalysis = null
             } else if (!isSingleQuestionAiLoading) {
                 isSingleQuestionAiLoading = true
@@ -917,7 +917,7 @@ fun PracticeScreen(
                 ActionPillButton(
                     Icons.AutoMirrored.Rounded.ArrowForward,
                     when {
-                        isResolvingUnsubmitted && nextUnsubmittedIndex != null -> "涓嬩竴閬撴湭鎻愪氦锛?unsubmittedCount锛"
+                        isResolvingUnsubmitted && nextUnsubmittedIndex != null -> "涓嬩竴閬撴湭鎻愪氦锛$unsubmittedCount锛"
                         isResolvingUnsubmitted -> "褰撳墠棰樻湭鎻愪氦"
                         shouldOfferUnsubmittedCompletion -> "琛ョ瓟鏈彁浜わ紙$unsubmittedCount锛"
                         else -> "涓嬩竴棰"
@@ -1039,7 +1039,7 @@ fun PracticeScreen(
                     Spacer(Modifier.height(8.dp))
                 }
                 val answerLabel = if (question.type == QuestionType.SHORT) "鍙傝€冪瓟妗" else "姝ｇ‘绛旀"
-                NoticeCard("$answerLabel锛?answerText", warning = false)
+                NoticeCard("$answerLabel锛$answerText", warning = false)
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text = "瑙ｆ瀽",
@@ -1264,7 +1264,7 @@ fun PracticeQuickEditScreen(
                         answerText = it
                         savedNotice = ""
                     },
-                    label = { Text(if (isObjective) "绛旀锛屼緥濡?A 鎴?A/B" else "鍙傝€冪瓟妗") },
+                    label = { Text(if (isObjective) "绛旀锛屼緥濡$A 鎴?A/B" else "鍙傝€冪瓟妗") },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = if (isObjective) 1 else 2,
                     keyboardOptions = KeyboardOptions(
@@ -1363,7 +1363,7 @@ fun PracticeQuickEditScreen(
 }
 
 /**
- * 缂栬緫寮忔暟鎹:琛嚎澶ф暟瀛?+ 灏忔爣绛?+ 鍙戜笣涓嬪垝绾裤€? * 杩愯涓椂灞曠ず涓や釜鏍稿績鏁版嵁:褰撳墠棰樺彿(甯︽€绘暟)+ 姝ｇ‘鐜囥€? * 鏁版嵁浠?QuizRepository 鍐呴儴璇诲彇,閬垮厤鎻愬墠渚濊禆涓婂眰灏氭湭瑙ｇ畻鐨勫彉閲忋€? */
+ * 缂栬緫寮忔暟鎹:琛嚎澶ф暟瀛?+ 灏忔爣绛?+ 鍙戜笣涓嬪垝绾裤€? * 杩愯涓椂灞曠ず涓や釜鏍稿績鏁版嵁:褰撳墠棰樺彿(甯︽€绘暟)+ 姝ｇ‘鐜囥€? * 鏁版嵁浠$QuizRepository 鍐呴儴璇诲彇,閬垮厤鎻愬墠渚濊禆涓婂眰灏氭湭瑙ｇ畻鐨勫彉閲忋€? */
 @Composable
 private fun PracticeEditorialFiguresRow(
     scale: Float,
@@ -2675,7 +2675,7 @@ private fun CustomQuestionCountDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "璇疯緭鍏?1锝?maxCount 涔嬮棿鐨勯鏁般€",
+                    text = "璇疯緭鍏?1锝$maxCount 涔嬮棿鐨勯鏁般€",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -2755,7 +2755,7 @@ private fun SingleQuestionAiAnalysisPanel(
             NoticeCard("AI 姝ｅ湪鍒嗘瀽褰撳墠棰樼洰锛岃绋嶅€欍€", warning = false)
         }
         error?.takeIf { it.isNotBlank() }?.let { message ->
-            NoticeCard("AI 鍒嗘瀽澶辫触锛?message", warning = true)
+            NoticeCard("AI 鍒嗘瀽澶辫触锛$message", warning = true)
         }
         analysis?.let { result ->
             SingleQuestionAiResultCard(result)
@@ -2815,7 +2815,7 @@ private fun SingleQuestionAiResultCard(result: AiSingleQuestionAnalysis) {
             )
             result.warning.takeIf { it.isNotBlank() }?.let { warning ->
                 Text(
-                    text = "鎻愮ず锛?warning",
+                    text = "鎻愮ず锛$warning",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error
                 )

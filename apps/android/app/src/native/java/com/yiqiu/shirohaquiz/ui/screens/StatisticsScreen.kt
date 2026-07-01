@@ -1,4 +1,4 @@
-﻿package com.yiqiu.shirohaquiz.ui.screens
+package com.yiqiu.shirohaquiz.ui.screens
 
 import com.yiqiu.shirohaquiz.ui.theme.shirohaEditorialBackground
 
@@ -70,7 +70,7 @@ import java.util.Locale
  * 瀛︿範缁熻(鏆栬壊缂栬緫鏉傚織椋庨噸鍐?
  *
  * 甯冨眬鑷笂鑰屼笅:
- *  1. ShirohaHeader(kicker/title/subtitle) 鈥?椤堕儴甯?Serif 澶ф爣棰? *  2. EditorialFiguresSection 鈥?6 涓?EditorialFigure 琛嚎澶ф暟瀛楃綉鏍? *  3. 瓒嬪娍鍥?EditorialSection(DailyTrendChart + Legend)
+ *  1. ShirohaHeader(kicker/title/subtitle) 鈥?椤堕儴甯?Serif 澶ф爣棰? *  2. EditorialFiguresSection 鈥?6 涓$EditorialFigure 琛嚎澶ф暟瀛楃綉鏍? *  3. 瓒嬪娍鍥?EditorialSection(DailyTrendChart + Legend)
  *  4. 閿欓鍒嗙被 EditorialSection(CategoryBarChart)
  *  5. AI 寤鸿 EditorialSection(AdviceContentBlock + ActionPillButton)
  */
@@ -120,7 +120,7 @@ fun StatisticsScreen(
                 scale = scale
             )
 
-            // === 6 涓?EditorialFigure 琛嚎澶ф暟瀛楃綉鏍?===
+            // === 6 涓$EditorialFigure 琛嚎澶ф暟瀛楃綉鏍?===
             EditorialFiguresSection(stats = data, scale = scale)
 
             // === 瓒嬪娍鍥?===
@@ -232,7 +232,7 @@ private fun EditorialFiguresSection(stats: StudyStatistics, scale: Float = 1f) {
 
 /**
  * AI 寤鸿鍗＄墖:鍦?EditorialSection 鍐呬娇鐢?娓叉煋寤鸿鍐呭 + ActionPillButton
- * 鎶藉嚭璇ュ瓙缁勪欢浠ヤ繚鎸佷富鍑芥暟缁撴瀯娓呮櫚,骞堕伩鍏?adviceState 鎻愬崌鍒拌繃澶氬眰绾с€? */
+ * 鎶藉嚭璇ュ瓙缁勪欢浠ヤ繚鎸佷富鍑芥暟缁撴瀯娓呮櫚,骞堕伩鍏$adviceState 鎻愬崌鍒拌繃澶氬眰绾с€? */
 @Composable
 private fun AiAdviceCard(
     data: StudyStatistics,
@@ -619,7 +619,7 @@ private fun StatisticsAdviceBlock(advice: PersonalizedAdvice) {
         advice.suggestions.forEach { item ->
             Column(modifier = Modifier.padding(top = 4.dp)) {
                 Text(
-                    text = "銆?{item.priority}銆?{item.title}",
+                    text = "銆${item.priority}銆${item.title}",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -660,7 +660,7 @@ private fun buildStatisticsRecordsSummary(stats: StudyStatistics): String {
             val accuracy = if (record.total > 0) {
                 (record.correct * 100.0 / record.total).toInt()
             } else 0
-            "$date ${record.source} 銆?{record.bankName.ifBlank { record.title }}銆?" +
+            "$date ${record.source} 銆${record.bankName.ifBlank { record.title }}銆?" +
                 "${record.correct}/${record.total} 姝ｇ‘鐜?$accuracy%"
         }
     return buildString {

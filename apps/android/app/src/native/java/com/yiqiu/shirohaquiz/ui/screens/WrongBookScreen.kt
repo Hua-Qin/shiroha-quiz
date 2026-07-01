@@ -197,7 +197,7 @@ fun WrongBookScreen(
 
     if (showClearWrongBookConfirm) {
         ShirohaDangerConfirmDialog(
-            title = if (isSingleBankScope) "纭娓呯┖鈥?{selectedBank?.name.orEmpty()}鈥濋敊棰橈紵" else "纭娓呯┖鍏ㄩ儴閿欓锛",
+            title = if (isSingleBankScope) "纭娓呯┖鈥${selectedBank?.name.orEmpty()}鈥濋敊棰橈紵" else "纭娓呯┖鍏ㄩ儴閿欓锛",
             message = if (isSingleBankScope) {
                 "杩欎細绉婚櫎璇ラ搴撶殑閿欓璁板綍锛屽寘鎷敊棰樻鏁般€佹帉鎻＄姸鎬佸拰澶嶄範缁熻銆傚叾浠栭搴撻敊棰樹笉浼氬彈褰卞搷銆"
             } else {
@@ -867,7 +867,7 @@ private fun WrongBookReviewCountDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
-                    text = "璇疯緭鍏?1锝?maxCount 涔嬮棿鐨勯鏁般€",
+                    text = "璇疯緭鍏?1锝$maxCount 涔嬮棿鐨勯鏁般€",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

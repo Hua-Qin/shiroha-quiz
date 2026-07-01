@@ -88,7 +88,7 @@ fun AboutScreen(
                 scale = scale
             )
 
-            // === Hero 鍖?Shiroha 妯″紡鏃跺甫娴姩鎻掔敾 ===
+            // === Hero 鍖$Shiroha 妯″紡鏃跺甫娴姩鎻掔敾 ===
             IllustrationHeroCard(
                 title = "Shiroha Quiz",
                 subtitle = "鎶婃瘡涓€娆＄粌涔?閮藉綋浣滀竴娆＄簿杩涖€",
@@ -143,7 +143,7 @@ fun AboutScreen(
                 }
             }
 
-            // === 椤圭洰绠€浠?闀挎枃鏈?Serif 姝ｆ枃 ===
+            // === 椤圭洰绠€浠?闀挎枃鏈$Serif 姝ｆ枃 ===
             EditorialSection(
                 kicker = "Story",
                 title = "瀹冩槸浠€涔",
@@ -303,7 +303,7 @@ private fun AboutFeatureRow(
 }
 
 /**
- * 搴旂敤鍏冩暟鎹?鐗堟湰鍙?/ 鏋勫缓鏃堕棿),浠?PackageInfo 璇诲彇,缂哄け鏃朵娇鐢ㄥ厹搴曟枃妗堛€? */
+ * 搴旂敤鍏冩暟鎹?鐗堟湰鍙?/ 鏋勫缓鏃堕棿),浠$PackageInfo 璇诲彇,缂哄け鏃朵娇鐢ㄥ厹搴曟枃妗堛€? */
 private data class AppMeta(
     val versionName: String,
     val buildTime: String

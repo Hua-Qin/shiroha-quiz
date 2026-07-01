@@ -453,7 +453,7 @@ private fun QuestionResultCard(
         result.sourceBankName?.takeIf { it.isNotBlank() }?.let { sourceBankName ->
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "鏉ユ簮锛?sourceBankName",
+                text = "鏉ユ簮锛$sourceBankName",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall
             )
@@ -501,7 +501,7 @@ private fun QuestionResultCard(
             text = if (structuredBlank) {
                 "浣犵殑绛旀锛歕n${MultiBlankSupport.userAnswerText(shownUserBlankAnswers)}"
             } else {
-                "浣犵殑绛旀锛?{result.userAnswer.joinToString(" / ").ifBlank { "鏈綔绛" }}"
+                "浣犵殑绛旀锛${result.userAnswer.joinToString(" / ").ifBlank { "鏈綔绛" }}"
             },
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -510,21 +510,21 @@ private fun QuestionResultCard(
             text = if (structuredBlank) {
                 "姝ｇ‘绛旀锛歕n${result.answerText.ifBlank { MultiBlankSupport.expectedAnswerText(question.blankAnswers) }}"
             } else {
-                "姝ｇ‘绛旀锛?{result.answerText.ifBlank { question.answer.joinToString(" / ").ifBlank { "鏈瘑鍒瓟妗" } }}"
+                "姝ｇ‘绛旀锛${result.answerText.ifBlank { question.answer.joinToString(" / ").ifBlank { "鏈瘑鍒瓟妗" } }}"
             },
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         if (result.maxScore != null && result.earnedScore != null) {
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "寰楀垎锛?{result.earnedScore.trimScore()} / ${result.maxScore.trimScore()} 鍒",
+                text = "寰楀垎锛${result.earnedScore.trimScore()} / ${result.maxScore.trimScore()} 鍒",
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         if (question.analysis.isNotBlank()) {
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "瑙ｆ瀽锛?{question.analysis}",
+                text = "瑙ｆ瀽锛${question.analysis}",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium
             )

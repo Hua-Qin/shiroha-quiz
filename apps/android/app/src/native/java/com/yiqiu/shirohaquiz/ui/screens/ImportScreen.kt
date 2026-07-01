@@ -212,7 +212,7 @@ fun ImportScreen(
         aiReviewSuggestions = emptyList()
         val hardCount = resultWithExtraWarnings.warnings.count { it.level == WarningLevel.ERROR }
         val softCount = resultWithExtraWarnings.warnings.count { it.level == WarningLevel.WARNING }
-        statusText = "宸插畬鎴?{if (useDualImport) "鍙屾枃浠? else "鍘熺敓"}瑙ｆ瀽锛?{resultWithExtraWarnings.questions.size} 棰橈紝纭敊璇?$hardCount 鏉★紝鍙‘璁ゆ彁绀?$softCount 鏉°€?
+        statusText = "宸插畬鎴${if (useDualImport) "鍙屾枃浠? else "鍘熺敓"}瑙ｆ瀽锛${resultWithExtraWarnings.questions.size} 棰橈紝纭敊璇?$hardCount 鏉★紝鍙‘璁ゆ彁绀?$softCount 鏉°€?
         isStatusWarn = hardCount > 0 || softCount > 0
     }
 
@@ -272,7 +272,7 @@ fun ImportScreen(
         }
         isImportBusy = true
         busyText = "姝ｅ湪璇诲彇棰樺簱鏂囦欢鈥︹€"
-        statusText = fileSizeCheck.warnMessage ?: "姝ｅ湪璇诲彇锛?selectedFileName"
+        statusText = fileSizeCheck.warnMessage ?: "姝ｅ湪璇诲彇锛$selectedFileName"
         isStatusWarn = fileSizeCheck.warnMessage != null
         clearParsedResult(clearImages = true)
         importScope.launch {
@@ -321,7 +321,7 @@ fun ImportScreen(
         }
         isImportBusy = true
         busyText = "姝ｅ湪璇诲彇绛旀鏂囦欢鈥︹€"
-        statusText = fileSizeCheck.warnMessage ?: "姝ｅ湪璇诲彇绛旀鏂囦欢锛?selectedAnswerFileName"
+        statusText = fileSizeCheck.warnMessage ?: "姝ｅ湪璇诲彇绛旀鏂囦欢锛$selectedAnswerFileName"
         isStatusWarn = fileSizeCheck.warnMessage != null
         importScope.launch {
             val result = runCatching {
@@ -422,7 +422,7 @@ fun ImportScreen(
                     isStatusWarn = false
                 }
             }.onFailure { error ->
-                statusText = "瑙ｆ瀽澶辫触锛?{error.message ?: "璇锋鏌ラ搴撴枃浠舵牸寮"}"
+                statusText = "瑙ｆ瀽澶辫触锛${error.message ?: "璇锋鏌ラ搴撴枃浠舵牸寮"}"
                 isStatusWarn = true
             }
         }
@@ -681,9 +681,9 @@ fun ImportScreen(
             Spacer(Modifier.height(12.dp))
             Text(
                 text = if (useDualImport) {
-                    "褰撳墠棰樺簱鏂囦欢锛?selectedFileName\n褰撳墠绛旀鏂囦欢锛?selectedAnswerFileName"
+                    "褰撳墠棰樺簱鏂囦欢锛$selectedFileName\n褰撳墠绛旀鏂囦欢锛$selectedAnswerFileName"
                 } else {
-                    "褰撳墠鏂囦欢锛?selectedFileName"
+                    "褰撳墠鏂囦欢锛$selectedFileName"
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1166,7 +1166,7 @@ fun ImportScreen(
                                             isStatusWarn = true
                                         }
                                     }.onFailure { error ->
-                                        statusText = "AI 閲嶆瀯澶辫触锛?{error.message ?: "璇锋鏌ユ帴鍙ｉ厤缃"}"
+                                        statusText = "AI 閲嶆瀯澶辫触锛${error.message ?: "璇锋鏌ユ帴鍙ｉ厤缃"}"
                                         isStatusWarn = true
                                     }
                                     isImportBusy = false
@@ -1247,7 +1247,7 @@ fun ImportScreen(
                                         } + if (processedAfter < baseReviewQuestions.size) " 鍙户缁偣鍑?AI 鏍稿澶勭悊涓嬩竴鎵广€? else " 褰撳墠鑼冨洿宸插鐞嗗畬銆?
                                         isStatusWarn = aiWarnings.isNotEmpty()
                                     }.onFailure { error ->
-                                        statusText = "AI 鏍稿澶辫触锛?{error.message ?: "璇锋鏌ユ帴鍙ｉ厤缃"}"
+                                        statusText = "AI 鏍稿澶辫触锛${error.message ?: "璇锋鏌ユ帴鍙ｉ厤缃"}"
                                         isStatusWarn = true
                                     }
                                     isImportBusy = false
@@ -1350,7 +1350,7 @@ fun ImportScreen(
                                         }
                                         isStatusWarn = false
                                     }.onFailure { error ->
-                                        statusText = "AI 瑙ｆ瀽澶辫触锛?{error.message ?: "璇锋鏌ユ帴鍙ｉ厤缃"}"
+                                        statusText = "AI 瑙ｆ瀽澶辫触锛${error.message ?: "璇锋鏌ユ帴鍙ｉ厤缃"}"
                                         isStatusWarn = true
                                     }
                                     isImportBusy = false
@@ -1524,7 +1524,7 @@ fun ImportScreen(
                                         val oldCount = target.questions.size
                                         val success = QuizRepository.appendQuestionsToBank(context, target.id, editableQuestions)
                                         statusText = if (success) {
-                                            "宸茶拷鍔犲埌锛?{bankDisplayPath(target.groupName, target.name)}锛屾柊澧?${editableQuestions.size} 棰橈紝褰撳墠鍏?${oldCount + editableQuestions.size} 棰樸€"
+                                            "宸茶拷鍔犲埌锛${bankDisplayPath(target.groupName, target.name)}锛屾柊澧?${editableQuestions.size} 棰橈紝褰撳墠鍏?${oldCount + editableQuestions.size} 棰樸€"
                                         } else {
                                             "杩藉姞澶辫触锛氭病鏈夋壘鍒扮洰鏍囬搴撱€"
                                         }
@@ -1555,7 +1555,7 @@ fun ImportScreen(
                 )
             }
 
-            // === 鏈€杩戝鍏?EditorialSection 鍖呰９ ===
+            // === 鏈€杩戝鍏$EditorialSection 鍖呰９ ===
             EditorialSection(
                 kicker = "Recent",
                 title = "鏈€杩戝鍏",
@@ -2033,20 +2033,20 @@ private fun NativeImportSummary(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            StatusChip("绛栫暐锛?{result.strategyName}", selected = true)
-            StatusChip("璇嗗埆棰樻暟锛?{result.questions.size}", selected = true)
+            StatusChip("绛栫暐锛${result.strategyName}", selected = true)
+            StatusChip("璇嗗埆棰樻暟锛${result.questions.size}", selected = true)
             StatusChip("宸茶瘑鍒瓟妗堬細$answeredCount", selected = answeredCount == result.questions.size)
             if (imageQuestionCount > 0) StatusChip("鍥剧墖棰橈細$imageQuestionCount", selected = true)
             StatusChip("纭敊璇細$hardCount", selected = hardCount == 0)
-            StatusChip("鎻愮ず锛?softCount", selected = softCount == 0)
+            StatusChip("鎻愮ず锛$softCount", selected = softCount == 0)
             StatusChip("缂?鐭В鏋愶細$missingAnalysisCount", selected = missingAnalysisCount == 0)
             if (aiReviewedCount > 0) StatusChip("AI宸叉牳瀵癸細$aiReviewedCount", selected = true)
-            if (aiReviewSuggestionCount > 0) StatusChip("AI寤鸿锛?aiReviewSuggestionCount", selected = true)
+            if (aiReviewSuggestionCount > 0) StatusChip("AI寤鸿锛$aiReviewSuggestionCount", selected = true)
             if (aiApplicableCount > 0) StatusChip("鍙噰绾筹細$aiApplicableCount", selected = true)
-            if (aiNeedConfirmCount > 0) StatusChip("闇€纭锛?aiNeedConfirmCount", selected = false)
+            if (aiNeedConfirmCount > 0) StatusChip("闇€纭锛$aiNeedConfirmCount", selected = false)
             if (aiHardErrorCount > 0) StatusChip("AI纭敊璇細$aiHardErrorCount", selected = false)
             if (aiAnalyzedCount > 0) StatusChip("AI宸插皾璇曡В鏋愶細$aiAnalyzedCount", selected = true)
-            if (aiAnalysisAppliedCount > 0) StatusChip("AI宸茶ˉ瑙ｆ瀽锛?aiAnalysisAppliedCount", selected = true)
+            if (aiAnalysisAppliedCount > 0) StatusChip("AI宸茶ˉ瑙ｆ瀽锛$aiAnalysisAppliedCount", selected = true)
         }
         if (result.warnings.isNotEmpty()) {
             val (globalWarnings, questionWarnings) = result.warnings.partition { warning ->
@@ -2168,7 +2168,7 @@ private fun NativeImportPreview(
             }
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "绛旀锛?answerText",
+                text = "绛旀锛$answerText",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -2191,7 +2191,7 @@ private fun NativeImportPreview(
             if (question.analysis.isNotBlank()) {
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "瑙ｆ瀽锛?{question.analysis}",
+                    text = "瑙ｆ瀽锛${question.analysis}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -2484,7 +2484,7 @@ private fun ReviewQuestionEditScreen(
         ShirohaHeader(
             kicker = "Edit",
             title = "缂栬緫棰樼洰",
-            subtitle = "绗?${questionIndex + 1} / $totalCount 棰?路 ${typeLabel(question.type)} 路 绛旀锛?{answerDisplayText(question)}"
+            subtitle = "绗?${questionIndex + 1} / $totalCount 棰?路 ${typeLabel(question.type)} 路 绛旀锛${answerDisplayText(question)}"
         )
 
         GlassCard {
@@ -2973,7 +2973,7 @@ private fun AiReviewSuggestionCard(
             }
             if (suggestion.suggestion.isNotBlank()) {
                 Text(
-                    text = "寤鸿锛?{suggestion.suggestion}",
+                    text = "寤鸿锛${suggestion.suggestion}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -3033,7 +3033,7 @@ private fun aiRefactorImportWarnings(
         ImportWarning(
             level = WarningLevel.WARNING,
             questionNumber = null,
-            message = "AI閲嶆瀯鎻愮ず锛?note"
+            message = "AI閲嶆瀯鎻愮ず锛$note"
         )
     }
     return dedupeImportWarnings(base + noteWarnings)
@@ -3143,7 +3143,7 @@ private fun importWarningSummaryText(warning: ImportWarning, questions: List<Que
     } else {
         "绗?${warning.questionNumber} 棰"
     }
-    return "$prefix锛?{displayImportWarningMessage(warning.message)}"
+    return "$prefix锛${displayImportWarningMessage(warning.message)}"
 }
 
 private fun mergeAiWarnings(
@@ -3309,8 +3309,8 @@ private fun mergeAiReviewSuggestions(
 
 private fun aiSuggestionApplySummary(suggestion: AiReviewSuggestion): String {
     val parts = mutableListOf<String>()
-    suggestion.suggestedType?.let { parts += "棰樺瀷鈫?{suggestedTypeLabel(it)}" }
-    if (suggestion.suggestedAnswer.isNotEmpty()) parts += "绛旀鈫?{suggestion.suggestedAnswer.joinToString("")}"
+    suggestion.suggestedType?.let { parts += "棰樺瀷鈫${suggestedTypeLabel(it)}" }
+    if (suggestion.suggestedAnswer.isNotEmpty()) parts += "绛旀鈫${suggestion.suggestedAnswer.joinToString("")}"
     if (suggestion.suggestedQuestion != null) parts += "棰樺共"
     if (suggestion.suggestedOptions.isNotEmpty()) parts += "閫夐」 ${suggestion.suggestedOptions.size} 椤"
     if (suggestion.suggestedAnalysis != null) parts += "瑙ｆ瀽"
@@ -3643,7 +3643,7 @@ private fun ReviewFilteredJumpList(
                             .shirohaNoRippleClickable { onIndexChange(index) }
                     ) {
                         Text(
-                            text = "绗?${index + 1} 棰?路 ${typeLabel(question.type)} 路 绛旀锛?{answerDisplayText(question)}",
+                            text = "绗?${index + 1} 棰?路 ${typeLabel(question.type)} 路 绛旀锛${answerDisplayText(question)}",
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.primary
@@ -3799,10 +3799,10 @@ private fun checkImportFileSize(context: Context, uri: Uri, fileName: String): I
     val size = queryFileSize(context, uri) ?: return ImportFileSizeCheck()
     return when {
         size > IMPORT_FILE_BLOCK_BYTES -> ImportFileSizeCheck(
-            blockMessage = "鏂囦欢杩囧ぇ锛?fileName锛堢害 ${formatFileSize(size)}锛夈€傚缓璁厛鍘嬬缉鍥剧墖銆佹媶鍒嗛搴擄紝鎴栨敼鐢ㄦ爣鍑嗘枃鏈?Excel/JSON 瀵煎叆銆"
+            blockMessage = "鏂囦欢杩囧ぇ锛$fileName锛堢害 ${formatFileSize(size)}锛夈€傚缓璁厛鍘嬬缉鍥剧墖銆佹媶鍒嗛搴擄紝鎴栨敼鐢ㄦ爣鍑嗘枃鏈?Excel/JSON 瀵煎叆銆"
         )
         size > IMPORT_FILE_WARN_BYTES -> ImportFileSizeCheck(
-            warnMessage = "鏂囦欢杈冨ぇ锛?fileName锛堢害 ${formatFileSize(size)}锛夛紝鍚ぇ鍥炬垨澶嶆潅 Word 鍐呭鏃跺彲鑳借鍙栬緝鎱€"
+            warnMessage = "鏂囦欢杈冨ぇ锛$fileName锛堢害 ${formatFileSize(size)}锛夛紝鍚ぇ鍥炬垨澶嶆潅 Word 鍐呭鏃跺彲鑳借鍙栬緝鎱€"
         )
         else -> ImportFileSizeCheck()
     }

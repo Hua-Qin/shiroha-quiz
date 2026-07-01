@@ -66,7 +66,7 @@ fun StandardImportFormatScreen(
                 scale = scale
             )
 
-            // === Hero 鍖?IllustrationHeroCard Shiroha 妯″紡甯︽彃鐢?===
+            // === Hero 鍖$IllustrationHeroCard Shiroha 妯″紡甯︽彃鐢?===
             EditorialSection(
                 kicker = "Overview",
                 title = "杩欏氨鏄綘鐨勯搴撳簲鏈夌殑鏍峰瓙",

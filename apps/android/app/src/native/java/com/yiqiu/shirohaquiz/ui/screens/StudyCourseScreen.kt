@@ -207,7 +207,7 @@ fun StudyCourseScreen(
 }
 
 /**
- * 绔犺妭鍒楄〃椤癸細CardWhite86 鍗＄墖 + 鐘舵€?chip + 鏍囬 + 鎻忚堪 + ActionPillButton
+ * 绔犺妭鍒楄〃椤癸細CardWhite86 鍗＄墖 + 鐘舵€$chip + 鏍囬 + 鎻忚堪 + ActionPillButton
  */
 @Composable
 private fun SectionCard(
@@ -216,7 +216,7 @@ private fun SectionCard(
     onClick: () -> Unit
 ) {
     val progress = QuizRepository.sectionProgress(
-        // 娉ㄦ剰锛氶€氳繃褰撳墠 courseId 璋冪敤锛屼娇鐢?stack 璇诲彇
+        // 娉ㄦ剰锛氶€氳繃褰撳墠 courseId 璋冪敤锛屼娇鐢$stack 璇诲彇
         QuizRepository.knowledgeCourses.firstOrNull { c ->
             c.sections.any { it.id == section.id }
         }?.courseId ?: "", section.id
@@ -283,7 +283,7 @@ private fun SectionCard(
                 )
             }
             Spacer(modifier = Modifier.height(ShirohaSpacing.Md))
-            // 鐘舵€?chip 琛岋細闅惧害 + 棰樼洰鏁?+ 鎺屾彙搴?            Row(
+            // 鐘舵€$chip 琛岋細闅惧害 + 棰樼洰鏁?+ 鎺屾彙搴?            Row(
                 horizontalArrangement = Arrangement.spacedBy(ShirohaSpacing.Sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -343,7 +343,7 @@ private fun masteryColor(level: MasteryLevel): Color = when (level) {
 private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
 /**
- * 绠€鍗曟棩鏈熸牸寮忓寲锛堜笉浣跨敤 remember锛屽洜涓?createdAt 鍦ㄥ閮?BoxWithConstraints 閲嶇粍鏃跺凡鏄ǔ瀹氬€硷級
+ * 绠€鍗曟棩鏈熸牸寮忓寲锛堜笉浣跨敤 remember锛屽洜涓?createdAt 鍦ㄥ閮$BoxWithConstraints 閲嶇粍鏃跺凡鏄ǔ瀹氬€硷級
  */
 private fun rememberOrFormatDate(timestamp: Long): String {
     return dateFormat.format(Date(timestamp))

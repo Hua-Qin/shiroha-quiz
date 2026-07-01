@@ -75,7 +75,7 @@ fun HomeRedirectNotice(onGoStatistics: () -> Unit) {
                 scale = scale
             )
 
-            // === Hero 鍖?Shiroha 妯″紡鏃跺甫娴姩鎻掔敾 ===
+            // === Hero 鍖$Shiroha 妯″紡鏃跺甫娴姩鎻掔敾 ===
             IllustrationHeroCard(
                 title = triggerTitle,
                 subtitle = triggerSubtitle,

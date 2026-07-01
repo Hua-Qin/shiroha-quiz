@@ -135,7 +135,7 @@ fun QuestionSearchScreen(
                 scale = scale
             )
 
-            // === 鎼滅储妗?EditorialSection 鍖呰９ ===
+            // === 鎼滅储妗$EditorialSection 鍖呰９ ===
             EditorialSection(
                 kicker = "Search",
                 title = "鎼滅储",
@@ -267,7 +267,7 @@ fun QuestionSearchScreen(
 
                 else -> EditorialSection(
                     kicker = "Results",
-                    title = "缁撴灉锛?{results.size}锛",
+                    title = "缁撴灉锛${results.size}锛",
                     scale = scale
                 ) {
                     results.forEachIndexed { index, result ->
@@ -331,7 +331,7 @@ private fun SearchScopeDialog(
             ) {
                 activeBank?.let { bank ->
                     SearchScopeOption(
-                        title = "褰撳墠棰樺簱锛?{bank.name}",
+                        title = "褰撳墠棰樺簱锛${bank.name}",
                         desc = bankDisplayPath(bank),
                         selected = selectedScopeKey == SCOPE_ACTIVE,
                         onClick = { onSelect(SCOPE_ACTIVE) }
@@ -464,7 +464,7 @@ private fun QuestionSearchResultCard(
         Spacer(Modifier.height(8.dp))
         // 鍛戒腑瀛楁 Chip
         Text(
-            text = "鍛戒腑锛?{result.matchedFields.joinToString("銆") { it.label }}",
+            text = "鍛戒腑锛${result.matchedFields.joinToString("銆") { it.label }}",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.SemiBold
@@ -478,7 +478,7 @@ private fun QuestionSearchResultCard(
             Spacer(Modifier.height(8.dp))
             // 绛旀棰勮
             Text(
-                text = "绛旀锛?{LatexDisplayFormatter.format(answerText)}",
+                text = "绛旀锛${LatexDisplayFormatter.format(answerText)}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = if (expanded) Int.MAX_VALUE else 1,
@@ -503,7 +503,7 @@ private fun QuestionSearchResultCard(
         } else if (question.analysis.isNotBlank()) {
             Spacer(Modifier.height(6.dp))
             Text(
-                text = "瑙ｆ瀽锛?{LatexDisplayFormatter.format(question.analysis)}",
+                text = "瑙ｆ瀽锛${LatexDisplayFormatter.format(question.analysis)}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
@@ -582,11 +582,11 @@ private fun String.toSearchScope(activeBankId: String?): QuestionSearchScope {
 
 private fun String.scopeLabel(banks: List<QuizBank>, activeBank: QuizBank?): String {
     return when {
-        this == SCOPE_ACTIVE && activeBank != null -> "褰撳墠棰樺簱锛?{activeBank.name}"
+        this == SCOPE_ACTIVE && activeBank != null -> "褰撳墠棰樺簱锛${activeBank.name}"
         this == SCOPE_ALL -> "鍏ㄩ儴棰樺簱"
         startsWith(SCOPE_BANK_PREFIX) -> {
             val bankId = removePrefix(SCOPE_BANK_PREFIX)
-            banks.firstOrNull { it.id == bankId }?.let { "鎸囧畾棰樺簱锛?{it.name}" } ?: "鎸囧畾棰樺簱"
+            banks.firstOrNull { it.id == bankId }?.let { "鎸囧畾棰樺簱锛${it.name}" } ?: "鎸囧畾棰樺簱"
         }
         else -> "鍏ㄩ儴棰樺簱"
     }
