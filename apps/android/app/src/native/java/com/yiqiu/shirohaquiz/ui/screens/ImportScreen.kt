@@ -3859,12 +3859,14 @@ D. 绱ф€ュ埗鍔?绛旀锛欰B
 瑙ｆ瀽锛氶洦澶╄矾婊戯紝搴斿钩绋虫帶鍒惰溅杈嗗苟鐣欒冻瀹夊叏璺濈銆"
 3. 鍥藉瀹夊叏鐢熶骇鏂归拡鏄€滃畨鍏ㄧ涓€锛岄闃蹭负涓烩€濄€傦紙瀵癸級
 绛旀锛氬
-瑙ｆ瀽锛氳繖鏄竴閬撳熀纭€鍒ゆ柇棰橈紝绛旀涓烘纭€"""".trimIndent()
+瑙ｆ瀽锛氳繖鏄竴閬撳熀纭€鍒ゆ柇棰橈紝绛旀涓烘纭€
+""".trimIndent()
 
 private fun sampleAnswerText(): String = """
 1. A
 2. AB
-3. 瀵"""".trimIndent()
+3. 瀵
+""".trimIndent()
 
 @Composable
 private fun ImportStepHeroCard() {
