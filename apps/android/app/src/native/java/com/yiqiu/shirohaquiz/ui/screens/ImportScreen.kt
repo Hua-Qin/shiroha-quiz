@@ -3703,7 +3703,7 @@ private fun normalizeJudgeAnswer(answer: List<String>): List<String> {
     return answer.mapNotNull { value ->
         when (value.trim().uppercase()) {
             "A", "姝ｇ‘", "瀵", "鏄", "TRUE", "T", "鈭", "鉁", "鉁", "鉁", "鈽" -> "A"
-            "B", "閿欒", "閿", "鍚", "FALSE", "F", "脳", "X", "鉁", "鉁", "鉂", "鉂? -> "B"
+            "B", "閿欒", "閿", "鍚", "FALSE", "F", "脳", "X", "鉁", "鉁", "鉂", "鉂" -> "B"
             else -> value.trim().takeIf { it.isNotBlank() }
         }
     }
@@ -3758,7 +3758,7 @@ private fun answerInputText(question: Question): String {
     if (question.type == QuestionType.JUDGE && question.answer.size == 1) {
         return when (question.answer.first().trim().uppercase()) {
             "A", "姝ｇ‘", "瀵", "鏄", "TRUE", "T", "鈭", "鉁", "鉁", "鉁", "鈽" -> "姝ｇ‘"
-            "B", "閿欒", "閿", "鍚", "FALSE", "F", "脳", "X", "鉁", "鉁", "鉂", "鉂? -> "閿欒"
+            "B", "閿欒", "閿", "鍚", "FALSE", "F", "脳", "X", "鉁", "鉁", "鉂", "鉂" -> "閿欒"
             else -> question.answer.first()
         }
     }
