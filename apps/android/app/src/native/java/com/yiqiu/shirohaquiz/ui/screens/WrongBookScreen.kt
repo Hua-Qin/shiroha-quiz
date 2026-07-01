@@ -135,7 +135,7 @@ fun WrongBookScreen(
 
     val selectedBankId = selectedScopeKey
         .takeIf { it.startsWith(WRONG_BOOK_PAGE_SCOPE_BANK_PREFIX) }
-        ".removePrefix(WRONG_BOOK_PAGE_SCOPE_BANK_PREFIX)
+        ?.removePrefix(WRONG_BOOK_PAGE_SCOPE_BANK_PREFIX)
     val selectedBank = selectedBankId?.let { id -> banks.firstOrNull { it.id == id } }
     val effectiveScopeKey = if (selectedBankId == null || selectedBank != null) {
         selectedScopeKey

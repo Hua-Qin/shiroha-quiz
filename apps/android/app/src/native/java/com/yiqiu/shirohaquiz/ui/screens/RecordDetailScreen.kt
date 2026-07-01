@@ -450,7 +450,7 @@ private fun QuestionResultCard(
             }
             StatusChip(if (result.correct) "姝ｇ‘" else "閿欒", selected = result.correct)
         }
-        result.sourceBankName?.takeIf { it.isNotBlank() }".let { sourceBankName ->
+        result.sourceBankName?.takeIf { it.isNotBlank() }?.let { sourceBankName ->
             Spacer(Modifier.height(8.dp))
             Text(
                 text = "鏉ユ簮锛$sourceBankName",
@@ -539,5 +539,4 @@ private fun typeLabelForRecord(type: QuestionType): String = when (type) {
     QuestionType.BLANK -> "濉┖棰"
     QuestionType.SHORT -> "绠€绛旈"
 }
-
 

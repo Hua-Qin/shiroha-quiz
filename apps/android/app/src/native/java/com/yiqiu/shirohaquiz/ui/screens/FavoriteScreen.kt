@@ -91,7 +91,7 @@ fun FavoriteScreen(
 
     val selectedBankId = selectedScopeKey
         .takeIf { it.startsWith(FAVORITE_SCOPE_BANK_PREFIX) }
-        ".removePrefix(FAVORITE_SCOPE_BANK_PREFIX)
+        ?.removePrefix(FAVORITE_SCOPE_BANK_PREFIX)
     val selectedBank = selectedBankId?.let { id -> banks.firstOrNull { it.id == id } }
     val effectiveScopeKey = if (selectedBankId == null || selectedBank != null) {
         selectedScopeKey

@@ -586,7 +586,7 @@ private fun String.scopeLabel(banks: List<QuizBank>, activeBank: QuizBank?): Str
         this == SCOPE_ALL -> "鍏ㄩ儴棰樺簱"
         startsWith(SCOPE_BANK_PREFIX) -> {
             val bankId = removePrefix(SCOPE_BANK_PREFIX)
-            banks.firstOrNull { it.id == bankId }".let { "鎸囧畾棰樺簱锛${it.name}" } ?: "鎸囧畾棰樺簱"
+            banks.firstOrNull { it.id == bankId }?.let { "鎸囧畾棰樺簱锛${it.name}" } ?: "鎸囧畾棰樺簱"
         }
         else -> "鍏ㄩ儴棰樺簱"
     }
@@ -601,4 +601,3 @@ private fun QuestionType.label(): String = when (this) {
     QuestionType.BLANK -> "濉┖棰"
     QuestionType.SHORT -> "绠€绛旈"
 }
-

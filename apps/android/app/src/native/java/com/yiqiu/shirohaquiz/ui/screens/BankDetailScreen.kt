@@ -463,7 +463,7 @@ private fun QuestionEditDialog(
                     OutlinedTextField(
                         value = answerText,
                         onValueChange = { answerText = it },
-                        label = { Text("绛旀锛屼緥濡$A 鎴$A B") },
+                        label = { Text("绛旀锛屼緥濡?A 鎴?A B") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )

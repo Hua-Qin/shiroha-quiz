@@ -918,7 +918,7 @@ private fun defaultJudgeOptions(): List<Option> = listOf(
 
 private fun nextOptionKey(options: List<Option>): String {
     val used = options.map { it.key.uppercase() }.toSet()
-    return ('A'..'H').firstOrNull { it.toString() !in used }".toString() ?: "${options.size + 1}"
+    return ('A'..'H').firstOrNull { it.toString() !in used }?.toString() ?: "${options.size + 1}"
 }
 
 private fun parseReviewAnswer(text: String, type: QuestionType): List<String> {

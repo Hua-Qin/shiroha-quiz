@@ -1050,7 +1050,7 @@ fun PracticeScreen(
                 Spacer(Modifier.height(4.dp))
                 Text(
                     text = question.analysis.takeIf { it.isNotBlank() }
-                        ".let(::formatAnalysisForDisplay)
+                        ?.let(::formatAnalysisForDisplay)
                         ?.let(LatexDisplayFormatter::format)
                         ?: "鏆傛棤瑙ｆ瀽",
                     style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp),
@@ -1264,7 +1264,7 @@ fun PracticeQuickEditScreen(
                         answerText = it
                         savedNotice = ""
                     },
-                    label = { Text(if (isObjective) "绛旀锛屼緥濡$A 鎴$A/B" else "鍙傝€冪瓟妗") },
+                    label = { Text(if (isObjective) "绛旀锛屼緥濡?A 鎴$A/B" else "鍙傝€冪瓟妗") },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = if (isObjective) 1 else 2,
                     keyboardOptions = KeyboardOptions(
@@ -2754,7 +2754,7 @@ private fun SingleQuestionAiAnalysisPanel(
         if (loading) {
             NoticeCard("AI 姝ｅ湪鍒嗘瀽褰撳墠棰樼洰锛岃绋嶅€欍€", warning = false)
         }
-        error?.takeIf { it.isNotBlank() }".let { message ->
+        error?.takeIf { it.isNotBlank() }?.let { message ->
             NoticeCard("AI 鍒嗘瀽澶辫触锛$message", warning = true)
         }
         analysis?.let { result ->
@@ -2934,7 +2934,7 @@ private fun minimumOptionCount(type: QuestionType): Int = when (type) {
 
 private fun nextQuickEditOptionKey(options: List<Option>): String? {
     val used = options.map { it.key.uppercase() }.toSet()
-    return ('A'..'Z').firstOrNull { it.toString() !in used }".toString()
+    return ('A'..'Z').firstOrNull { it.toString() !in used }?.toString()
 }
 
 private fun parseQuickEditAnswer(raw: String, type: QuestionType, options: List<Option>): List<String> {

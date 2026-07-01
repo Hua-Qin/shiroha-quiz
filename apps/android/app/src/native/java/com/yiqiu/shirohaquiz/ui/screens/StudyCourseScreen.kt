@@ -219,7 +219,7 @@ private fun SectionCard(
         // 娉ㄦ剰锛氶€氳繃褰撳墠 courseId 璋冪敤锛屼娇鐢$stack 璇诲彇
         QuizRepository.knowledgeCourses.firstOrNull { c ->
             c.sections.any { it.id == section.id }
-        }".courseId ?: "", section.id
+        }?.courseId ?: "", section.id
     )
     val mastery = progress.masteryLevel
     val questionCount = QuizRepository.knowledgeCourses
@@ -348,4 +348,3 @@ private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 private fun rememberOrFormatDate(timestamp: Long): String {
     return dateFormat.format(Date(timestamp))
 }
-

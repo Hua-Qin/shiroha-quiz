@@ -1062,7 +1062,7 @@ fun ImportScreen(
                                     return@ActionPillButton
                                 }
                                 val warningTexts = displayResult.warnings.map { warning ->
-                                    val numberText = warning.questionNumber?.takeIf { it.isNotBlank() }".let { "棰樺彿$it锛" }.orEmpty()
+                                    val numberText = warning.questionNumber?.takeIf { it.isNotBlank() }?.let { "棰樺彿$it锛" }.orEmpty()
                                     "${warning.level.name}锛"numberText${warning.message}"
                                 }.distinct().take(120)
                                 val beforeCount = editableQuestions.size
@@ -2942,7 +2942,7 @@ private fun AiReviewSuggestionCard(
         "hard_error" -> "纭敊璇"
         else -> "闇€纭"
     }
-    val issueText = suggestion.issueTypes.takeIf { it.isNotEmpty() }".joinToString("銆").orEmpty()
+    val issueText = suggestion.issueTypes.takeIf { it.isNotEmpty() }?.joinToString("銆").orEmpty()
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -3100,7 +3100,7 @@ private fun suggestionsToImportWarnings(
         .filter(::isActionableAiSuggestion)
         .mapNotNull { suggestion ->
             val question = questionById[suggestion.questionId] ?: return@mapNotNull null
-            val issueText = suggestion.issueTypes.takeIf { it.isNotEmpty() }".joinToString("銆").orEmpty()
+            val issueText = suggestion.issueTypes.takeIf { it.isNotEmpty() }?.joinToString("銆").orEmpty()
             val message = buildString {
                 append("AI寤鸿")
                 if (issueText.isNotBlank()) append("[").append(issueText).append("]")
@@ -3851,7 +3851,7 @@ B. 瑁呴グ浣滅敤
 C. 澧炲姞閲嶉噺
 D. 鏃犲疄闄呬綔鐢?绛旀锛欰
 瑙ｆ瀽锛氬畨鍏ㄥ附鐢ㄤ簬鍑忚交鍧犺惤鐗╁拰纰版挒瀵瑰ご閮ㄩ€犳垚鐨勪激瀹炽€"
-2. 闆ㄥぉ椹鹃┒鏃跺簲娉ㄦ剰鍝簺浜嬮」锛圓B锛"A. 闄嶄綆杞﹂€$B. 鍔犲ぇ璺熻溅璺濈
+2. 闆ㄥぉ椹鹃┒鏃跺簲娉ㄦ剰鍝簺浜嬮」锛圓B锛"A. 闄嶄綆杞﹂€?B. 鍔犲ぇ璺熻溅璺濈
 C. 鎬ユ墦鏂瑰悜
 D. 绱ф€ュ埗鍔?绛旀锛欰B
 瑙ｆ瀽锛氶洦澶╄矾婊戯紝搴斿钩绋虫帶鍒惰溅杈嗗苟鐣欒冻瀹夊叏璺濈銆"

@@ -341,7 +341,7 @@ fun ExamScreen(
 
             FinishedExamPanel(
                 examSummary = examSummary,
-                recordId = QuizRepository.studyRecords.firstOrNull { it.source == "鑰冭瘯" }".id,
+                recordId = QuizRepository.studyRecords.firstOrNull { it.source == "鑰冭瘯" }?.id,
                 onRestart = { QuizRepository.resetExam() },
                 onOpenRecord = onOpenRecord,
                 onBackHome = {

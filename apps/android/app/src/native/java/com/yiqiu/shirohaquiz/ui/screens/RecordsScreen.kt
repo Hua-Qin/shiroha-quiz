@@ -87,7 +87,7 @@ fun RecordsScreen(
 
     val selectedBankId = selectedScopeKey
         .takeIf { it.startsWith(RECORD_SCOPE_BANK_PREFIX) }
-        ".removePrefix(RECORD_SCOPE_BANK_PREFIX)
+        ?.removePrefix(RECORD_SCOPE_BANK_PREFIX)
     val selectedBank = selectedBankId?.let { id -> banks.firstOrNull { it.id == id } }
     val effectiveScopeKey = if (selectedBankId == null || selectedBank != null) {
         selectedScopeKey
@@ -645,5 +645,4 @@ private fun recordFooterText(record: StudyRecord): String {
 internal fun Double.trimScore(): String {
     return if (this % 1.0 == 0.0) this.toInt().toString() else "%.1f".format(this)
 }
-
 
