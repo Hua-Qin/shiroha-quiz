@@ -1108,7 +1108,6 @@ fun PracticeScreen(
     }
     }
 }
-}
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -2237,8 +2236,8 @@ private fun PracticeProgressCard(
     expanded: Boolean,
     reciteMode: Boolean = false,
     reciteIndex: Int = 0,
-    onOpenAnswerSheet: (() -> Unit),
-    onToggleWrongOnly: (() -> Unit),
+    onOpenAnswerSheet: (() -> Unit)",
+    onToggleWrongOnly: (() -> Unit)",
     onToggle: () -> Unit
 ) {
     val accuracy = if (scoredAnswered == 0) 0 else correct * 100 / scoredAnswered
@@ -2705,7 +2704,10 @@ private fun CustomQuestionCountDialog(
 }
 
 
-private fun normalizeVisiblePracticeCountMode(mode: String, availableCount: Int): String {
+private fun normalizeVisiblePracticeCountMode(
+    mode: String,
+    availableCount: Int
+): String {
     return when {
         mode == "50" && availableCount >= 50 -> "50"
         mode == "100" && availableCount >= 100 -> "100"
