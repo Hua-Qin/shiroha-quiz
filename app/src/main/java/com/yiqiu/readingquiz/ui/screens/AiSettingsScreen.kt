@@ -109,7 +109,7 @@ fun AiSettingsScreen(onBack: () -> Unit) {
                         .fillMaxWidth()
                         .menuAnchor()
                 )
-                androidx.compose.material3.ExposedDropdownMenu(
+                ExposedDropdownMenu(
                     expanded = modelMenuOpen,
                     onDismissRequest = { modelMenuOpen = false },
                     modifier = Modifier.heightIn(max = 360.dp)
