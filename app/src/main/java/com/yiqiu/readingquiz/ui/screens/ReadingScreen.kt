@@ -282,10 +282,11 @@ private fun androidx.compose.foundation.lazy.LazyListScope.renderBlocks(
 
 @Composable
 private fun SectionHeader(title: String, level: Int) {
+    // CafeType 无 BodyBold，使用 Body + Bold weight 替代（FontWeight.SemiBold 即可视觉区分层级）
     val (style, indent) = when (level) {
         1 -> CafeType.Title to 0.dp
         2 -> CafeType.Heading to 8.dp
-        else -> CafeType.BodyBold to 16.dp
+        else -> CafeType.Body to 16.dp
     }
     val color = if (level == 1) CafeColors.Accent else CafeColors.Fg
     Row(modifier = Modifier.padding(start = indent, top = 8.dp, bottom = 4.dp)) {

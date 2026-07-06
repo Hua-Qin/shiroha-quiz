@@ -377,11 +377,29 @@ object ReadingAiClient {
 
     // ----------------- Payload -----------------
 
+    /**
+     * 递归展平 Section 为纯文本（AI 输入不需要层级标记）。
+     */
+    private fun flattenSection(section: com.yiqiu.readingquiz.data.model.ArticleBlock.Section): String {
+        val sb = StringBuilder()
+        sb.append(section.title).append('\n')
+        section.children.forEach { child ->
+            when (child) {
+                is com.yiqiu.readingquiz.data.model.ArticleBlock.Paragraph -> sb.append(child.text).append('\n')
+                is com.yiqiu.readingquiz.data.model.ArticleBlock.Image -> sb.append("[图片：${child.caption}]").append('\n')
+                is com.yiqiu.readingquiz.data.model.ArticleBlock.Section -> sb.append(flattenSection(child)).append('\n')
+            }
+        }
+        return sb.toString().trim()
+    }
+
     private fun buildArticlePayload(article: Article, questionCount: Int): String {
+        // Task 3：扁平化所有 block（Section 递归展平为子块的纯文本拼接）
         val plainText = article.blocks.joinToString("\n\n") { block ->
             when (block) {
                 is com.yiqiu.readingquiz.data.model.ArticleBlock.Paragraph -> block.text
                 is com.yiqiu.readingquiz.data.model.ArticleBlock.Image -> "[图片：${block.caption}]"
+                is com.yiqiu.readingquiz.data.model.ArticleBlock.Section -> flattenSection(block)
             }
         }
         return JSONObject()

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import com.yiqiu.readingquiz.data.model.Article
 import com.yiqiu.readingquiz.data.model.Question
@@ -310,10 +311,10 @@ object ReadingRepository {
     private fun saveQuestions() {
         if (!::store.isInitialized) return
         val o = JSONObject()
-        // 显式标注参数类型规避 questionsByArticle 同时实现 Iterable 与 Map 时的 forEach 重载歧义
-        questionsByArticle.forEach { entry: Map.Entry<String, List<Question>> ->
-            val articleId = entry.key
-            val qs = entry.value
+        // SnapshotStateMap 同时实现 Iterable<Map.Entry> 与 Map，两者的 forEach 重载冲突。
+        // 显式声明 receiver 为 Map<K,V> 消除歧义。
+        val asMap: Map<String, List<Question>> = questionsByArticle
+        asMap.forEach { (articleId, qs) ->
             val arr = JSONArray()
             qs.forEach { q -> arr.put(questionToJson(q)) }
             o.put(articleId, arr)
