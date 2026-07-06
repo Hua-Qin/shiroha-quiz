@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Reading Quiz</string>
+    <string name="import_article">导入文章</string>
+    <string name="enter_quiz">进入答题</string>
+    <string name="take_notes">记笔记</string>
+    <string name="submit_answer">提交答案</string>
+    <string name="next_question">下一题</string>
+    <string name="view_analysis">查看解析</string>
+    <string name="view_score">查看成绩</string>
+    <string name="mark_doubt">标记疑问</string>
+</resources>

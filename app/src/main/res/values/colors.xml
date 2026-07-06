@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- cafe-ui 设计令牌 -->
+    <color name="cafe_bg">#F9F7F5</color>
+    <color name="cafe_surface">#FFFFFF</color>
+    <color name="cafe_fg">#0A0A0A</color>
+    <color name="cafe_accent">#5D4432</color>
+    <color name="cafe_accent_fg">#FFFFFF</color>
+    <color name="cafe_accent2">#16A34A</color>
+    <color name="cafe_accent2_fg">#FFFFFF</color>
+    <color name="cafe_muted">#666666</color>
+    <color name="cafe_border">#E6E6E6</color>
+    <color name="cafe_nav_scrim">#80000000</color>
+</resources>
