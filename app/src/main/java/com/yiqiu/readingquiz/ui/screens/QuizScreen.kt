@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.yiqiu.readingquiz.data.ReadingRepository
 import com.yiqiu.readingquiz.data.model.Question
@@ -226,14 +227,20 @@ fun QuizScreen(
                 .padding(CafeSpacing.ContainerPad),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = {
-                marked = !marked
-                ReadingRepository.toggleMarked(session.id, question.id)
-            }) {
+            IconButton(
+                onClick = {
+                    marked = !marked
+                    ReadingRepository.toggleMarked(session.id, question.id)
+                },
+                // 透明背景 + 减小尺寸（默认 48dp → 36dp），减少对阅读区域的视觉占用
+                modifier = Modifier
+                    .background(Color.Transparent)
+                    .size(36.dp)
+            ) {
                 Icon(
                     imageVector = Icons.Rounded.Bookmark,
                     contentDescription = "标记疑问",
-                    tint = if (marked) CafeColors.Accent2 else CafeColors.Fg
+                    tint = if (marked) CafeColors.Accent2 else CafeColors.Muted
                 )
             }
             Spacer(modifier = Modifier.weight(1f))

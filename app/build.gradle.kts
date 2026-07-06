@@ -62,6 +62,12 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.material3:material3")
     implementation("com.google.android.material:material:1.12.0")
+    // 协程（显式声明，用于 AiSettingsScreen 异步网络请求，避免 NetworkOnMainThreadException）
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    // 图片加载（Coil 2.x 兼容 Kotlin 1.9.24；3.x 需要 Kotlin 2.0+，不兼容）
+    implementation("io.coil-kt:coil-compose:2.7.0")
+    // Markdown 渲染（0.5.8 基于 coil2；0.6.0+ 迁移到 coil3 不兼容 Kotlin 1.9.24）
+    implementation("com.github.jeziellago:compose-markdown:0.5.8")
     testImplementation("junit:junit:4.13.2")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

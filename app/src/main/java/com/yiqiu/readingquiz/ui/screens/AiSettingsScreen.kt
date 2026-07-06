@@ -1,6 +1,10 @@
 package com.yiqiu.readingquiz.ui.screens
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -20,8 +24,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.FileDownload
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -30,16 +38,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.yiqiu.readingquiz.ai.ErrorLogStore
 import com.yiqiu.readingquiz.ai.ModelPresets
 import com.yiqiu.readingquiz.ai.ReadingAiClient
 import com.yiqiu.readingquiz.data.AiConfig
@@ -51,6 +62,9 @@ import com.yiqiu.readingquiz.ui.components.CafePrimaryButton
 import com.yiqiu.readingquiz.ui.theme.CafeColors
 import com.yiqiu.readingquiz.ui.theme.CafeSpacing
 import com.yiqiu.readingquiz.ui.theme.CafeType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * AI 设置页。
@@ -68,6 +82,8 @@ fun AiSettingsScreen(onBack: () -> Unit) {
     Log.d("Nav", "→ ai-settings")
     // 锁定初始值（避免 Composable 重组时回退到旧值）
     val initial = remember { ReadingRepository.aiConfig.value }
+    // 协程作用域（用于异步网络请求，避免主线程 NetworkOnMainThreadException）
+    val scope = rememberCoroutineScope()
 
     var baseUrl by remember { mutableStateOf(initial.apiBaseUrl) }
     var apiKey by remember { mutableStateOf(initial.apiKey) }
@@ -81,6 +97,9 @@ fun AiSettingsScreen(onBack: () -> Unit) {
     // 模型下拉
     var modelOptions by remember { mutableStateOf<List<String>>(emptyList()) }
     var modelMenuOpen by remember { mutableStateOf(false) }
+
+    // 错误日志弹窗
+    var showLogDialog by remember { mutableStateOf(false) }
 
     // 导入文章（位于 AI 配置下方）
     val context = LocalContext.current
@@ -141,22 +160,28 @@ fun AiSettingsScreen(onBack: () -> Unit) {
             modelName = "",
             timeoutSeconds = timeout.toIntOrNull() ?: 60
         )
-        when (val r = ReadingAiClient.fetchModels(cfg)) {
-            is ReadingAiClient.AiResult.Success -> {
-                modelOptions = r.value
-                status = if (r.value.isEmpty()) "该 API 未返回任何模型（请检查 Base URL 是否正确）"
-                else "已获取 ${r.value.size} 个模型，请从下拉选择。"
-                statusIsError = r.value.isEmpty()
-                if (modelName.isBlank() && r.value.isNotEmpty()) {
-                    modelName = r.value.first()
+        // 异步执行网络请求（避免主线程 NetworkOnMainThreadException）
+        scope.launch {
+            val r = withContext(Dispatchers.IO) {
+                ReadingAiClient.fetchModels(cfg)
+            }
+            when (r) {
+                is ReadingAiClient.AiResult.Success -> {
+                    modelOptions = r.value
+                    status = if (r.value.isEmpty()) "该 API 未返回任何模型（请检查 Base URL 是否正确）"
+                    else "已获取 ${r.value.size} 个模型，请从下拉选择。"
+                    statusIsError = r.value.isEmpty()
+                    if (modelName.isBlank() && r.value.isNotEmpty()) {
+                        modelName = r.value.first()
+                    }
+                }
+                is ReadingAiClient.AiResult.Failure -> {
+                    status = "获取失败：${r.message}"
+                    statusIsError = true
                 }
             }
-            is ReadingAiClient.AiResult.Failure -> {
-                status = "获取失败：${r.message}"
-                statusIsError = true
-            }
+            fetchingModels = false
         }
-        fetchingModels = false
     }
 
     val onTestConnection: () -> Unit = onTestConnection@{
@@ -188,22 +213,23 @@ fun AiSettingsScreen(onBack: () -> Unit) {
             modelName = modelName,
             timeoutSeconds = timeout.toIntOrNull() ?: 60
         )
-        status = try {
-            when (val r = ReadingAiClient.testConnection(cfg)) {
+        // 异步执行网络请求
+        scope.launch {
+            val r = withContext(Dispatchers.IO) {
+                ReadingAiClient.testConnection(cfg)
+            }
+            when (r) {
                 is ReadingAiClient.AiResult.Success -> {
                     statusIsError = false
-                    r.value
+                    status = r.value
                 }
                 is ReadingAiClient.AiResult.Failure -> {
                     statusIsError = true
-                    "失败：${r.message}"
+                    status = "失败：${r.message}"
                 }
             }
-        } catch (e: Throwable) {
-            statusIsError = true
-            "失败：${e.message ?: "未知错误"}"
+            testing = false
         }
-        testing = false
     }
 
     val onSave: () -> Unit = onSave@{
@@ -391,6 +417,27 @@ fun AiSettingsScreen(onBack: () -> Unit) {
             }
         }
 
+        item(key = "error-log-button") {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = CafeSpacing.ContainerPad),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { showLogDialog = true }) {
+                    Icon(
+                        imageVector = Icons.Rounded.BugReport,
+                        contentDescription = "查看错误日志",
+                        tint = CafeColors.Muted
+                    )
+                }
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    text = "查看错误日志（${ErrorLogStore.entries.size}）",
+                    style = CafeType.Caption,
+                    color = CafeColors.Muted
+                )
+            }
+        }
+
         item(key = "footer-tip") {
             Spacer(modifier = Modifier.height(12.dp))
             Text(
@@ -402,6 +449,90 @@ fun AiSettingsScreen(onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
+
+    if (showLogDialog) {
+        ErrorLogDialog(onDismiss = { showLogDialog = false })
+    }
+}
+
+/**
+ * 错误日志弹窗：展示 ErrorLogStore 中的记录，支持一键复制到剪贴板和清空。
+ */
+@Composable
+private fun ErrorLogDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("错误日志（最近 ${ErrorLogStore.entries.size} 条）") },
+        text = {
+            if (ErrorLogStore.entries.isEmpty()) {
+                Text("暂无错误记录。", style = CafeType.Body, color = CafeColors.Muted)
+            } else {
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 400.dp).fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    items(ErrorLogStore.entries.size) { index ->
+                        val entry = ErrorLogStore.entries.getOrNull(index) ?: return@items
+                        Column {
+                            Text(
+                                text = "${entry.level}/${entry.tag}: ${entry.message}",
+                                style = CafeType.Caption,
+                                color = when (entry.level) {
+                                    "E" -> CafeColors.Wrong
+                                    "W" -> CafeColors.Accent2
+                                    else -> CafeColors.Muted
+                                }
+                            )
+                            entry.throwable?.let {
+                                Text(
+                                    text = it,
+                                    style = CafeType.Caption,
+                                    color = CafeColors.Muted
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Row {
+                if (ErrorLogStore.entries.isNotEmpty()) {
+                    TextButton(onClick = { ErrorLogStore.clear() }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Delete,
+                            contentDescription = null,
+                            tint = CafeColors.Wrong
+                        )
+                        Spacer(modifier = Modifier.size(4.dp))
+                        Text("清空")
+                    }
+                }
+                TextButton(onClick = {
+                    if (ErrorLogStore.entries.isNotEmpty()) {
+                        val text = ErrorLogStore.toClipboardText()
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clipboard.setPrimaryClip(ClipData.newPlainText("错误日志", text))
+                        Toast.makeText(context, "已复制 ${ErrorLogStore.entries.size} 条日志", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "暂无日志可复制", Toast.LENGTH_SHORT).show()
+                    }
+                }) {
+                    Icon(
+                        imageVector = Icons.Rounded.ContentCopy,
+                        contentDescription = null,
+                        tint = CafeColors.Accent
+                    )
+                    Spacer(modifier = Modifier.size(4.dp))
+                    Text("一键复制")
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("关闭") }
+        }
+    )
 }
 
 // ============== 子 Composable（拆出来减少 AiSettingsScreen 的重组代价） ==============
