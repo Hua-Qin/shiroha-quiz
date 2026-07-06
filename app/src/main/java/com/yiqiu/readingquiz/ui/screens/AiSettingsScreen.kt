@@ -92,12 +92,18 @@ fun AiSettingsScreen(onBack: () -> Unit) {
             importMessage = "已取消导入。"
             return@rememberLauncherForActivityResult
         }
+        // 真实处理：捕获所有异常，给出明确文案，避免崩溃
         importMessage = try {
-            when (val r = FileImporter.importFromUri(context, uri)) {
-                is FileImporter.Result.Success -> "已导入：${r.article.title}"
-                is FileImporter.Result.Failure -> "导入失败：${r.reason}"
+            val result = FileImporter.importFromUri(context, uri)
+            when (result) {
+                is FileImporter.Result.Success -> "已导入：${result.article.title}"
+                is FileImporter.Result.Failure -> {
+                    Log.w("AiSettings", "import failed: ${result.reason}")
+                    "导入失败：${result.reason}"
+                }
             }
         } catch (e: Throwable) {
+            Log.w("AiSettings", "import exception: ${e.message}", e)
             "导入异常：${e.message ?: "未知错误"}"
         }
     }
@@ -105,12 +111,27 @@ fun AiSettingsScreen(onBack: () -> Unit) {
     val applyPreset: (ModelPresets.Preset) -> Unit = { preset ->
         baseUrl = preset.baseUrl
         modelName = preset.defaultModel
-        status = "已应用预设：${preset.displayName}（请填写 API Key 后测试连接）"
+        status = if (apiKey.isBlank()) {
+            "已应用预设：${preset.displayName}。请填写 API Key 后点击「测试连接」验证。"
+        } else {
+            "已应用预设：${preset.displayName}（Base URL 已更新）"
+        }
         statusIsError = false
     }
 
     val onFetchModels: () -> Unit = onFetchModels@{
         Log.d("AiSettings", "fetchModels clicked")
+        // 前置校验：API Base URL 与 API Key 必填；空值直接给出明确提示，避免调用后报错
+        if (baseUrl.isBlank()) {
+            status = "请先填写 API Base URL"
+            statusIsError = true
+            return@onFetchModels
+        }
+        if (apiKey.isBlank()) {
+            status = "请先填写 API Key（缺少密钥无法获取模型列表）"
+            statusIsError = true
+            return@onFetchModels
+        }
         fetchingModels = true
         status = null
         statusIsError = false
@@ -123,8 +144,9 @@ fun AiSettingsScreen(onBack: () -> Unit) {
         when (val r = ReadingAiClient.fetchModels(cfg)) {
             is ReadingAiClient.AiResult.Success -> {
                 modelOptions = r.value
-                status = "已获取 ${r.value.size} 个模型，请从下拉选择。"
-                statusIsError = false
+                status = if (r.value.isEmpty()) "该 API 未返回任何模型（请检查 Base URL 是否正确）"
+                else "已获取 ${r.value.size} 个模型，请从下拉选择。"
+                statusIsError = r.value.isEmpty()
                 if (modelName.isBlank() && r.value.isNotEmpty()) {
                     modelName = r.value.first()
                 }
@@ -139,6 +161,24 @@ fun AiSettingsScreen(onBack: () -> Unit) {
 
     val onTestConnection: () -> Unit = onTestConnection@{
         Log.d("AiSettings", "testConnection clicked")
+        // 前置校验：缺密钥/URL/模型时直接提示
+        when {
+            baseUrl.isBlank() -> {
+                status = "请先填写 API Base URL"
+                statusIsError = true
+                return@onTestConnection
+            }
+            apiKey.isBlank() -> {
+                status = "请先填写 API Key（缺少密钥无法测试连接）"
+                statusIsError = true
+                return@onTestConnection
+            }
+            modelName.isBlank() -> {
+                status = "请先填写或选择模型名"
+                statusIsError = true
+                return@onTestConnection
+            }
+        }
         testing = true
         status = null
         statusIsError = false
@@ -168,6 +208,12 @@ fun AiSettingsScreen(onBack: () -> Unit) {
 
     val onSave: () -> Unit = onSave@{
         Log.d("AiSettings", "save clicked, model=$modelName")
+        // 前置校验：保存时至少需要 baseUrl（密钥缺失时仍允许保存，方便用户分阶段配置）
+        if (baseUrl.isBlank()) {
+            status = "保存失败：请先填写 API Base URL"
+            statusIsError = true
+            return@onSave
+        }
         ReadingRepository.updateAiConfig(
             AiConfig(
                 apiBaseUrl = baseUrl,
@@ -176,8 +222,9 @@ fun AiSettingsScreen(onBack: () -> Unit) {
                 timeoutSeconds = timeout.toIntOrNull() ?: 60
             )
         )
-        status = "已保存。"
-        statusIsError = false
+        status = if (apiKey.isBlank()) "已保存（注意：API Key 为空，将无法连接 AI 服务）"
+        else "已保存。"
+        statusIsError = apiKey.isBlank()
     }
 
     val onImportClick: () -> Unit = onImportClick@{
@@ -247,8 +294,10 @@ fun AiSettingsScreen(onBack: () -> Unit) {
                 onModelNameChange = { modelName = it },
                 modelOptions = modelOptions,
                 menuOpen = modelMenuOpen,
-                onMenuOpenChange = {
-                    if (modelOptions.isNotEmpty()) modelMenuOpen = !modelMenuOpen
+                onMenuOpenChange = { newState ->
+                    // 仅在已有模型列表时响应展开；空列表强制折叠避免无内容弹出
+                    if (modelOptions.isNotEmpty()) modelMenuOpen = newState
+                    else modelMenuOpen = false
                 },
                 onModelSelected = { id ->
                     modelName = id
@@ -428,7 +477,7 @@ private fun ModelDropdownField(
     onModelNameChange: (String) -> Unit,
     modelOptions: List<String>,
     menuOpen: Boolean,
-    onMenuOpenChange: () -> Unit,
+    onMenuOpenChange: (Boolean) -> Unit,
     onModelSelected: (String) -> Unit
 ) {
     ExposedDropdownMenuBox(
@@ -449,13 +498,13 @@ private fun ModelDropdownField(
         )
         ExposedDropdownMenu(
             expanded = menuOpen,
-            onDismissRequest = { onMenuOpenChange() },
+            onDismissRequest = { onMenuOpenChange(false) },
             modifier = Modifier.heightIn(max = 360.dp)
         ) {
             if (modelOptions.isEmpty()) {
                 DropdownMenuItem(
                     text = { Text("请先点击「获取模型列表」", color = CafeColors.Muted) },
-                    onClick = onMenuOpenChange
+                    onClick = { onMenuOpenChange(false) }
                 )
             } else {
                 // 用 Column + verticalScroll 替代嵌套 LazyColumn（避免测量冲突）
