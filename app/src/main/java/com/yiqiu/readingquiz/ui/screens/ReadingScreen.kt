@@ -246,16 +246,19 @@ private fun BottomActionBar(
 
 /**
  * 递归渲染 ArticleBlock 列表（顶层用 LazyListScope DSL）。
+ * 使用全局计数器为每个 item 生成唯一 key（spec 附录 A.3：
+ * 禁止用 String.hashCode() 作 LazyColumn key，中文短文本碰撞率极高）。
  */
 private fun androidx.compose.foundation.lazy.LazyListScope.renderBlocks(
-    blocks: List<ArticleBlock>
+    blocks: List<ArticleBlock>,
+    counter: KeyCounter = KeyCounter()
 ) {
     blocks.forEach { block ->
         when (block) {
-            is ArticleBlock.Paragraph -> item(key = "p-${block.text.hashCode()}") {
+            is ArticleBlock.Paragraph -> item(key = counter.next("p")) {
                 CafeHighlightText(text = block.text, highlights = block.highlights)
             }
-            is ArticleBlock.Image -> item(key = "img-${block.path}") {
+            is ArticleBlock.Image -> item(key = counter.next("img")) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -271,13 +274,22 @@ private fun androidx.compose.foundation.lazy.LazyListScope.renderBlocks(
                 }
             }
             is ArticleBlock.Section -> {
-                item(key = "s-${block.title}-${block.level}") {
+                item(key = counter.next("s")) {
                     SectionHeader(block.title, block.level)
                 }
-                renderBlocks(block.children)
+                renderBlocks(block.children, counter)
             }
         }
     }
+}
+
+/**
+ * 全局唯一 key 生成器（基于 AtomicInteger 防止 LazyColumn key 碰撞）。
+ * 每次 next(prefix) 返回 "$prefix-${递增 id}"，天然唯一。
+ */
+private class KeyCounter {
+    private val seq = java.util.concurrent.atomic.AtomicInteger(0)
+    fun next(prefix: String): String = "$prefix-${seq.incrementAndGet()}"
 }
 
 @Composable

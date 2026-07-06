@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.yiqiu.readingquiz.ai.ModelPresets
 import com.yiqiu.readingquiz.ai.ReadingAiClient
 import com.yiqiu.readingquiz.data.AiConfig
 import com.yiqiu.readingquiz.data.ReadingRepository
@@ -106,6 +107,52 @@ fun AiSettingsScreen(onBack: () -> Unit) {
             modifier = Modifier.padding(horizontal = CafeSpacing.ContainerPad),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // Task 模型适配：预设服务选择（智谱清言 / 阶跃星辰 / 自定义）
+            Text(
+                text = "快速选择服务",
+                style = CafeType.Body,
+                color = CafeColors.Muted
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                ModelPresets.ALL.forEach { preset ->
+                    CafeCard(modifier = Modifier.fillMaxWidth()) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = preset.displayName,
+                                    style = CafeType.Heading,
+                                    color = CafeColors.Fg
+                                )
+                                Text(
+                                    text = "默认模型：${preset.defaultModel}",
+                                    style = CafeType.Caption,
+                                    color = CafeColors.Muted
+                                )
+                                Text(
+                                    text = preset.baseUrl,
+                                    style = CafeType.Caption,
+                                    color = CafeColors.Muted
+                                )
+                            }
+                            CafeGhostButton(
+                                text = "应用",
+                                onClick = {
+                                    baseUrl = preset.baseUrl
+                                    modelName = preset.defaultModel
+                                    status = "已应用预设：${preset.displayName}（请填写 API Key 后测试连接）"
+                                    statusIsError = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            Text(
+                text = "提示：智谱清言与阶跃星辰均提供 OpenAI 兼容 API，可直接使用「获取模型列表」自动拉取完整模型清单。",
+                style = CafeType.Caption,
+                color = CafeColors.Muted
+            )
+
             OutlinedTextField(
                 value = baseUrl, onValueChange = { baseUrl = it },
                 label = { Text("API Base URL") },
