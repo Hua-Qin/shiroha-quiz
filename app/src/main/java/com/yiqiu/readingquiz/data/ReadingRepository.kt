@@ -310,9 +310,12 @@ object ReadingRepository {
     private fun saveQuestions() {
         if (!::store.isInitialized) return
         val o = JSONObject()
-        questionsByArticle.forEach { (articleId, qs) ->
+        // 显式标注参数类型规避 questionsByArticle 同时实现 Iterable 与 Map 时的 forEach 重载歧义
+        questionsByArticle.forEach { entry: Map.Entry<String, List<Question>> ->
+            val articleId = entry.key
+            val qs = entry.value
             val arr = JSONArray()
-            qs.forEach { arr.put(questionToJson(it)) }
+            qs.forEach { q -> arr.put(questionToJson(q)) }
             o.put(articleId, arr)
         }
         store.edit().putString("questions_map_json", o.toString()).apply()

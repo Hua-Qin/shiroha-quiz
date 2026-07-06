@@ -53,7 +53,10 @@ object BackupExporter {
             .put("sessions", sessionsArr)
             // questionsMap: { articleId → questions JSONArray }
             .put("questionsMap", JSONObject().apply {
-                ReadingRepository.questionsByArticle.forEach { (articleId, qs) ->
+                // 显式标注参数类型规避 questionsByArticle 同时实现 Iterable 与 Map 时的 forEach 重载歧义
+                ReadingRepository.questionsByArticle.forEach { entry: Map.Entry<String, List<com.yiqiu.readingquiz.data.model.Question>> ->
+                    val articleId = entry.key
+                    val qs = entry.value
                     val qArr = JSONArray()
                     qs.forEach { q ->
                         qArr.put(JSONObject()
