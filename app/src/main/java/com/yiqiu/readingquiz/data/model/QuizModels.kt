@@ -19,7 +19,8 @@ data class Question(
     val answer: List<String>,
     val blankAnswers: List<String>,
     val analysis: String,
-    val category: String
+    val category: String,
+    val explanation: String = analysis
 )
 
 data class UserAnswer(

@@ -1,5 +1,6 @@
 package com.yiqiu.readingquiz.ai
 
+import android.util.Log
 import com.yiqiu.readingquiz.data.AiConfig
 import com.yiqiu.readingquiz.data.model.Article
 import com.yiqiu.readingquiz.data.model.Option
@@ -26,14 +27,20 @@ import java.net.UnknownHostException
  */
 object ReadingAiClient {
 
+    private const val TAG = "ReadingAi"
+
     sealed class AiResult<out T> {
         data class Success<T>(val value: T) : AiResult<T>()
         data class Failure(val category: String, val message: String) : AiResult<Nothing>()
     }
 
     fun testConnection(config: AiConfig): AiResult<String> {
+        Log.d(TAG, "testConnection: baseUrl=${config.apiBaseUrl}, model=${config.modelName}")
         val err = validateConfigOrError(config)
-        if (err != null) return AiResult.Failure("config", err)
+        if (err != null) {
+            Log.w(TAG, "testConnection config invalid: $err")
+            return AiResult.Failure("config", err)
+        }
         val content = try {
             requestChatCompletion(
                 config = config,
@@ -42,11 +49,14 @@ object ReadingAiClient {
                 maxTokens = 64
             )
         } catch (e: Throwable) {
+            Log.w(TAG, "testConnection FAILED: ${e.message}", e)
             return AiResult.Failure("exception", e.message ?: "未知错误")
         }
         return if (content.isNullOrBlank()) {
+            Log.i(TAG, "testConnection SUCCESS (empty content)")
             AiResult.Success("连接成功。")
         } else {
+            Log.i(TAG, "testConnection SUCCESS: ${content.take(40)}")
             AiResult.Success("连接成功：${content.take(40)}")
         }
     }
@@ -63,26 +73,48 @@ object ReadingAiClient {
         if (config.apiKey.isBlank()) {
             return AiResult.Failure("config", "API Key 不能为空")
         }
+        // URL 合法性校验
         val endpoint = "${config.apiBaseUrl.trimEnd('/')}/models"
+        try {
+            URL(endpoint)
+        } catch (e: Throwable) {
+            Log.w(TAG, "fetchModels invalid URL: $endpoint", e)
+            return AiResult.Failure("config", "API Base URL 格式不合法：$endpoint")
+        }
+        Log.d(TAG, "fetchModels: endpoint=$endpoint")
         val timeoutMs = config.timeoutSeconds.coerceIn(15, 180) * 1000
         val body = try {
             getRaw(endpoint, config.apiKey, timeoutMs)
         } catch (e: Throwable) {
+            Log.w(TAG, "fetchModels network error: ${e.message}", e)
             return AiResult.Failure("exception", e.message ?: "未知错误")
-        } ?: return AiResult.Failure("network", "请求失败：无法连接到 ${config.apiBaseUrl}")
+        }
+        if (body == null) {
+            Log.w(TAG, "fetchModels: null response body")
+            return AiResult.Failure("network", "请求失败：无法连接到 ${config.apiBaseUrl}")
+        }
         return try {
-            val obj = org.json.JSONObject(body)
+            val obj = JSONObject(body)
             val arr = obj.optJSONArray("data")
-                ?: return AiResult.Failure("parse", "返回缺少 data 数组")
+            if (arr == null) {
+                Log.w(TAG, "fetchModels parse: missing 'data' array, bodyPreview='${body.take(200)}'")
+                return AiResult.Success(emptyList())
+            }
             val ids = mutableListOf<String>()
             for (i in 0 until arr.length()) {
                 val item = arr.optJSONObject(i) ?: continue
                 val id = item.optString("id", "")
                 if (id.isNotBlank()) ids.add(id)
             }
-            if (ids.isEmpty()) AiResult.Failure("parse", "未解析到任何模型 id")
-            else AiResult.Success(ids)
-        } catch (e: org.json.JSONException) {
+            if (ids.isEmpty()) {
+                Log.w(TAG, "fetchModels parse: no model ids found, count=${arr.length()}")
+                AiResult.Failure("parse", "未解析到任何模型 id")
+            } else {
+                Log.i(TAG, "fetchModels SUCCESS: ${ids.size} models")
+                AiResult.Success(ids)
+            }
+        } catch (e: JSONException) {
+            Log.w(TAG, "fetchModels parse failed: bodyPreview='${body.take(200)}'", e)
             AiResult.Failure("parse", "JSON 解析失败：${e.message}")
         }
     }
@@ -92,8 +124,12 @@ object ReadingAiClient {
         article: Article,
         questionCount: Int = 5
     ): AiResult<List<Question>> {
+        Log.d(TAG, "generateQuestions: articleId=${article.id}, count=$questionCount")
         val err = validateConfigOrError(config)
-        if (err != null) return AiResult.Failure("config", err)
+        if (err != null) {
+            Log.w(TAG, "generateQuestions config invalid: $err")
+            return AiResult.Failure("config", err)
+        }
         val userPayload = buildArticlePayload(article, questionCount)
         val content = try {
             requestChatCompletion(
@@ -102,10 +138,16 @@ object ReadingAiClient {
                 userPayload = userPayload
             )
         } catch (e: Throwable) {
+            Log.w(TAG, "generateQuestions FAILED: ${e.message}", e)
             return AiResult.Failure("exception", e.message ?: "未知错误")
-        } ?: return AiResult.Failure("network", "AI 请求失败：无法连接到 ${config.apiBaseUrl}")
-
-        return parseQuestions(content)
+        }
+        if (content == null) {
+            Log.w(TAG, "generateQuestions: null content")
+            return AiResult.Failure("network", "AI 请求失败：无法连接到 ${config.apiBaseUrl}")
+        }
+        val result = parseQuestions(content)
+        Log.i(TAG, "generateQuestions result: ${(result as? AiResult.Success)?.value?.size ?: "failure ${(result as AiResult.Failure).message}"}")
+        return result
     }
 
     // ----------------- HTTP -----------------
@@ -173,14 +215,20 @@ object ReadingAiClient {
             readTimeout = timeoutMs
             setRequestProperty("Authorization", "Bearer $apiKey")
             setRequestProperty("Accept", "application/json")
+            setRequestProperty("User-Agent", "ReadingQuiz/0.2 (Android)")
         }
         return try {
             val code = conn.responseCode
-            val stream = if (code in 200..299) conn.inputStream else conn.errorStream
-            stream?.let {
-                BufferedReader(InputStreamReader(it, Charsets.UTF_8)).use(BufferedReader::readText)
+            if (code !in 200..299) {
+                Log.w(TAG, "getRaw $endpoint: HTTP $code")
+                null
+            } else {
+                conn.inputStream?.let {
+                    BufferedReader(InputStreamReader(it, Charsets.UTF_8)).use(BufferedReader::readText)
+                }
             }
-        } catch (_: Throwable) {
+        } catch (e: Throwable) {
+            Log.w(TAG, "getRaw $endpoint exception: ${e.message}", e)
             null
         } finally {
             conn.disconnect()
@@ -193,6 +241,8 @@ object ReadingAiClient {
         timeoutMs: Int,
         payload: JSONObject
     ): String? {
+        val start = System.currentTimeMillis()
+        Log.d(TAG, "POST $endpoint timeoutMs=$timeoutMs")
         val url = URL(endpoint)
         val conn = (url.openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
@@ -202,16 +252,26 @@ object ReadingAiClient {
             setRequestProperty("Content-Type", "application/json; charset=utf-8")
             setRequestProperty("Authorization", "Bearer $apiKey")
             setRequestProperty("Accept", "application/json")
+            setRequestProperty("User-Agent", "ReadingQuiz/0.2 (Android)")
         }
         return try {
             OutputStreamWriter(conn.outputStream, Charsets.UTF_8).use { it.write(payload.toString()) }
             val code = conn.responseCode
+            val elapsed = System.currentTimeMillis() - start
             val stream = if (code in 200..299) conn.inputStream else conn.errorStream
             val body = stream?.let {
                 BufferedReader(InputStreamReader(it, Charsets.UTF_8)).use(BufferedReader::readText)
             } ?: ""
-            if (code !in 200..299) return null
+            if (code !in 200..299) {
+                Log.w(TAG, "POST $endpoint: HTTP $code, elapsed=${elapsed}ms, bodyPreview='${body.take(200)}'")
+                return null
+            }
+            Log.d(TAG, "POST $endpoint: HTTP $code, elapsed=${elapsed}ms")
             extractContent(JSONObject(body))
+        } catch (e: Throwable) {
+            val elapsed = System.currentTimeMillis() - start
+            Log.w(TAG, "POST $endpoint exception after ${elapsed}ms: ${e.message}", e)
+            null
         } finally {
             conn.disconnect()
         }
@@ -339,9 +399,13 @@ object ReadingAiClient {
     }
 
     private fun validateConfigOrError(config: AiConfig): String? {
-        if (config.apiBaseUrl.isBlank()) return "API Base URL 不能为空"
-        if (config.apiKey.isBlank()) return "API Key 不能为空"
-        if (config.modelName.isBlank()) return "模型名不能为空"
-        return null
+        val err: String? = when {
+            config.apiBaseUrl.isBlank() -> "API Base URL 不能为空"
+            config.apiKey.isBlank() -> "API Key 不能为空"
+            config.modelName.isBlank() -> "模型名不能为空"
+            else -> null
+        }
+        Log.d(TAG, "validateConfig: ok=${err == null}")
+        return err
     }
 }

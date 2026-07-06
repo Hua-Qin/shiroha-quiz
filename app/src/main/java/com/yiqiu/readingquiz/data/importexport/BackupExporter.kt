@@ -46,11 +46,27 @@ object BackupExporter {
         val payload = JSONObject()
             .put("app", "ReadingQuiz")
             .put("kind", "full-backup")
-            .put("appVersion", "0.1.0-alpha")
+            .put("appVersion", "0.2.0-alpha")
             .put("exportedAt", System.currentTimeMillis())
             .put("articles", articlesArr)
             .put("notes", notesArr)
             .put("sessions", sessionsArr)
+            // questionsMap: { articleId → questions JSONArray }
+            .put("questionsMap", JSONObject().apply {
+                ReadingRepository.questionsByArticle.forEach { (articleId, qs) ->
+                    val qArr = JSONArray()
+                    qs.forEach { q ->
+                        qArr.put(JSONObject()
+                            .put("id", q.id)
+                            .put("type", q.type.name)
+                            .put("question", q.question)
+                            .put("answer", JSONArray(q.answer))
+                            .put("blankAnswers", JSONArray(q.blankAnswers))
+                            .put("explanation", q.explanation))
+                    }
+                    put(articleId, qArr)
+                }
+            })
             // ⚠️ AI API Key 故意不在导出中
         return payload.toString(2)
     }

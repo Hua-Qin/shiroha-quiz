@@ -1,5 +1,6 @@
 package com.yiqiu.readingquiz.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,19 +20,17 @@ import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.BookmarkBorder
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.Fullscreen
+import androidx.compose.material.icons.rounded.FullscreenExit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -46,8 +45,10 @@ import com.yiqiu.readingquiz.ui.theme.CafeType
 
 /**
  * 阅读页。
- * 严格遵守 spec 附录 A.1：使用 Icons.Filled.Flag（已收藏）与 Icons.Rounded.BookmarkBorder（未收藏）；
- * 并显式 import 对应的 extension property（spec 附录 A.2）。
+ * - 严格遵守 spec 附录 A.1：使用 Icons.Filled.Flag（已收藏）+ Icons.Rounded.BookmarkBorder（未收藏）+ Icons.Rounded.Fullscreen / FullscreenExit。
+ * - Task 4：删除 snapshotFlow 自动全屏，改用 `immersive` 手动开关（TopBar 隐藏，BottomActionBar 保留）。
+ * - Task 5：删除 Share 按钮。
+ * - Task 3：递归渲染 ArticleBlock.Section。
  */
 @Composable
 fun ReadingScreen(
@@ -56,6 +57,7 @@ fun ReadingScreen(
     onEnterQuiz: (String) -> Unit
 ) {
     val article = remember(articleId) { ReadingRepository.getArticle(articleId) }
+    Log.d("Reading", "open: articleId=$articleId, found=${article != null}")
     if (article == null) {
         Column(modifier = Modifier.fillMaxSize().padding(CafeSpacing.ContainerPad)) {
             Text(text = "文章不存在", style = CafeType.Heading, color = CafeColors.Wrong)
@@ -67,7 +69,8 @@ fun ReadingScreen(
 
     val listState = rememberLazyListState()
     var isMarked by remember { mutableStateOf(article.favorite) }
-    var isFullscreen by remember { mutableStateOf(false) }
+    var immersive by remember { mutableStateOf(false) }
+
     val progress by remember {
         derivedStateOf {
             val info = listState.layoutInfo
@@ -77,20 +80,21 @@ fun ReadingScreen(
         }
     }
 
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.isScrollInProgress }
-            .collect { scrolling -> isFullscreen = scrolling }
-    }
-
     Column(modifier = Modifier.fillMaxSize().background(CafeColors.Bg)) {
-        if (!isFullscreen) {
+        // Task 4：TopBar 仅在 immersive=false 时显示
+        if (!immersive) {
             TopBar(
                 article = article,
                 isMarked = isMarked,
+                immersive = immersive,
                 onBack = onBack,
                 onToggleMark = {
                     isMarked = !isMarked
                     ReadingRepository.toggleFavorite(article.id)
+                },
+                onToggleImmersive = {
+                    immersive = !immersive
+                    Log.d("Reading", "immersive=$immersive")
                 }
             )
             ProgressIndicator(percent = progress)
@@ -111,35 +115,23 @@ fun ReadingScreen(
                     color = CafeColors.Muted
                 )
             }
-            items(count = article.blocks.size) { idx ->
-                when (val block = article.blocks[idx]) {
-                    is ArticleBlock.Paragraph -> CafeHighlightText(
-                        text = block.text,
-                        highlights = block.highlights
-                    )
-                    is ArticleBlock.Image -> Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .background(CafeColors.Border)
-                    ) {
-                        Text(
-                            text = "[图片：${block.caption}]",
-                            style = CafeType.Caption,
-                            color = CafeColors.Muted,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                }
-            }
+            // Task 3：递归渲染 Section / Paragraph / Image
+            renderBlocks(article.blocks)
         }
 
-        if (!isFullscreen) {
-            BottomActionBar(
-                articleId = article.id,
-                onEnterQuiz = onEnterQuiz
-            )
-        }
+        // Task 4：BottomActionBar 始终保留（仅 IconButton 可隐藏）
+        BottomActionBar(
+            immersive = immersive,
+            articleId = article.id,
+            onEnterQuiz = {
+                Log.d("Reading", "→ quiz")
+                onEnterQuiz(article.id)
+            },
+            onToggleImmersive = {
+                immersive = !immersive
+                Log.d("Reading", "immersive=$immersive")
+            }
+        )
     }
 }
 
@@ -147,8 +139,10 @@ fun ReadingScreen(
 private fun TopBar(
     article: Article,
     isMarked: Boolean,
+    immersive: Boolean,
     onBack: () -> Unit,
-    onToggleMark: () -> Unit
+    onToggleMark: () -> Unit,
+    onToggleImmersive: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -167,7 +161,6 @@ private fun TopBar(
         Text(text = article.category, style = CafeType.Caption, color = CafeColors.Muted)
         Spacer(modifier = Modifier.weight(1f))
         IconButton(onClick = onToggleMark) {
-            // 关键点：Flag 与 FlagBorder 都从允许清单选；共用 Icon 变量需要显式声明公共类型
             val icon: androidx.compose.ui.graphics.vector.ImageVector =
                 if (isMarked) Icons.Filled.Flag else Icons.Rounded.BookmarkBorder
             Icon(
@@ -176,10 +169,10 @@ private fun TopBar(
                 tint = if (isMarked) CafeColors.Accent2 else CafeColors.Fg
             )
         }
-        IconButton(onClick = { /* TODO: share intent */ }) {
+        IconButton(onClick = onToggleImmersive) {
             Icon(
-                imageVector = Icons.Rounded.Share,
-                contentDescription = "分享",
+                imageVector = Icons.Rounded.FullscreenExit,
+                contentDescription = "退出沉浸模式",
                 tint = CafeColors.Fg
             )
         }
@@ -214,8 +207,10 @@ private fun ProgressIndicator(percent: Int) {
 
 @Composable
 private fun BottomActionBar(
+    immersive: Boolean,
     articleId: String,
-    onEnterQuiz: (String) -> Unit
+    onEnterQuiz: () -> Unit,
+    onToggleImmersive: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -231,10 +226,69 @@ private fun BottomActionBar(
                 tint = CafeColors.Fg
             )
         }
+        // Task 4：沉浸模式下显示 Fullscreen 进入按钮，否则隐藏（TopBar 已有 FullscreenExit）
+        if (immersive) {
+            IconButton(onClick = onToggleImmersive) {
+                Icon(
+                    imageVector = Icons.Rounded.Fullscreen,
+                    contentDescription = "进入沉浸模式",
+                    tint = CafeColors.Fg
+                )
+            }
+        }
         Spacer(modifier = Modifier.weight(1f))
         CafePrimaryButton(
             text = "进入答题",
-            onClick = { onEnterQuiz(articleId) }
+            onClick = onEnterQuiz
         )
+    }
+}
+
+/**
+ * 递归渲染 ArticleBlock 列表（顶层用 LazyListScope DSL）。
+ */
+private fun androidx.compose.foundation.lazy.LazyListScope.renderBlocks(
+    blocks: List<ArticleBlock>
+) {
+    blocks.forEach { block ->
+        when (block) {
+            is ArticleBlock.Paragraph -> item(key = "p-${block.text.hashCode()}") {
+                CafeHighlightText(text = block.text, highlights = block.highlights)
+            }
+            is ArticleBlock.Image -> item(key = "img-${block.path}") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .background(CafeColors.Border)
+                ) {
+                    Text(
+                        text = "[图片：${block.caption}]",
+                        style = CafeType.Caption,
+                        color = CafeColors.Muted,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
+            is ArticleBlock.Section -> {
+                item(key = "s-${block.title}-${block.level}") {
+                    SectionHeader(block.title, block.level)
+                }
+                renderBlocks(block.children)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SectionHeader(title: String, level: Int) {
+    val (style, indent) = when (level) {
+        1 -> CafeType.Title to 0.dp
+        2 -> CafeType.Heading to 8.dp
+        else -> CafeType.BodyBold to 16.dp
+    }
+    val color = if (level == 1) CafeColors.Accent else CafeColors.Fg
+    Row(modifier = Modifier.padding(start = indent, top = 8.dp, bottom = 4.dp)) {
+        Text(text = title, style = style, color = color)
     }
 }

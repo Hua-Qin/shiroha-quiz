@@ -1,8 +1,10 @@
 package com.yiqiu.readingquiz.ui.screens
 
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.FileDownload
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -31,11 +35,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.yiqiu.readingquiz.ai.ReadingAiClient
 import com.yiqiu.readingquiz.data.AiConfig
 import com.yiqiu.readingquiz.data.ReadingRepository
+import com.yiqiu.readingquiz.data.importexport.FileImporter
 import com.yiqiu.readingquiz.ui.components.CafeCard
 import com.yiqiu.readingquiz.ui.components.CafeGhostButton
 import com.yiqiu.readingquiz.ui.components.CafePrimaryButton
@@ -46,6 +52,7 @@ import com.yiqiu.readingquiz.ui.theme.CafeType
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AiSettingsScreen(onBack: () -> Unit) {
+    Log.d("Nav", "→ ai-settings")
     val initial = ReadingRepository.aiConfig.value
     var baseUrl by remember { mutableStateOf(initial.apiBaseUrl) }
     var apiKey by remember { mutableStateOf(initial.apiKey) }
@@ -59,6 +66,26 @@ fun AiSettingsScreen(onBack: () -> Unit) {
     // 模型下拉
     var modelOptions by remember { mutableStateOf<List<String>>(emptyList()) }
     var modelMenuOpen by remember { mutableStateOf(false) }
+
+    // Task 6：导入文章按钮（位于 AI 配置下方）
+    val context = LocalContext.current
+    var importMessage by remember { mutableStateOf<String?>(null) }
+    val openDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri == null) {
+            importMessage = "已取消导入。"
+            return@rememberLauncherForActivityResult
+        }
+        importMessage = try {
+            when (val r = FileImporter.importFromUri(context, uri)) {
+                is FileImporter.Result.Success -> "已导入：${r.article.title}"
+                is FileImporter.Result.Failure -> "导入失败：${r.reason}"
+            }
+        } catch (e: Throwable) {
+            "导入异常：${e.message ?: "未知错误"}"
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize().background(CafeColors.Bg)) {
         Row(
@@ -142,6 +169,7 @@ fun AiSettingsScreen(onBack: () -> Unit) {
                 CafeGhostButton(
                     text = if (fetchingModels) "获取中..." else "获取模型列表",
                     onClick = {
+                        Log.d("AiSettings", "fetchModels clicked")
                         fetchingModels = true
                         status = null
                         statusIsError = false
@@ -173,6 +201,7 @@ fun AiSettingsScreen(onBack: () -> Unit) {
                 CafeGhostButton(
                     text = if (testing) "测试中..." else "测试连接",
                     onClick = {
+                        Log.d("AiSettings", "testConnection clicked")
                         testing = true
                         status = null
                         statusIsError = false
@@ -212,6 +241,7 @@ fun AiSettingsScreen(onBack: () -> Unit) {
             CafePrimaryButton(
                 text = "保存",
                 onClick = {
+                    Log.d("AiSettings", "save clicked, model=$modelName")
                     ReadingRepository.updateAiConfig(
                         AiConfig(
                             apiBaseUrl = baseUrl,
@@ -225,6 +255,51 @@ fun AiSettingsScreen(onBack: () -> Unit) {
                 },
                 modifier = Modifier.fillMaxWidth()
             )
+
+            // Task 6：导入文章区段（位于 AI 配置下方）
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "导入文章",
+                style = CafeType.Heading,
+                color = CafeColors.Fg
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Rounded.FileDownload,
+                    contentDescription = null,
+                    tint = CafeColors.Accent
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    text = "支持 JSON / Markdown / TXT 格式",
+                    style = CafeType.Caption,
+                    color = CafeColors.Muted
+                )
+            }
+            CafeGhostButton(
+                text = "选择文件导入",
+                onClick = {
+                    Log.d("FileImport", "user clicked importFile")
+                    openDocumentLauncher.launch(
+                        arrayOf(
+                            "application/json",
+                            "text/markdown",
+                            "text/plain",
+                            "text/*"
+                        )
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+            importMessage?.let { msg ->
+                Text(
+                    text = msg,
+                    style = CafeType.Caption,
+                    color = if (msg.startsWith("已取消") || msg.startsWith("导入失败") || msg.startsWith("导入异常"))
+                        CafeColors.Wrong else CafeColors.Accent2
+                )
+            }
+
             status?.let {
                 CafeCard(modifier = Modifier.fillMaxWidth()) {
                     Row(verticalAlignment = Alignment.CenterVertically) {

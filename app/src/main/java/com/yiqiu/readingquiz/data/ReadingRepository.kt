@@ -2,6 +2,7 @@ package com.yiqiu.readingquiz.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import com.yiqiu.readingquiz.data.model.Article
@@ -21,12 +22,19 @@ import java.util.UUID
  */
 object ReadingRepository {
 
+    private const val TAG = "Repo"
+
     private lateinit var store: SharedPreferences
 
     val articles = mutableStateListOf<Article>()
     val notes = mutableStateListOf<ReadingNote>()
     val sessions = mutableStateListOf<QuizSession>()
     val aiConfig = mutableStateOf(AiConfig.EMPTY)
+
+    /**
+     * 文章 → 已生成题目缓存（用于持久化 + 跨重启复用）。
+     */
+    val questionsByArticle = mutableStateMapOf<String, List<Question>>()
 
     fun init(context: Context) {
         if (::store.isInitialized) return
@@ -40,6 +48,7 @@ object ReadingRepository {
     // ----------------- 文章 -----------------
 
     fun addArticle(article: Article) {
+        Log.d(TAG, "addArticle: id=${article.id}, title='${article.title}'")
         articles.add(article)
         saveArticles()
     }
@@ -56,8 +65,10 @@ object ReadingRepository {
     fun toggleFavorite(articleId: String) {
         val idx = articles.indexOfFirst { it.id == articleId }
         if (idx >= 0) {
+            val newState = !articles[idx].favorite
+            Log.d(TAG, "toggleFavorite: id=$articleId → $newState")
             articles[idx] = articles[idx].copy(
-                favorite = !articles[idx].favorite,
+                favorite = newState,
                 updatedAt = System.currentTimeMillis()
             )
             saveArticles()
@@ -151,9 +162,21 @@ object ReadingRepository {
     // ----------------- AI 配置 -----------------
 
     fun updateAiConfig(config: AiConfig) {
+        Log.i(TAG, "updateAiConfig: baseUrl=${config.apiBaseUrl}, model=${config.modelName}")
         aiConfig.value = config
         saveAiConfig()
     }
+
+    // ----------------- 题目缓存 -----------------
+
+    fun setQuestions(articleId: String, questions: List<Question>) {
+        Log.d(TAG, "setQuestions: articleId=$articleId, count=${questions.size}")
+        questionsByArticle[articleId] = questions
+        saveQuestions()
+    }
+
+    fun getQuestions(articleId: String): List<Question> =
+        questionsByArticle[articleId] ?: emptyList()
 
     // ----------------- 持久化 -----------------
 
@@ -162,6 +185,7 @@ object ReadingRepository {
         loadNotes()
         loadSessions()
         loadAiConfig()
+        loadQuestions()
     }
 
     private fun loadArticles() {
@@ -260,35 +284,46 @@ object ReadingRepository {
         store.edit().putString("ai_config_json", o.toString()).apply()
     }
 
+    /**
+     * 题目缓存持久化：顶层 map，每个 articleId → questions JSON array。
+     */
+    private fun loadQuestions() {
+        val raw = store.getString("questions_map_json", null) ?: return
+        runCatching {
+            val map = JSONObject(raw)
+            val keys = map.keys()
+            while (keys.hasNext()) {
+                val articleId = keys.next()
+                val arr = map.optJSONArray(articleId) ?: continue
+                val qs = mutableListOf<Question>()
+                for (i in 0 until arr.length()) {
+                    qs.add(questionFromJson(arr.getJSONObject(i)))
+                }
+                questionsByArticle[articleId] = qs
+            }
+            Log.d(TAG, "loadQuestions: ${questionsByArticle.size} article entries")
+        }.onFailure {
+            Log.w(TAG, "loadQuestions FAILED: ${it.message}", it)
+        }
+    }
+
+    private fun saveQuestions() {
+        if (!::store.isInitialized) return
+        val o = JSONObject()
+        questionsByArticle.forEach { (articleId, qs) ->
+            val arr = JSONArray()
+            qs.forEach { arr.put(questionToJson(it)) }
+            o.put(articleId, arr)
+        }
+        store.edit().putString("questions_map_json", o.toString()).apply()
+    }
+
     // ----------------- JSON 互转 -----------------
 
     private fun articleToJson(article: Article): JSONObject {
         val blocksArr = JSONArray()
         article.blocks.forEach { b ->
-            val obj = JSONObject()
-            when (b) {
-                is com.yiqiu.readingquiz.data.model.ArticleBlock.Paragraph -> {
-                    obj.put("type", "paragraph")
-                    obj.put("text", b.text)
-                    val hlArr = JSONArray()
-                    b.highlights.forEach { h ->
-                        hlArr.put(
-                            JSONObject()
-                                .put("text", h.text)
-                                .put("startIndex", h.startIndex)
-                                .put("endIndex", h.endIndex)
-                                .put("explanation", h.explanation)
-                        )
-                    }
-                    obj.put("highlights", hlArr)
-                }
-                is com.yiqiu.readingquiz.data.model.ArticleBlock.Image -> {
-                    obj.put("type", "image")
-                    obj.put("path", b.path)
-                    obj.put("caption", b.caption)
-                }
-            }
-            blocksArr.put(obj)
+            blocksArr.put(blockToJson(b))
         }
         return JSONObject()
             .put("id", article.id)
@@ -303,42 +338,45 @@ object ReadingRepository {
             .put("updatedAt", article.updatedAt)
     }
 
+    private fun blockToJson(b: com.yiqiu.readingquiz.data.model.ArticleBlock): JSONObject = when (b) {
+        is com.yiqiu.readingquiz.data.model.ArticleBlock.Paragraph -> {
+            val obj = JSONObject()
+            obj.put("type", "paragraph")
+            obj.put("text", b.text)
+            val hlArr = JSONArray()
+            b.highlights.forEach { h ->
+                hlArr.put(
+                    JSONObject()
+                        .put("text", h.text)
+                        .put("startIndex", h.startIndex)
+                        .put("endIndex", h.endIndex)
+                        .put("explanation", h.explanation)
+                )
+            }
+            obj.put("highlights", hlArr)
+        }
+        is com.yiqiu.readingquiz.data.model.ArticleBlock.Image -> {
+            JSONObject()
+                .put("type", "image")
+                .put("path", b.path)
+                .put("caption", b.caption)
+        }
+        is com.yiqiu.readingquiz.data.model.ArticleBlock.Section -> {
+            val childrenArr = JSONArray()
+            b.children.forEach { childrenArr.put(blockToJson(it)) }
+            JSONObject()
+                .put("type", "section")
+                .put("title", b.title)
+                .put("level", b.level)
+                .put("children", childrenArr)
+        }
+    }
+
     private fun articleFromJson(o: JSONObject): Article {
         val blocksArr = o.getJSONArray("blocks")
         val blocks = mutableListOf<com.yiqiu.readingquiz.data.model.ArticleBlock>()
         for (i in 0 until blocksArr.length()) {
-            val b = blocksArr.getJSONObject(i)
-            when (b.optString("type", "paragraph")) {
-                "image" -> blocks.add(
-                    com.yiqiu.readingquiz.data.model.ArticleBlock.Image(
-                        path = b.optString("path", ""),
-                        caption = b.optString("caption", "")
-                    )
-                )
-                else -> {
-                    val hlArr = b.optJSONArray("highlights")
-                    val highlights = mutableListOf<com.yiqiu.readingquiz.data.model.HighlightSpan>()
-                    if (hlArr != null) {
-                        for (j in 0 until hlArr.length()) {
-                            val h = hlArr.getJSONObject(j)
-                            highlights.add(
-                                com.yiqiu.readingquiz.data.model.HighlightSpan(
-                                    text = h.optString("text", ""),
-                                    startIndex = h.optInt("startIndex", 0),
-                                    endIndex = h.optInt("endIndex", 0),
-                                    explanation = h.optString("explanation", "")
-                                )
-                            )
-                        }
-                    }
-                    blocks.add(
-                        com.yiqiu.readingquiz.data.model.ArticleBlock.Paragraph(
-                            text = b.optString("text", ""),
-                            highlights = highlights
-                        )
-                    )
-                }
-            }
+            blocks.addAll(blockFromJson(blocksArr.getJSONObject(i)))
         }
         return Article(
             id = o.getString("id"),
@@ -353,6 +391,60 @@ object ReadingRepository {
             createdAt = o.optLong("createdAt", System.currentTimeMillis()),
             updatedAt = o.optLong("updatedAt", System.currentTimeMillis())
         )
+    }
+
+    /**
+     * 从 JSON 单个 block 对象反序列化。
+     * 注意：section 类型会递归解析 children 数组，每个 child 可能是任意类型。
+     */
+    private fun blockFromJson(b: JSONObject): List<com.yiqiu.readingquiz.data.model.ArticleBlock> {
+        return when (b.optString("type", "paragraph")) {
+            "image" -> listOf(
+                com.yiqiu.readingquiz.data.model.ArticleBlock.Image(
+                    path = b.optString("path", ""),
+                    caption = b.optString("caption", "")
+                )
+            )
+            "section" -> {
+                val childrenArr = b.optJSONArray("children")
+                val children = mutableListOf<com.yiqiu.readingquiz.data.model.ArticleBlock>()
+                if (childrenArr != null) {
+                    for (j in 0 until childrenArr.length()) {
+                        children.addAll(blockFromJson(childrenArr.getJSONObject(j)))
+                    }
+                }
+                listOf(
+                    com.yiqiu.readingquiz.data.model.ArticleBlock.Section(
+                        title = b.optString("title", ""),
+                        level = b.optInt("level", 1),
+                        children = children
+                    )
+                )
+            }
+            else -> {
+                val hlArr = b.optJSONArray("highlights")
+                val highlights = mutableListOf<com.yiqiu.readingquiz.data.model.HighlightSpan>()
+                if (hlArr != null) {
+                    for (j in 0 until hlArr.length()) {
+                        val h = hlArr.getJSONObject(j)
+                        highlights.add(
+                            com.yiqiu.readingquiz.data.model.HighlightSpan(
+                                text = h.optString("text", ""),
+                                startIndex = h.optInt("startIndex", 0),
+                                endIndex = h.optInt("endIndex", 0),
+                                explanation = h.optString("explanation", "")
+                            )
+                        )
+                    }
+                }
+                listOf(
+                    com.yiqiu.readingquiz.data.model.ArticleBlock.Paragraph(
+                        text = b.optString("text", ""),
+                        highlights = highlights
+                    )
+                )
+            }
+        }
     }
 
     private fun sessionToJson(session: QuizSession): JSONObject {
