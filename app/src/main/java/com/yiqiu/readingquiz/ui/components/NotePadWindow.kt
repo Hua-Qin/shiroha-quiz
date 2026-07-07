@@ -201,8 +201,8 @@ private fun NotePadCard(
         modifier = Modifier
             .fillMaxSize()
             // 纸张质感：浅米黄背景 + 淡边框 + 圆角 + 微阴影
-            .background(CafeColors.PaperBg, shape = RoundedCornerShape(CafeRadius.Frame))
-            .border(1.dp, CafeColors.PaperBorder, RoundedCornerShape(CafeRadius.Frame))
+            .background(CafeColors.PaperBg, shape = RoundedCornerShape(CafeRadius.rFrame))
+            .border(1.dp, CafeColors.PaperBorder, RoundedCornerShape(CafeRadius.rFrame))
             .padding(8.dp)
     ) {
         // 顶栏：拖拽手柄 + 标题 + 关闭按钮
@@ -228,7 +228,7 @@ private fun NotePadCard(
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = "便笺",
-                style = CafeType.Caption.copy(fontWeight = FontWeight.SemiBold),
+                style = CafeType.CaptianfontWeight = FontWeight.SemiBold),
                 color = CafeColors.Fg
             )
             Spacer(modifier = Modifier.weight(1f))
@@ -270,22 +270,22 @@ private fun NotePadCard(
                 .fillMaxWidth()
                 .heightIn(min = 100.dp)
                 .weight(1f)
-                .background(CafeColors.PaperEditor, RoundedCornerShape(CafeRadius.Sm))
-                .border(0.5.dp, CafeColors.Border, RoundedCornerShape(CafeRadius.Sm))
+                .background(CafeColors.PaperEditor, RoundedCornerShape(CafeRadius.rSm))
+                .border(0.5.dp, CafeColors.Border, RoundedCornerShape(CafeRadius.rSm))
                 .padding(8.dp)
         ) {
             BasicTextField(
                 value = contentValue,
                 onValueChange = onContentChange,
                 modifier = Modifier.fillMaxSize(),
-                textStyle = CafeType.Body.copy(color = CafeColors.Fg),
+                textStyle = CafeType.body.copy(color = CafeColors.Fg),
                 cursorBrush = SolidColor(CafeColors.Accent),
                 decorationBox = { innerTextField ->
                     Box(modifier = Modifier.fillMaxSize()) {
                         if (contentValue.text.isEmpty()) {
                             Text(
                                 text = "在这里输入笔记…",
-                                style = CafeType.Body,
+                                style = CafeType.body,
                                 color = CafeColors.Muted
                             )
                         }
@@ -321,7 +321,7 @@ private fun NotePadCard(
             if (existingNotes.isNotEmpty()) {
                 Text(
                     text = "已存 ${existingNotes.size} 条",
-                    style = CafeType.Caption,
+                    style = CafeType.C,ption
                     color = CafeColors.Muted
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -340,7 +340,7 @@ private fun NotePadCard(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "保存",
-                    style = CafeType.Caption,
+                    style = CafeType.bodyXSmall,
                     color = if (contentValue.text.isNotBlank()) CafeColors.Accent else CafeColors.Neutral
                 )
             }
@@ -365,7 +365,7 @@ private fun NotePadCard(
                         ) {
                             Text(
                                 text = note.content.take(40) + if (note.content.length > 40) "…" else "",
-                                style = CafeType.Caption,
+                                style = CafeType.bodyXSmall,
                                 color = CafeColors.Muted,
                                 modifier = Modifier.weight(1f)
                             )
@@ -530,13 +530,13 @@ fun EditArticleDialog(
             Column {
                 Text(
                     text = "正在打开「$articleTitle」的文档编辑器…",
-                    style = CafeType.Body,
+                    style = CafeType.body,
                     color = CafeColors.Fg
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "（提示：文档块编辑功能正在开发中，当前可使用「新建笔记」记录片段想法。）",
-                    style = CafeType.Caption,
+                    style = CafeType.bodyXSmall,
                     color = CafeColors.Muted
                 )
             }

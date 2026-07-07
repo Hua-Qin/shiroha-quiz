@@ -39,7 +39,7 @@ import com.yiqiu.readingquiz.ui.theme.CafeType
  * 2. **新建笔记**：弹出便笺浮窗（NotePadWindow）
  *
  * 设计风格：cafe-ui + Material DropdownMenu 视觉规范
- * - 圆角卡片（CafeRadius.Frame = 18dp）
+ * - 圆角卡片（CafeRadius.rFrame = 18dp）
  * - 选项行高 56dp，左侧 Icon（24dp）+ 标题 + 副标题
  * - 半透明遮罩 + 点击遮罩关闭
  */
@@ -68,14 +68,14 @@ fun NoteActionMenu(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .background(CafeColors.Surface, RoundedCornerShape(CafeRadius.Frame))
-                    .border(1.dp, CafeColors.Border, RoundedCornerShape(CafeRadius.Frame))
+                    .background(CafeColors.Surface, RoundedCornerShape(CafeRadius.rFrame))
+                    .border(1.dp, CafeColors.Border, RoundedCornerShape(CafeRadius.rFrame))
                     .padding(vertical = 8.dp)
             ) {
                 // 标题
                 Text(
                     text = "选择操作",
-                    style = CafeType.Caption.copy(fontWeight = FontWeight.SemiBold),
+                    style = CafeType.bodyXSmall.copy(fontWeight = FontWeight.SemiBold),
                     color = CafeColors.Muted,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
@@ -129,7 +129,7 @@ private fun NoteActionItem(
         Box(
             modifier = Modifier
                 .size(36.dp)
-                .background(CafeColors.Bg, RoundedCornerShape(CafeRadius.Md)),
+                .background(CafeColors.Bg, RoundedCornerShape(CafeRadius.rMd)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -143,13 +143,13 @@ private fun NoteActionItem(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = CafeType.Body.copy(fontWeight = FontWeight.Medium),
+                style = CafeType.body.copy(fontWeight = FontWeight.Medium),
                 color = CafeColors.Fg
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = subtitle,
-                style = CafeType.Caption,
+                style = CafeType.bodyXSmall,
                 color = CafeColors.Muted
             )
         }

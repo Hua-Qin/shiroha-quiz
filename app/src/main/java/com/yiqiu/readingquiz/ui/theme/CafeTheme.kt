@@ -21,11 +21,11 @@ fun CafeTheme(content: @Composable () -> Unit) {
     )
 
     val shapes = Shapes(
-        extraSmall = RoundedCornerShape(CafeRadius.Sm),
-        small = RoundedCornerShape(CafeRadius.Md),
-        medium = RoundedCornerShape(CafeRadius.Card),
-        large = RoundedCornerShape(CafeRadius.CardLg),
-        extraLarge = RoundedCornerShape(CafeRadius.Panel)
+        extraSmall = RoundedCornerShape(CafeRadius.rSm),
+        small = RoundedCornerShape(CafeRadius.rMd),
+        medium = RoundedCornerShape(CafeRadius.rCard),
+        large = RoundedCornerShape(CafeRadius.rCardLg),
+        extraLarge = RoundedCornerShape(CafeRadius.rPanel)
     )
 
     MaterialTheme(

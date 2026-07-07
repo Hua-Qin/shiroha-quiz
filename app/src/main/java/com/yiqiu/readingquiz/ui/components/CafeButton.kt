@@ -3,6 +3,7 @@ package com.yiqiu.readingquiz.ui.components
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -96,7 +96,7 @@ fun CafeButton(
             )
             .clickable(
                 interactionSource = interactionSource,
-                indication = rememberRipple(color = contentColor),
+                indication = LocalIndication.current,
                 enabled = enabled && !loading,
                 role = Role.Button,
                 onClick = onClick
