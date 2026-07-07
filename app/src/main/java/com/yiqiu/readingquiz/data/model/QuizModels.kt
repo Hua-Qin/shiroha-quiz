@@ -21,6 +21,8 @@ data class Question(
     val analysis: String,
     val category: String = "",
     val explanation: String = analysis,
+    // 题目所属文章 ID（全局统一题库字段，所有题目挂在单一 questions 列表下）
+    val articleId: String = "",
     // 章节绑定：sectionId 指向 ArticleBlock.Section.id；null 表示未绑定（旧数据兼容）
     val sectionId: String? = null,
     // 题目关联的原文片段（用于跨章节去重与展示上下文）

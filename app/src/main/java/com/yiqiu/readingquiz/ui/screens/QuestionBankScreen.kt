@@ -365,7 +365,8 @@ private fun AiGenerateCta(
                 text = if (loading) "生成中" else "开始生成",
                 onClick = onClick,
                 enabled = enabled,
-                loading = loading
+                loading = loading,
+                onBanner = true
             )
         },
         secondaryButton = {

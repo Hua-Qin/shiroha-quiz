@@ -51,26 +51,20 @@ object BackupExporter {
             .put("articles", articlesArr)
             .put("notes", notesArr)
             .put("sessions", sessionsArr)
-            // questionsMap: { articleId → questions JSONArray }
-            .put("questionsMap", JSONObject().apply {
-                // SnapshotStateMap 同时实现 Iterable 与 Map，forEach 重载冲突；显式 Map 化消除歧义
-                val asMap: Map<String, List<com.yiqiu.readingquiz.data.model.Question>> =
-                    ReadingRepository.questionsByArticle
-                asMap.forEach { (articleId, qs) ->
-                    val qArr = JSONArray()
-                    qs.forEach { q ->
-                        qArr.put(JSONObject()
-                            .put("id", q.id)
-                            .put("type", q.type.name)
-                            .put("question", q.question)
-                            .put("answer", JSONArray(q.answer))
-                            .put("blankAnswers", JSONArray(q.blankAnswers))
-                            .put("explanation", q.explanation)
-                            // 新增字段：章节绑定（如为 null 则 JSON 中省略，反序列化时兼容）
-                            .put("sectionId", q.sectionId ?: JSONObject.NULL)
-                            .put("anchorText", q.anchorText))
-                    }
-                    put(articleId, qArr)
+            // questionsList: 扁平 JSON array，每条自带 articleId（统一题库）
+            .put("questionsList", JSONArray().apply {
+                ReadingRepository.allQuestions().forEach { q ->
+                    put(JSONObject()
+                        .put("id", q.id)
+                        .put("type", q.type.name)
+                        .put("question", q.question)
+                        .put("answer", JSONArray(q.answer))
+                        .put("blankAnswers", JSONArray(q.blankAnswers))
+                        .put("explanation", q.explanation)
+                        .put("articleId", q.articleId)
+                        // 新增字段：章节绑定（如为 null 则 JSON 中省略，反序列化时兼容）
+                        .put("sectionId", q.sectionId ?: JSONObject.NULL)
+                        .put("anchorText", q.anchorText))
                 }
             })
             // ⚠️ AI API Key 故意不在导出中

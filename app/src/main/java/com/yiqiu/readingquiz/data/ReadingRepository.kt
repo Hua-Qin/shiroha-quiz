@@ -34,9 +34,10 @@ object ReadingRepository {
     val aiConfig = mutableStateOf(AiConfig.EMPTY)
 
     /**
-     * 文章 → 已生成题目缓存（用于持久化 + 跨重启复用）。
+     * 全局统一题库：所有题目挂在单一 List 下（按 articleId 字段归属文章）。
+     * 用 mutableStateListOf 让 Compose 自动订阅变更，触发 UI 重组。
      */
-    val questionsByArticle = mutableStateMapOf<String, List<Question>>()
+    val questions = mutableStateListOf<Question>()
 
     /**
      * 章节学习进度（key = "${articleId}#${sectionId}"）。
@@ -267,56 +268,68 @@ object ReadingRepository {
         saveAiConfig()
     }
 
-    // ----------------- 题目缓存 -----------------
+    // ----------------- 题目缓存（统一题库） -----------------
+    //
+    // 设计：所有题目挂在单一 `questions` 列表下，按 Question.articleId 字段归属文章。
+    // 任何"按文章"的操作都是这条列表的过滤 / 子集写入，不存在第二份题库副本。
 
-    fun setQuestions(articleId: String, questions: List<Question>) {
-        Log.d(TAG, "setQuestions: articleId=$articleId, count=${questions.size}")
-        questionsByArticle[articleId] = questions
+    /** 用传入列表整体替换单一题库（用于还原/导入）。 */
+    fun setQuestions(newQuestions: List<Question>) {
+        questions.clear()
+        questions.addAll(newQuestions)
+        Log.d(TAG, "setQuestions: replaced with ${questions.size} questions")
         saveQuestions()
     }
 
-    fun getQuestions(articleId: String): List<Question> =
-        questionsByArticle[articleId] ?: emptyList()
+    /** 整库只读快照。 */
+    fun allQuestions(): List<Question> = questions.toList()
 
     /**
-     * 向指定文章的题目列表追加题目（保留现有题目）。
+     * 取出指定文章的所有题目（按入题时间/位置保持顺序）。
+     */
+    fun getQuestions(articleId: String): List<Question> =
+        questions.filter { it.articleId == articleId }
+
+    /**
+     * 向统一题库追加新题目（保留所有已有题目）。
+     * 调用方需保证传入的 Question.articleId 已正确赋值，否则归到 articleId 入参所属文章。
      */
     fun addQuestions(articleId: String, newQuestions: List<Question>) {
-        val existing = questionsByArticle[articleId] ?: emptyList()
-        val merged = existing + newQuestions
-        questionsByArticle[articleId] = merged
-        Log.d(TAG, "addQuestions: articleId=$articleId, added=${newQuestions.size}, total=${merged.size}")
+        if (newQuestions.isEmpty()) return
+        // 兜底：若调用方忘了填 articleId，按入参补齐
+        val normalized = newQuestions.map { if (it.articleId.isBlank()) it.copy(articleId = articleId) else it }
+        questions.addAll(normalized)
+        Log.d(TAG, "addQuestions: articleId=$articleId, added=${normalized.size}, total=${questions.size}")
         saveQuestions()
     }
 
     /**
-     * 删除指定文章的某道题目。
+     * 在统一题库中按 id 删除一道题。
      */
     fun deleteQuestion(articleId: String, questionId: String) {
-        val list = questionsByArticle[articleId] ?: return
-        val newList = list.filterNot { it.id == questionId }
-        if (newList.size == list.size) {
+        val idx = questions.indexOfFirst { it.id == questionId && it.articleId == articleId }
+        if (idx < 0) {
             Log.w(TAG, "deleteQuestion: id=$questionId not found in articleId=$articleId")
             return
         }
-        questionsByArticle[articleId] = newList
-        Log.d(TAG, "deleteQuestion: articleId=$articleId, id=$questionId, remaining=${newList.size}")
+        questions.removeAt(idx)
+        Log.d(TAG, "deleteQuestion: articleId=$articleId, id=$questionId, remaining=${questions.size}")
         saveQuestions()
     }
 
     /**
      * 更新单道题目（用于编辑器保存）。
+     * articleId 入参用于安全性校验：id 必须属于指定文章。
      */
     fun updateQuestion(articleId: String, updated: Question) {
-        val list = questionsByArticle[articleId] ?: return
-        val idx = list.indexOfFirst { it.id == updated.id }
+        val safe = if (updated.articleId.isBlank()) updated.copy(articleId = articleId) else updated
+        val idx = questions.indexOfFirst { it.id == safe.id && it.articleId == articleId }
         if (idx < 0) {
-            Log.w(TAG, "updateQuestion: id=${updated.id} not found")
+            Log.w(TAG, "updateQuestion: id=${safe.id} not found in articleId=$articleId")
             return
         }
-        val newList = list.toMutableList().apply { this[idx] = updated }
-        questionsByArticle[articleId] = newList
-        Log.d(TAG, "updateQuestion: articleId=$articleId, id=${updated.id}")
+        questions[idx] = safe
+        Log.d(TAG, "updateQuestion: articleId=$articleId, id=${safe.id}")
         saveQuestions()
     }
 
@@ -428,40 +441,55 @@ object ReadingRepository {
     }
 
     /**
-     * 题目缓存持久化：顶层 map，每个 articleId → questions JSON array。
+     * 题目缓存持久化：单一 JSON array，每条记录自带 articleId。
+     * - 新格式直接读取：[...]
+     * - 旧格式（questions_map_json：{ articleId: [...] }）自动迁移一次
      */
     private fun loadQuestions() {
-        val raw = store.getString("questions_map_json", null) ?: return
+        // 优先尝试新格式 questions_json
+        val rawNew = store.getString("questions_json", null)
+        if (rawNew != null) {
+            runCatching {
+                val arr = JSONArray(rawNew)
+                questions.clear()
+                for (i in 0 until arr.length()) {
+                    questions.add(questionFromJson(arr.getJSONObject(i)))
+                }
+                Log.d(TAG, "loadQuestions: loaded ${questions.size} from questions_json")
+            }.onFailure {
+                Log.w(TAG, "loadQuestions new-format FAILED: ${it.message}", it)
+            }
+            return
+        }
+        // 兼容老格式 questions_map_json
+        val rawOld = store.getString("questions_map_json", null) ?: return
         runCatching {
-            val map = JSONObject(raw)
+            val map = JSONObject(rawOld)
             val keys = map.keys()
+            questions.clear()
             while (keys.hasNext()) {
                 val articleId = keys.next()
                 val arr = map.optJSONArray(articleId) ?: continue
-                val qs = mutableListOf<Question>()
                 for (i in 0 until arr.length()) {
-                    qs.add(questionFromJson(arr.getJSONObject(i)))
+                    val q = questionFromJson(arr.getJSONObject(i))
+                    // 老数据没有 articleId 字段 → 补齐到 map key
+                    questions.add(if (q.articleId.isBlank()) q.copy(articleId = articleId) else q)
                 }
-                questionsByArticle[articleId] = qs
             }
-            Log.d(TAG, "loadQuestions: ${questionsByArticle.size} article entries")
+            Log.i(TAG, "loadQuestions migrated from questions_map_json: ${questions.size} questions")
+            // 迁移完成：写入新格式并清掉旧 key
+            saveQuestions()
+            store.edit().remove("questions_map_json").apply()
         }.onFailure {
-            Log.w(TAG, "loadQuestions FAILED: ${it.message}", it)
+            Log.w(TAG, "loadQuestions legacy FAILED: ${it.message}", it)
         }
     }
 
     private fun saveQuestions() {
         if (!::store.isInitialized) return
-        val o = JSONObject()
-        // SnapshotStateMap 同时实现 Iterable<Map.Entry> 与 Map，两者的 forEach 重载冲突。
-        // 显式声明 receiver 为 Map<K,V> 消除歧义。
-        val asMap: Map<String, List<Question>> = questionsByArticle
-        asMap.forEach { (articleId, qs) ->
-            val arr = JSONArray()
-            qs.forEach { q -> arr.put(questionToJson(q)) }
-            o.put(articleId, arr)
-        }
-        store.edit().putString("questions_map_json", o.toString()).apply()
+        val arr = JSONArray()
+        questions.forEach { q -> arr.put(questionToJson(q)) }
+        store.edit().putString("questions_json", arr.toString()).apply()
     }
 
     /**
@@ -714,6 +742,7 @@ object ReadingRepository {
             .put("blankAnswers", JSONArray(q.blankAnswers))
             .put("analysis", q.analysis)
             .put("category", q.category)
+            .put("articleId", q.articleId)
             .put("sectionId", q.sectionId ?: JSONObject.NULL)
             .put("anchorText", q.anchorText)
     }
@@ -740,6 +769,7 @@ object ReadingRepository {
             blankAnswers = o.optJSONArray("blankAnswers").toStringList(),
             analysis = o.optString("analysis", ""),
             category = o.optString("category", ""),
+            articleId = o.optString("articleId", ""),
             // 章节绑定：optString("sectionId") 遇 JSONObject.NULL 时返回 "null" 字符串；用 isNull 严格判断
             sectionId = if (o.isNull("sectionId")) null else o.optString("sectionId", "").ifBlank { null },
             anchorText = o.optString("anchorText", "")

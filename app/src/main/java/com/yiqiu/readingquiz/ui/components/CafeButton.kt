@@ -143,6 +143,11 @@ fun CafeButton(
 
 /**
  * 便捷：带 AutoAwesome 魔法图标的 Primary 按钮（用于 AI 出题等场景）。
+ *
+ * 视觉约束：此按钮常用于 [com.yiqiu.readingquiz.ui.components.CafeCtaBanner] 等
+ * 渐变背景容器内（brown → green），或 [CafeCard] 白色背景内：
+ * - onBanner=true  → 用 OnDark 变体（白底 + accent 文字），避免与棕色渐变融为一体
+ * - onBanner=false → 用 Primary 变体（accent 填充 + 白字），与卡片白色背景形成强对比
  */
 @Composable
 fun CafeButtonAi(
@@ -150,13 +155,14 @@ fun CafeButtonAi(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    loading: Boolean = false
+    loading: Boolean = false,
+    onBanner: Boolean = false
 ) {
     CafeButton(
         text = text,
         onClick = onClick,
         modifier = modifier,
-        variant = CafeButtonVariant.Primary,
+        variant = if (onBanner) CafeButtonVariant.OnDark else CafeButtonVariant.Primary,
         enabled = enabled,
         loading = loading,
         leadingIcon = Icons.Rounded.AutoAwesome

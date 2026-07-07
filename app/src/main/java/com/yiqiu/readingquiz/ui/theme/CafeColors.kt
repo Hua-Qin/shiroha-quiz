@@ -4,10 +4,13 @@ import androidx.compose.ui.graphics.Color
 
 /**
  * cafe-ui 色板（caffe-ui §1 color tokens）。
- * 主色：咖啡棕 #5D4432；点缀色：清新绿 #16A34A；底色：暖白 #F9F7F5。
+ * 主色：咖啡棕 #5D4432；点缀色：焦糖棕 #A87C5F；底色：暖白 #F9F7F5。
  *
  * 全应用唯一颜色真源。任何 UI 组件必须只引用本 object 的字段，
  * 禁止硬编码 Color(0xFF...) 或 "#RRGGBB"。
+ *
+ * 设计约束：不使用任何绿色（包括 #16A34A），避免与品牌识别冲突。
+ * 第二个点缀色（Accent2 = 焦糖棕）与主色同色系，确保整套调色板保持咖啡馆暖色调。
  */
 object CafeColors {
     // 基础色
@@ -16,7 +19,7 @@ object CafeColors {
     val Fg: Color = Color(0xFF0A0A0A)        // 主前景文字
     val Accent: Color = Color(0xFF5D4432)    // #5D4432 咖啡棕
     val AccentFg: Color = Color(0xFFFFFFFF)  // accent 上的文字
-    val Accent2: Color = Color(0xFF16A34A)   // #16A34A 清新绿
+    val Accent2: Color = Color(0xFFA87C5F)   // #A87C5F 焦糖棕（替代原 #16A34A 绿色）
     val Accent2Fg: Color = Color(0xFFFFFFFF) // accent2 上的文字
     val Muted: Color = Color(0xFF666666)     // 次要文字
     val Border: Color = Color(0xFFE6E6E6)    // 细边
@@ -30,7 +33,7 @@ object CafeColors {
     val PaperEditor: Color = Color(0xFFFFFBEF)   // 编辑区略浅
 
     // 答题判题反馈用色（不依赖颜色之外的可达性）
-    val Correct: Color = Accent2              // 答对 = 绿
+    val Correct: Color = Accent2              // 答对 = 焦糖棕（替代原绿色）
     val Wrong: Color = Color(0xFFB91C1C)      // 答错 = 红
     val Neutral: Color = Color(0xFF94A3B8)    // 未作答 = 灰
 }

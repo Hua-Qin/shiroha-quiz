@@ -38,6 +38,108 @@ object ReadingAiClient {
      */
     class AiHttpException(val code: Int, override val message: String) : IOException(message)
 
+    /**
+     * 重试策略：仅对可恢复错误（timeout / connect / DNS / 5xx / 429）做指数退避重试。
+     * - 默认最多重试 2 次（共 3 次调用）
+     * - 起始退避 800ms，每次 ×2，封顶 4s
+     * - 鉴权失败（401/403） / 资源不存在（404） / 客户端错误（其他 4xx）直接失败，不重试
+     */
+    private const val MAX_RETRIES = 2
+    private const val INITIAL_BACKOFF_MS = 800L
+    private const val MAX_BACKOFF_MS = 4_000L
+
+    private fun backoffDelay(attempt: Int): Long =
+        (INITIAL_BACKOFF_MS * (1L shl attempt)).coerceAtMost(MAX_BACKOFF_MS)
+
+    /**
+     * 判断异常是否值得重试：网络抖动 / 超时 / 5xx / 429 都视为可恢复。
+     */
+    private fun isRetryable(e: Throwable): Boolean = when (e) {
+        is AiHttpException -> e.code == 429 || e.code in 500..599
+        is java.net.SocketTimeoutException -> true
+        is java.net.ConnectException -> true
+        is java.net.UnknownHostException -> true
+        is java.net.SocketException -> true   // connection reset / aborted
+        is IOException -> true                // 其他 IO 错误（如 SSL、网络断开）也尝试
+        else -> false
+    }
+
+    /**
+     * 用闭包形式对单次网络请求做重试包装。返回最后一次的结果（成功或失败）。
+     * - 调用方拿到的 AiResult 与无重试版本一致
+     * - 每次重试前 sleep（指数退避）
+     * - 重试过程中也尊重 suspend 语义（在调用方协程线程上 sleep）
+     */
+    private fun <T> withRetry(
+        logTag: String,
+        block: () -> AiResult<T>
+    ): AiResult<T> {
+        var lastFailure: AiResult.Failure? = null
+        for (attempt in 0..MAX_RETRIES) {
+            try {
+                val r = block()
+                if (r is AiResult.Success) {
+                    if (attempt > 0) {
+                        Log.i(TAG, "$logTag retry SUCCESS after $attempt retries")
+                    }
+                    return r
+                } else {
+                    lastFailure = r as AiResult.Failure
+                    // 解析类错误（parse / config）直接放弃，不重试
+                    if (r.category == "parse" || r.category == "config") {
+                        return r
+                    }
+                    // 其他失败不视为可重试对象
+                    // （具体网络异常分类在 catch 块里处理）
+                }
+            } catch (e: AiHttpException) {
+                if (!isRetryable(e)) {
+                    Log.w(TAG, "$logTag non-retryable HTTP ${e.code}: ${e.message}")
+                    return AiResult.Failure(
+                        category = "http",
+                        message = "HTTP ${e.code}${httpHint(e.code)}：${e.message}"
+                    )
+                }
+                lastFailure = AiResult.Failure(
+                    category = "http",
+                    message = "HTTP ${e.code}${httpHint(e.code)}：${e.message}"
+                )
+            } catch (e: Throwable) {
+                if (!isRetryable(e)) {
+                    Log.w(TAG, "$logTag non-retryable exception: ${e.message}", e)
+                    return AiResult.Failure(
+                        category = "exception",
+                        message = "${e.javaClass.simpleName}: ${e.message ?: "未知错误"}"
+                    )
+                }
+                lastFailure = AiResult.Failure(
+                    category = "exception",
+                    message = "${e.javaClass.simpleName}: ${e.message ?: "未知错误"}"
+                )
+            }
+            // 是否还有下一次重试
+            if (attempt < MAX_RETRIES) {
+                val delay = backoffDelay(attempt)
+                Log.w(TAG, "$logTag retry attempt=${attempt + 1}/$MAX_RETRIES in ${delay}ms")
+                try {
+                    Thread.sleep(delay)
+                } catch (_: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                    return lastFailure ?: AiResult.Failure("exception", "重试被中断")
+                }
+            }
+        }
+        return lastFailure ?: AiResult.Failure("exception", "未知错误")
+    }
+
+    private fun httpHint(code: Int): String = when (code) {
+        401, 403 -> "（API Key 无效或权限不足）"
+        404 -> "（endpoint 不存在，请检查 Base URL）"
+        429 -> "（请求频率超限）"
+        in 500..599 -> "（服务端错误）"
+        else -> ""
+    }
+
     fun testConnection(config: AiConfig): AiResult<String> {
         Log.d(TAG, "testConnection: baseUrl=${config.apiBaseUrl}, model=${config.modelName}")
         val err = validateConfigOrError(config)
@@ -46,37 +148,31 @@ object ReadingAiClient {
             ErrorLogStore.log(TAG, "testConnection 配置无效：$err", "W")
             return AiResult.Failure("config", err)
         }
-        val content = try {
-            requestChatCompletion(
-                config = config,
-                systemPrompt = AiPrompts.TEST_CONNECTION_SYSTEM_PROMPT,
-                userPayload = "请只回复 JSON：{\"ok\":true}",
-                maxTokens = 64
-            )
-        } catch (e: AiHttpException) {
-            Log.w(TAG, "testConnection HTTP ${e.code}: ${e.message}")
-            ErrorLogStore.log(TAG, "testConnection HTTP ${e.code}：${e.message}", "E", e)
-            val hint = when (e.code) {
-                401, 403 -> "（API Key 无效或权限不足）"
-                404 -> "（endpoint 不存在，请检查 Base URL）"
-                429 -> "（请求频率超限）"
-                in 500..599 -> "（服务端错误）"
-                else -> ""
+        return withRetry("testConnection") {
+            val content = try {
+                requestChatCompletion(
+                    config = config,
+                    systemPrompt = AiPrompts.TEST_CONNECTION_SYSTEM_PROMPT,
+                    userPayload = "请只回复 JSON：{\"ok\":true}",
+                    maxTokens = 64
+                )
+            } catch (e: Throwable) {
+                // 统一抛给 withRetry 做重试判断
+                Log.w(TAG, "testConnection throwable: ${e.message}", e)
+                ErrorLogStore.log(TAG, "testConnection 网络异常：${e.message}", "E", e)
+                throw e
             }
-            return AiResult.Failure("http", "HTTP ${e.code}${hint}：${e.message}")
-        } catch (e: Throwable) {
-            Log.w(TAG, "testConnection FAILED: ${e.message}", e)
-            ErrorLogStore.log(TAG, "testConnection 网络异常：${e.message}", "E", e)
-            return AiResult.Failure("exception", e.message ?: "未知错误")
-        }
-        // 关键修复：content == null 意味着请求失败（网络错误/鉴权失败/timeout），必须返回 Failure 而非 Success
-        return if (content.isNullOrBlank()) {
-            Log.w(TAG, "testConnection FAILED: null/blank content")
-            ErrorLogStore.log(TAG, "testConnection 失败：请求未返回内容（请检查 API Key 与网络）", "E")
-            AiResult.Failure("network", "请求失败：无法连接到 ${config.apiBaseUrl}，请检查 API Key 与网络")
-        } else {
-            Log.i(TAG, "testConnection SUCCESS: ${content.take(40)}")
-            AiResult.Success("连接成功：${content.take(40)}")
+            if (content.isNullOrBlank()) {
+                Log.w(TAG, "testConnection FAILED: null/blank content")
+                ErrorLogStore.log(TAG, "testConnection 失败：请求未返回内容（请检查 API Key 与网络）", "E")
+                AiResult.Failure(
+                    "network",
+                    "请求失败：无法连接到 ${config.apiBaseUrl}，请检查 API Key 与网络"
+                )
+            } else {
+                Log.i(TAG, "testConnection SUCCESS: ${content.take(40)}")
+                AiResult.Success("连接成功：${content.take(40)}")
+            }
         }
     }
 
@@ -105,22 +201,17 @@ object ReadingAiClient {
         }
         Log.d(TAG, "fetchModels: endpoint=$endpoint")
         val timeoutMs = config.timeoutSeconds.coerceIn(15, 180) * 1000
-        val body = try {
-            getRaw(endpoint, config.apiKey, timeoutMs)
-        } catch (e: AiHttpException) {
-            Log.w(TAG, "fetchModels HTTP ${e.code}: ${e.message}")
-            ErrorLogStore.log(TAG, "fetchModels HTTP ${e.code}：${e.message}", "E", e)
-            val hint = when (e.code) {
-                401, 403 -> "（API Key 无效或权限不足）"
-                404 -> "（endpoint 不存在，请检查 Base URL）"
-                else -> ""
+        val bodyResult = withRetry("fetchModels") {
+            try {
+                AiResult.Success(getRaw(endpoint, config.apiKey, timeoutMs))
+            } catch (e: Throwable) {
+                Log.w(TAG, "fetchModels network error: ${e.message}", e)
+                ErrorLogStore.log(TAG, "fetchModels 网络异常：${e.message}", "E", e)
+                throw e
             }
-            return AiResult.Failure("http", "HTTP ${e.code}${hint}：${e.message}")
-        } catch (e: Throwable) {
-            Log.w(TAG, "fetchModels network error: ${e.message}", e)
-            ErrorLogStore.log(TAG, "fetchModels 网络异常：${e.message}", "E", e)
-            return AiResult.Failure("exception", "${e.javaClass.simpleName}: ${e.message ?: "未知错误"}")
         }
+        if (bodyResult is AiResult.Failure) return bodyResult
+        val body = (bodyResult as AiResult.Success).value
         return try {
             val obj = JSONObject(body)
             val arr = obj.optJSONArray("data")
@@ -197,32 +288,32 @@ object ReadingAiClient {
             return AiResult.Failure("config", err)
         }
         val userPayload = buildArticlePayload(article, questionCount)
-        val content = try {
-            requestChatCompletion(
-                config = config,
-                systemPrompt = systemPrompt,
-                userPayload = userPayload
-            )
-        } catch (e: AiHttpException) {
-            Log.w(TAG, "$logTag HTTP ${e.code}: ${e.message}")
-            ErrorLogStore.log(TAG, "$logTag HTTP ${e.code}：${e.message}", "E", e)
-            val hint = when (e.code) {
-                401, 403 -> "（API Key 无效或权限不足）"
-                429 -> "（请求频率超限）"
-                else -> ""
+        val content = withRetry(logTag) {
+            try {
+                val c = requestChatCompletion(
+                    config = config,
+                    systemPrompt = systemPrompt,
+                    userPayload = userPayload
+                )
+                if (c == null) {
+                    AiResult.Failure("parse", "AI 返回了空内容，请重试或更换模型")
+                } else {
+                    AiResult.Success(c)
+                }
+            } catch (e: Throwable) {
+                Log.w(TAG, "$logTag FAILED: ${e.message}", e)
+                ErrorLogStore.log(TAG, "$logTag 网络异常：${e.message}", "E", e)
+                throw e
             }
-            return AiResult.Failure("http", "HTTP ${e.code}${hint}：${e.message}")
-        } catch (e: Throwable) {
-            Log.w(TAG, "$logTag FAILED: ${e.message}", e)
-            ErrorLogStore.log(TAG, "$logTag 网络异常：${e.message}", "E", e)
-            return AiResult.Failure("exception", "${e.javaClass.simpleName}: ${e.message ?: "未知错误"}")
         }
-        if (content == null) {
+        if (content is AiResult.Failure) return content
+        val contentStr = (content as AiResult.Success).value
+        if (contentStr.isBlank()) {
             Log.w(TAG, "$logTag: null content (empty choices)")
             ErrorLogStore.log(TAG, "$logTag：AI 返回空内容", "W")
             return AiResult.Failure("parse", "AI 返回了空内容，请重试或更换模型")
         }
-        val result = parseQuestions(content)
+        val result = parseQuestions(contentStr)
         Log.i(TAG, "$logTag result: ${(result as? AiResult.Success)?.value?.size ?: "failure ${(result as AiResult.Failure).message}"}")
         return result
     }
@@ -341,6 +432,14 @@ object ReadingAiClient {
             }
             Log.d(TAG, "POST $endpoint: HTTP $code, elapsed=${elapsed}ms")
             return extractContent(JSONObject(body))
+        } catch (e: java.net.SocketTimeoutException) {
+            val elapsed = System.currentTimeMillis() - start
+            // 区分连接超时和读取超时：连接阶段几乎无耗时；其余视为读取超时
+            val phase = if (elapsed < timeoutMs * 0.9) "连接" else "等待响应"
+            Log.w(TAG, "POST $endpoint TIMEOUT(${phase}): ${e.message}, elapsed=${elapsed}ms")
+            throw java.net.SocketTimeoutException(
+                "请求${phase}超时（已等待 ${elapsed}ms）：${e.message ?: "请检查网络或调高超时秒数"}"
+            )
         } finally {
             conn.disconnect()
         }

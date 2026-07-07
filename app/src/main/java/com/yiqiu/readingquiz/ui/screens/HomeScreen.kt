@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoStories
 import androidx.compose.material.icons.rounded.Bookmark
+import androidx.compose.material.icons.rounded.EditNote
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,19 +46,18 @@ import com.yiqiu.readingquiz.ui.theme.CafeType
  * 首页（cafe-ui 风格）。
  *
  * 布局：
- * 1. CafeTopBar（showBrandLogo + AI 设置入口）
+ * 1. CafeTopBar（showBrandLogo + AI 设置入口 + 笔记入口）
  * 2. LazyColumn 滚动主区：
  *    - 欢迎 Feature Card
  *    - 3 列 KPI Row
  *    - 文章列表（每行 CafeListRow + Badge 进度）
  *    - 底部 CTA Banner（导入文章 + AI 设置）
- *
- * 函数签名 `HomeScreen(onOpenArticle, onOpenAiSettings)` 必须保持不变。
  */
 @Composable
 fun HomeScreen(
     onOpenArticle: (String) -> Unit,
-    onOpenAiSettings: () -> Unit
+    onOpenAiSettings: () -> Unit,
+    onOpenNotes: () -> Unit
 ) {
     val articles = ReadingRepository.articles
     Log.d("Nav", "home: articles=${articles.size}")
@@ -73,6 +73,13 @@ fun HomeScreen(
             subtitle = "${articles.size} 篇文章",
             showBrandLogo = true,
             actions = {
+                IconButton(onClick = onOpenNotes) {
+                    Icon(
+                        imageVector = Icons.Rounded.EditNote,
+                        contentDescription = "我的笔记",
+                        tint = CafeColors.Fg
+                    )
+                }
                 IconButton(onClick = onOpenAiSettings) {
                     Icon(
                         imageVector = Icons.Rounded.Tune,

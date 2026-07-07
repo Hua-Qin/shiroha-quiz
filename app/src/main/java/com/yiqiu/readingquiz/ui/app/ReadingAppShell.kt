@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import com.yiqiu.readingquiz.ui.screens.AiSettingsScreen
 import com.yiqiu.readingquiz.ui.screens.ChapterOutlineScreen
 import com.yiqiu.readingquiz.ui.screens.HomeScreen
+import com.yiqiu.readingquiz.ui.screens.NotesScreen
 import com.yiqiu.readingquiz.ui.screens.QuestionBankScreen
 import com.yiqiu.readingquiz.ui.screens.QuestionEditorScreen
 import com.yiqiu.readingquiz.ui.screens.QuizScreen
@@ -31,6 +32,7 @@ sealed class Route {
     data class Quiz(val articleId: String, val sectionId: String? = null) : Route()
     data class Score(val articleId: String) : Route()
     data object AiSettings : Route()
+    data object Notes : Route()
     data class ChapterOutline(val articleId: String) : Route()
     data class QuestionBank(val articleId: String) : Route()
     data class QuestionEditor(val articleId: String, val questionId: String) : Route()
@@ -61,7 +63,8 @@ fun ReadingAppShell() {
         when (route) {
             is Route.Home -> HomeScreen(
                 onOpenArticle = { id -> stack.add(Route.ChapterOutline(id)) },
-                onOpenAiSettings = { stack.add(Route.AiSettings) }
+                onOpenAiSettings = { stack.add(Route.AiSettings) },
+                onOpenNotes = { stack.add(Route.Notes) }
             )
             is Route.ChapterOutline -> ChapterOutlineScreen(
                 articleId = route.articleId,
@@ -103,6 +106,10 @@ fun ReadingAppShell() {
             )
             is Route.AiSettings -> AiSettingsScreen(
                 onBack = { stack.removeAt(stack.lastIndex) }
+            )
+            is Route.Notes -> NotesScreen(
+                onBack = { stack.removeAt(stack.lastIndex) },
+                onOpenArticle = { id -> stack.add(Route.ChapterOutline(id)) }
             )
         }
     }
