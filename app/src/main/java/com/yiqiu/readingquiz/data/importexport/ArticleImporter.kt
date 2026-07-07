@@ -56,6 +56,8 @@ object ArticleImporter {
         val stack = ArrayDeque<Pair<Int, MutableList<ArticleBlock>>>()
         stack.addLast(1 to topLevel)
         val paragraphBuf = StringBuilder()
+        // 章节计数器：为每个 Section 生成稳定 ID（S#01, S#02, ...）
+        val sectionCounter = intArrayOf(1)
         fun flushParagraph() {
             if (paragraphBuf.isNotBlank()) {
                 val text = paragraphBuf.toString().trim()
@@ -77,10 +79,17 @@ object ArticleImporter {
                     // 弹栈直到栈顶 level < level
                     while (stack.size > 1 && stack.last().first >= level) stack.removeLast()
                     val children = mutableListOf<ArticleBlock>()
-                    val section = ArticleBlock.Section(title = t, level = level, children = children)
+                    val sectionId = "S#${"%02d".format(sectionCounter[0])}"
+                    sectionCounter[0]++
+                    val section = ArticleBlock.Section(
+                        title = t,
+                        level = level,
+                        children = children,
+                        id = sectionId
+                    )
                     stack.last().second.add(section)
                     stack.addLast(level to children)
-                    Log.d(TAG, "section L$level: '$t'")
+                    Log.d(TAG, "section L$level: '$t', id=$sectionId")
                 }
                 line.matches(Regex("^!\\[([^\\]]*)]\\(([^)]+)\\)\\s*$")) -> {
                     flushParagraph()
@@ -148,7 +157,8 @@ object ArticleImporter {
                     ArticleBlock.Section(
                         title = b.optString("title", ""),
                         level = b.optInt("level", 1),
-                        children = buildBlocks(b)  // 递归解析 children
+                        children = buildBlocks(b),  // 递归解析 children
+                        id = b.optString("id", "")   // 兼容旧 JSON 无 id
                     )
                 )
                 else -> {

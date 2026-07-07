@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import com.yiqiu.readingquiz.ui.screens.AiSettingsScreen
+import com.yiqiu.readingquiz.ui.screens.ChapterOutlineScreen
 import com.yiqiu.readingquiz.ui.screens.HomeScreen
 import com.yiqiu.readingquiz.ui.screens.QuizScreen
 import com.yiqiu.readingquiz.ui.screens.ReadingScreen
@@ -17,14 +18,15 @@ import com.yiqiu.readingquiz.ui.screens.ScoreScreen
 
 /**
  * 路由密封类。
- * ArticleId 用于携带当前文章 id。
+ * ArticleId 用于携带当前文章 id；sectionId 用于章节锚点跳转（可选）。
  */
 sealed class Route {
     data object Home : Route()
-    data class Reading(val articleId: String) : Route()
-    data class Quiz(val articleId: String) : Route()
+    data class Reading(val articleId: String, val initialSectionId: String? = null) : Route()
+    data class Quiz(val articleId: String, val sectionId: String? = null) : Route()
     data class Score(val articleId: String) : Route()
     data object AiSettings : Route()
+    data class ChapterOutline(val articleId: String) : Route()
 }
 
 @Composable
@@ -45,18 +47,29 @@ fun ReadingAppShell() {
     ) { route ->
         when (route) {
             is Route.Home -> HomeScreen(
-                onOpenArticle = { id -> stack.add(Route.Reading(id)) },
+                onOpenArticle = { id -> stack.add(Route.ChapterOutline(id)) },
                 onOpenAiSettings = { stack.add(Route.AiSettings) }
+            )
+            is Route.ChapterOutline -> ChapterOutlineScreen(
+                articleId = route.articleId,
+                onBack = { stack.removeAt(stack.lastIndex) },
+                onSelectSection = { sectionId ->
+                    // 选章节后：先把 Reading 入栈（含 initialSectionId），再把 Quiz 入栈（含 sectionId）
+                    // 这样用户进阅读页时自动滚动到该章节，进答题时只答该章节题目
+                    stack.add(Route.Reading(route.articleId, sectionId))
+                }
             )
             is Route.Reading -> ReadingScreen(
                 articleId = route.articleId,
                 onBack = { stack.removeAt(stack.lastIndex) },
-                onEnterQuiz = { id -> stack.add(Route.Quiz(id)) }
+                onEnterQuiz = { id -> stack.add(Route.Quiz(id, route.initialSectionId)) },
+                initialSectionId = route.initialSectionId
             )
             is Route.Quiz -> QuizScreen(
                 articleId = route.articleId,
                 onBack = { stack.removeAt(stack.lastIndex) },
-                onViewScore = { id -> stack.add(Route.Score(id)) }
+                onViewScore = { id -> stack.add(Route.Score(id)) },
+                sectionId = route.sectionId
             )
             is Route.Score -> ScoreScreen(
                 articleId = route.articleId,

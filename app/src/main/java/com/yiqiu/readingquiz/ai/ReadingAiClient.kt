@@ -414,7 +414,10 @@ object ReadingAiClient {
             answer = answer,
             blankAnswers = blanks,
             analysis = o.optString("analysis", ""),
-            category = o.optString("category", "")
+            category = o.optString("category", ""),
+            // 章节绑定：AI 必须返回 sectionId；缺省时为 null（旧数据兼容）
+            sectionId = if (o.isNull("sectionId")) null else o.optString("sectionId", "").ifBlank { null },
+            anchorText = o.optString("anchorText", "")
         )
     }
 
@@ -443,8 +446,40 @@ object ReadingAiClient {
         return sb.toString().trim()
     }
 
+    /**
+     * 把文章所有章节展平为列表（用于 AI payload + UI 章节大纲）。
+     * 每条包含 sectionId、level、title、纯文本内容。
+     */
+    private fun flattenAllSections(blocks: List<com.yiqiu.readingquiz.data.model.ArticleBlock>, counter: IntArray = intArrayOf(1)): JSONArray {
+        val arr = JSONArray()
+        for (block in blocks) {
+            when (block) {
+                is com.yiqiu.readingquiz.data.model.ArticleBlock.Section -> {
+                    val sid = "S#${"%02d".format(counter[0])}"
+                    counter[0]++
+                    val childSections = JSONArray()
+                    block.children.forEach { child ->
+                        if (child is com.yiqiu.readingquiz.data.model.ArticleBlock.Section) {
+                            // 递归子章节
+                            val sub = flattenAllSections(listOf(child), counter)
+                            for (i in 0 until sub.length()) childSections.put(sub.getJSONObject(i))
+                        }
+                    }
+                    arr.put(JSONObject()
+                        .put("sectionId", sid)
+                        .put("level", block.level)
+                        .put("title", block.title)
+                        .put("content", flattenSection(block))
+                        .put("children", childSections))
+                }
+            }
+        }
+        return arr
+    }
+
     private fun buildArticlePayload(article: Article, questionCount: Int): String {
-        // Task 3：扁平化所有 block（Section 递归展平为子块的纯文本拼接）
+        // 按章节切片 payload：让 AI 能把每道题归属到具体章节
+        val sectionsArr = flattenAllSections(article.blocks)
         val plainText = article.blocks.joinToString("\n\n") { block ->
             when (block) {
                 is com.yiqiu.readingquiz.data.model.ArticleBlock.Paragraph -> block.text
@@ -462,6 +497,7 @@ object ReadingAiClient {
                 .put("source", article.source)
                 .put("category", article.category)
                 .put("content", plainText)
+                .put("sections", sectionsArr)
             )
             .toString()
     }

@@ -65,7 +65,10 @@ object BackupExporter {
                             .put("question", q.question)
                             .put("answer", JSONArray(q.answer))
                             .put("blankAnswers", JSONArray(q.blankAnswers))
-                            .put("explanation", q.explanation))
+                            .put("explanation", q.explanation)
+                            // 新增字段：章节绑定（如为 null 则 JSON 中省略，反序列化时兼容）
+                            .put("sectionId", q.sectionId ?: JSONObject.NULL)
+                            .put("anchorText", q.anchorText))
                     }
                     put(articleId, qArr)
                 }

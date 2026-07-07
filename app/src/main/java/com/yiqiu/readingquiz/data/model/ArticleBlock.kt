@@ -12,7 +12,9 @@ sealed class ArticleBlock {
     data class Section(
         val title: String,
         val level: Int,
-        val children: List<ArticleBlock>
+        val children: List<ArticleBlock>,
+        // 稳定 ID：用于题目绑定、章节大纲跳转、阅读页锚点。默认空字符串（兼容旧导入数据）
+        val id: String = ""
     ) : ArticleBlock()
 
     data class Paragraph(

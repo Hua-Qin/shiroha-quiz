@@ -11,7 +11,7 @@ object AiPrompts {
 
 输出要求（严格遵守）：
 1. 仅返回单个 JSON 对象，不要任何解释、代码围栏或前后多余文本。
-2. JSON 结构：{"questions":[{"type":"SINGLE|MULTIPLE|JUDGE|BLANK|SHORT","question":"...","options":[{"key":"A","text":"..."}],"answer":["A"],"blankAnswers":[],"analysis":"...","category":"..."}]}
+2. JSON 结构：{"questions":[{"type":"SINGLE|MULTIPLE|JUDGE|BLANK|SHORT","question":"...","options":[{"key":"A","text":"..."}],"answer":["A"],"blankAnswers":[],"analysis":"...","category":"...","sectionId":"S#01","anchorText":"该题对应的原文片段（前 80 字符）"}]}
 3. type 必须是枚举之一：SINGLE / MULTIPLE / JUDGE / BLANK / SHORT。
 4. 5 道题必须覆盖：至少 1 SINGLE、1 MULTIPLE、1 JUDGE、1 BLANK、1 SHORT。
 5. 答案必须严格基于文章内容，禁止编造事实或引用文章外的信息。
@@ -20,6 +20,8 @@ object AiPrompts {
 8. SHORT 题 answer 提供给阅卷者参考；options 留空数组。
 9. analysis 用一段话解释本题为什么这样作答，可引用文章原句。
 10. 保留 LaTeX 公式包裹在 $...$。
+11. **sectionId 必须填写**：从输入 JSON 的 sections 数组中选取题目所对应的章节 ID（如 "S#01"），不可省略。若无法归属，填入首个章节 ID。
+12. **anchorText 必须填写**：题目对应的原文片段（≤80 字符），用于去重和上下文展示。
     """
 
     const val TEST_CONNECTION_SYSTEM_PROMPT: String =

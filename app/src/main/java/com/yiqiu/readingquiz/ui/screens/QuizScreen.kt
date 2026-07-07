@@ -18,6 +18,7 @@ import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.RadioButtonUnchecked
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -38,6 +39,9 @@ import com.yiqiu.readingquiz.data.model.QuestionType
 import com.yiqiu.readingquiz.data.model.UserAnswer
 import com.yiqiu.readingquiz.ui.components.CafePrimaryButton
 import com.yiqiu.readingquiz.ui.components.CafeProgressDots
+import com.yiqiu.readingquiz.ui.components.NoteActionMenu
+import com.yiqiu.readingquiz.ui.components.NotePadWindow
+import com.yiqiu.readingquiz.ui.components.EditArticleDialog
 import com.yiqiu.readingquiz.ui.theme.CafeColors
 import com.yiqiu.readingquiz.ui.theme.CafeSpacing
 import com.yiqiu.readingquiz.ui.theme.CafeType
@@ -47,9 +51,14 @@ import kotlinx.coroutines.delay
 fun QuizScreen(
     articleId: String,
     onBack: () -> Unit,
-    onViewScore: (String) -> Unit
+    onViewScore: (String) -> Unit,
+    sectionId: String? = null
 ) {
-    val session = remember(articleId) { ReadingRepository.sessionFor(articleId) }
+    // 章节过滤：当传入 sectionId 时，仅显示该 sectionId 下的题目
+    val session = remember(articleId, sectionId) {
+        if (sectionId != null) ReadingRepository.sessionForArticleAndSection(articleId, sectionId)
+        else ReadingRepository.sessionFor(articleId)
+    }
     if (session == null) {
         Column(modifier = Modifier.fillMaxSize().padding(CafeSpacing.ContainerPad)) {
             Text(text = "未找到答题会话，请返回文章后点击「进入答题」",
@@ -68,6 +77,10 @@ fun QuizScreen(
     var judged by remember { mutableStateOf(false) }
     var correct by remember { mutableStateOf(false) }
     var marked by remember { mutableStateOf(session.markedForReview.contains(session.questions[currentIndex].id)) }
+    // 笔记操作三态：菜单 → 文档编辑 / 浮窗
+    var showActionMenu by remember { mutableStateOf(false) }
+    var showEditArticle by remember { mutableStateOf(false) }
+    var showNotePad by remember { mutableStateOf(false) }
 
     LaunchedEffect(session.id) {
         while (true) {
@@ -108,11 +121,24 @@ fun QuizScreen(
                 )
             }
             Spacer(modifier = Modifier.size(8.dp))
-            Text(
-                text = "第 ${currentIndex + 1} / ${session.questions.size} 题",
-                style = CafeType.Heading,
-                color = CafeColors.Fg
-            )
+            Column {
+                Text(
+                    text = "第 ${currentIndex + 1} / ${session.questions.size} 题",
+                    style = CafeType.Heading,
+                    color = CafeColors.Fg
+                )
+                if (sectionId != null) {
+                    // 章节答题模式：附加"该章节已答 N/M"
+                    val answeredCount = session.answers.count { a ->
+                        session.questions.any { it.id == a.questionId }
+                    }
+                    Text(
+                        text = "该章节已答 $answeredCount / ${session.questions.size}",
+                        style = CafeType.Caption,
+                        color = CafeColors.Accent2
+                    )
+                }
+            }
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = formatDuration(nowMs - session.startedAt),
@@ -243,6 +269,19 @@ fun QuizScreen(
                     tint = if (marked) CafeColors.Accent2 else CafeColors.Muted
                 )
             }
+            // 答题页笔记入口（点击 Edit 图标弹出选择菜单）
+            IconButton(
+                onClick = { showActionMenu = true },
+                modifier = Modifier
+                    .background(Color.Transparent)
+                    .size(36.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Edit,
+                    contentDescription = "记笔记",
+                    tint = CafeColors.Muted
+                )
+            }
             Spacer(modifier = Modifier.weight(1f))
             val btnText = when {
                 !judged -> "提交答案"
@@ -275,8 +314,20 @@ fun QuizScreen(
                         ReadingRepository.updateAnswer(session.id, ans)
                         judged = true
                         correct = ans.correct
+                        // 累计错题到章节进度
+                        if (!ans.correct) {
+                            val targetSectionId = sectionId ?: question.sectionId
+                            if (targetSectionId != null) {
+                                ReadingRepository.incrementSectionWrong(articleId, targetSectionId)
+                            }
+                        }
                         if (isLast) {
                             ReadingRepository.completeSession(session.id, nowMs - session.startedAt)
+                            // 章节完成标记：当传入 sectionId 时，最后一题完成后标记该章节已完成
+                            val targetSectionId = sectionId ?: question.sectionId
+                            if (targetSectionId != null) {
+                                ReadingRepository.markSectionCompleted(articleId, targetSectionId)
+                            }
                         }
                     } else {
                         if (isLast) {
@@ -295,6 +346,31 @@ fun QuizScreen(
                 }
             )
         }
+    }
+
+    // 笔记操作菜单
+    if (showActionMenu) {
+        NoteActionMenu(
+            onEditArticle = { showEditArticle = true },
+            onCreateNote = { showNotePad = true },
+            onDismiss = { showActionMenu = false }
+        )
+    }
+
+    // 直接编辑文档（占位对话框）
+    if (showEditArticle) {
+        EditArticleDialog(
+            articleTitle = session.articleId,
+            onDismiss = { showEditArticle = false }
+        )
+    }
+
+    // 便笺浮窗
+    if (showNotePad) {
+        NotePadWindow(
+            articleId = session.articleId,
+            onDismiss = { showNotePad = false }
+        )
     }
 }
 

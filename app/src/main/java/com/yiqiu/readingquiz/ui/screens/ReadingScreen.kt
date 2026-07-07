@@ -32,6 +32,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +54,9 @@ import com.yiqiu.readingquiz.data.model.ArticleBlock
 import com.yiqiu.readingquiz.data.model.ReadingNote
 import com.yiqiu.readingquiz.ui.components.CafeHighlightText
 import com.yiqiu.readingquiz.ui.components.CafePrimaryButton
+import com.yiqiu.readingquiz.ui.components.EditArticleDialog
+import com.yiqiu.readingquiz.ui.components.NoteActionMenu
+import com.yiqiu.readingquiz.ui.components.NotePadWindow
 import com.yiqiu.readingquiz.ui.theme.CafeColors
 import com.yiqiu.readingquiz.ui.theme.CafeSpacing
 import com.yiqiu.readingquiz.ui.theme.CafeType
@@ -70,10 +74,11 @@ import java.util.UUID
 fun ReadingScreen(
     articleId: String,
     onBack: () -> Unit,
-    onEnterQuiz: (String) -> Unit
+    onEnterQuiz: (String) -> Unit,
+    initialSectionId: String? = null
 ) {
     val article = remember(articleId) { ReadingRepository.getArticle(articleId) }
-    Log.d("Reading", "open: articleId=$articleId, found=${article != null}")
+    Log.d("Reading", "open: articleId=$articleId, section=$initialSectionId, found=${article != null}")
     if (article == null) {
         Column(modifier = Modifier.fillMaxSize().padding(CafeSpacing.ContainerPad)) {
             Text(text = "文章不存在", style = CafeType.Heading, color = CafeColors.Wrong)
@@ -86,7 +91,23 @@ fun ReadingScreen(
     val listState = rememberLazyListState()
     var isMarked by remember { mutableStateOf(article.favorite) }
     var immersive by remember { mutableStateOf(false) }
-    var showNoteDialog by remember { mutableStateOf(false) }
+    // 笔记操作三态：菜单 → 文档编辑 / 浮窗
+    var showActionMenu by remember { mutableStateOf(false) }
+    var showEditArticle by remember { mutableStateOf(false) }
+    var showNotePad by remember { mutableStateOf(false) }
+
+    // 章节锚点：进入时计算 sectionId → item index 映射，进入后 scrollToItem
+    val sectionIndexMap = remember(article.id, article.blocks) {
+        buildSectionIndexMap(article.blocks)
+    }
+    LaunchedEffect(initialSectionId, sectionIndexMap) {
+        if (initialSectionId != null && sectionIndexMap.containsKey(initialSectionId)) {
+            val idx = sectionIndexMap[initialSectionId] ?: return@LaunchedEffect
+            // 滚动到该章节 item（item 0 是文章标题，所以 idx 需要 +1）
+            listState.scrollToItem(idx + 1)
+            Log.d("Reading", "scrolled to section=$initialSectionId at index=$idx")
+        }
+    }
 
     val progress by remember {
         derivedStateOf {
@@ -115,6 +136,8 @@ fun ReadingScreen(
                 }
             )
             ProgressIndicator(percent = progress)
+            // 新增章节进度条（已学章节 X/Y）
+            SectionProgressBar(articleId = article.id)
         }
 
         LazyColumn(
@@ -140,7 +163,8 @@ fun ReadingScreen(
         BottomActionBar(
             immersive = immersive,
             articleId = article.id,
-            onEditClick = { showNoteDialog = true },
+            sectionId = initialSectionId,
+            onEditClick = { showActionMenu = true },
             onEnterQuiz = {
                 Log.d("Reading", "→ quiz")
                 onEnterQuiz(article.id)
@@ -152,10 +176,28 @@ fun ReadingScreen(
         )
     }
 
-    if (showNoteDialog) {
-        NoteDialog(
+    // 笔记操作菜单（点击 Edit 按钮后弹出，选择「直接编辑文档」或「新建笔记」）
+    if (showActionMenu) {
+        NoteActionMenu(
+            onEditArticle = { showEditArticle = true },
+            onCreateNote = { showNotePad = true },
+            onDismiss = { showActionMenu = false }
+        )
+    }
+
+    // 直接编辑文档（占位对话框）
+    if (showEditArticle) {
+        EditArticleDialog(
+            articleTitle = article.title,
+            onDismiss = { showEditArticle = false }
+        )
+    }
+
+    // 便笺浮窗（新建笔记）
+    if (showNotePad) {
+        NotePadWindow(
             articleId = article.id,
-            onDismiss = { showNoteDialog = false }
+            onDismiss = { showNotePad = false }
         )
     }
 }
@@ -234,6 +276,7 @@ private fun ProgressIndicator(percent: Int) {
 private fun BottomActionBar(
     immersive: Boolean,
     articleId: String,
+    sectionId: String?,
     onEditClick: () -> Unit,
     onEnterQuiz: () -> Unit,
     onToggleImmersive: () -> Unit
@@ -264,7 +307,7 @@ private fun BottomActionBar(
         }
         Spacer(modifier = Modifier.weight(1f))
         CafePrimaryButton(
-            text = "进入答题",
+            text = if (initialSectionId != null) "答本章节题" else "进入答题",
             onClick = onEnterQuiz
         )
     }
@@ -417,64 +460,91 @@ private fun ImagePreviewDialog(path: String, onDismiss: () -> Unit) {
 }
 
 /**
- * 笔记编辑弹窗：输入笔记并持久化到 ReadingRepository.notes。
+ * 构建 Section.id → LazyColumn item index 的映射。
+ * 顶层 item 是文章标题（index 0），其后按 renderBlocks 的 DFS 顺序排列。
+ * 仅统计 level > 0 的 Section 起始位置（SectionHeader 占据的 item）。
+ */
+private fun buildSectionIndexMap(blocks: List<ArticleBlock>): Map<String, Int> {
+    val map = mutableMapOf<String, Int>()
+    var itemIndex = 0
+    fun walk(list: List<ArticleBlock>) {
+        for (block in list) {
+            when (block) {
+                is ArticleBlock.Section -> {
+                    // SectionHeader 占用 1 个 item
+                    if (block.id.isNotBlank()) {
+                        map[block.id] = itemIndex
+                    }
+                    itemIndex++
+                    walk(block.children)
+                }
+                is ArticleBlock.Paragraph -> itemIndex++
+                is ArticleBlock.Image -> itemIndex++
+            }
+        }
+    }
+    walk(blocks)
+    return map
+}
+
+/**
+ * 章节进度条（已学章节 X/Y）。
+ * 订阅 ReadingRepository.sectionProgress 实现实时更新。
  */
 @Composable
-private fun NoteDialog(articleId: String, onDismiss: () -> Unit) {
-    val notes = remember { ReadingRepository.notesForArticle(articleId) }
-    var input by remember { mutableStateOf("") }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("记笔记") },
-        text = {
-            Column {
-                if (notes.isNotEmpty()) {
-                    notes.forEach { note ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = note.content,
-                                modifier = Modifier.weight(1f),
-                                style = CafeType.Body,
-                                color = CafeColors.Fg
-                            )
-                            IconButton(onClick = { ReadingRepository.deleteNote(note.id) }) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Close,
-                                    contentDescription = "删除笔记",
-                                    tint = CafeColors.Muted
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-                OutlinedTextField(
-                    value = input,
-                    onValueChange = { input = it },
-                    label = { Text("新笔记内容") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                if (input.isNotBlank()) {
-                    ReadingRepository.addNote(
-                        ReadingNote(
-                            id = UUID.randomUUID().toString(),
-                            articleId = articleId,
-                            content = input.trim(),
-                            anchorText = "",
-                            createdAt = System.currentTimeMillis()
-                        )
-                    )
-                }
-                onDismiss()
-            }) { Text("保存") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("取消") }
+private fun SectionProgressBar(articleId: String) {
+    val totalSections = remember(articleId) {
+        ReadingRepository.getArticle(articleId)?.let { countAllSections(it.blocks) } ?: 0
+    }
+    val completedCount = ReadingRepository.sectionProgress.values
+        .count { it.articleId == articleId && it.completed }
+        .coerceAtMost(totalSections.coerceAtLeast(1))
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = CafeSpacing.ContainerPad, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "已学章节 $completedCount / $totalSections",
+            style = CafeType.Caption,
+            color = CafeColors.Accent2
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(3.dp)
+                .background(CafeColors.Border)
+        ) {
+            val frac = if (totalSections > 0) completedCount.toFloat() / totalSections else 0f
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(fraction = frac.coerceIn(0f, 1f))
+                    .height(3.dp)
+                    .background(CafeColors.Accent2)
+            )
         }
-    )
+    }
+}
+
+/**
+ * 统计文章中所有 Section 的数量（含嵌套）。
+ */
+private fun countAllSections(blocks: List<ArticleBlock>): Int {
+    var count = 0
+    fun walk(list: List<ArticleBlock>) {
+        for (block in list) {
+            when (block) {
+                is ArticleBlock.Section -> {
+                    count++
+                    walk(block.children)
+                }
+                else -> { /* no-op */ }
+            }
+        }
+    }
+    walk(blocks)
+    return count
 }

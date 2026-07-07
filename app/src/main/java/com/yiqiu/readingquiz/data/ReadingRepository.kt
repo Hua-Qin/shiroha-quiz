@@ -11,6 +11,7 @@ import com.yiqiu.readingquiz.data.model.Question
 import com.yiqiu.readingquiz.data.model.QuestionType
 import com.yiqiu.readingquiz.data.model.QuizSession
 import com.yiqiu.readingquiz.data.model.ReadingNote
+import com.yiqiu.readingquiz.data.model.SectionProgress
 import com.yiqiu.readingquiz.data.model.UserAnswer
 import org.json.JSONArray
 import org.json.JSONObject
@@ -36,6 +37,12 @@ object ReadingRepository {
      * 文章 → 已生成题目缓存（用于持久化 + 跨重启复用）。
      */
     val questionsByArticle = mutableStateMapOf<String, List<Question>>()
+
+    /**
+     * 章节学习进度（key = "${articleId}#${sectionId}"）。
+     * Compose 通过 collectAsState 订阅实现实时更新。
+     */
+    val sectionProgress = mutableStateMapOf<String, SectionProgress>()
 
     fun init(context: Context) {
         if (::store.isInitialized) return
@@ -92,6 +99,82 @@ object ReadingRepository {
 
     fun notesForArticle(articleId: String): List<ReadingNote> =
         notes.filter { it.articleId == articleId }
+
+    // ----------------- 章节学习进度 -----------------
+
+    /**
+     * 拼装 sectionProgress 的 key（articleId#sectionId）。
+     * 暴露为公开函数供 UI 层复用，避免硬编码格式。
+     */
+    fun sectionProgressKey(articleId: String, sectionId: String): String =
+        "${articleId}#${sectionId}"
+
+    /**
+     * 获取指定文章的所有章节进度。
+     */
+    fun sectionProgressFor(articleId: String): List<SectionProgress> {
+        return sectionProgress.values.filter { it.articleId == articleId }
+    }
+
+    /**
+     * 获取单个章节的进度（不存在时返回默认值）。
+     */
+    fun progressOf(articleId: String, sectionId: String): SectionProgress {
+        val key = sectionProgressKey(articleId, sectionId)
+        return sectionProgress[key] ?: SectionProgress(
+            articleId = articleId,
+            sectionId = sectionId
+        )
+    }
+
+    /**
+     * 标记某章节已完成（题目全部答完时调用）。
+     */
+    fun markSectionCompleted(articleId: String, sectionId: String) {
+        val key = sectionProgressKey(articleId, sectionId)
+        val cur = sectionProgress[key]
+        val updated = SectionProgress(
+            articleId = articleId,
+            sectionId = sectionId,
+            completed = true,
+            wrongCount = cur?.wrongCount ?: 0,
+            unansweredCount = 0,
+            lastUpdated = System.currentTimeMillis()
+        )
+        sectionProgress[key] = updated
+        Log.i(TAG, "markSectionCompleted: $key")
+        saveSectionProgress()
+    }
+
+    /**
+     * 累计章节答错题数。
+     */
+    fun incrementSectionWrong(articleId: String, sectionId: String) {
+        val key = sectionProgressKey(articleId, sectionId)
+        val cur = sectionProgress[key]
+        val updated = (cur ?: SectionProgress(articleId, sectionId)).copy(
+            wrongCount = (cur?.wrongCount ?: 0) + 1,
+            lastUpdated = System.currentTimeMillis()
+        )
+        sectionProgress[key] = updated
+        Log.d(TAG, "incrementSectionWrong: $key → ${updated.wrongCount}")
+        saveSectionProgress()
+    }
+
+    /**
+     * 累计章节未答题数。
+     */
+    fun incrementSectionUnanswered(articleId: String, sectionId: String) {
+        val key = sectionProgressKey(articleId, sectionId)
+        val cur = sectionProgress[key]
+        val updated = (cur ?: SectionProgress(articleId, sectionId)).copy(
+            unansweredCount = (cur?.unansweredCount ?: 0) + 1,
+            lastUpdated = System.currentTimeMillis()
+        )
+        sectionProgress[key] = updated
+        Log.d(TAG, "incrementSectionUnanswered: $key → ${updated.unansweredCount}")
+        saveSectionProgress()
+    }
 
     // ----------------- 答题会话 -----------------
 
@@ -160,6 +243,22 @@ object ReadingRepository {
         sessions.firstOrNull { it.articleId == articleId && !it.completed }
             ?: sessions.firstOrNull { it.articleId == articleId }
 
+    /**
+     * 按章节获取答题会话（仅包含该 sectionId 下的题目）。
+     * - 若已存在该 articleId 的会话，按 sectionId 过滤 questions 后返回临时视图
+     * - 若不存在会话，返回 null（由 UI 引导用户先进入阅读页生成题目）
+     */
+    fun sessionForArticleAndSection(articleId: String, sectionId: String): QuizSession? {
+        val base = sessionFor(articleId) ?: return null
+        val filtered = base.questions.filter { it.sectionId == sectionId }
+        if (filtered.isEmpty()) return null
+        return base.copy(
+            questions = filtered,
+            answers = base.answers.filter { ans -> filtered.any { it.id == ans.questionId } },
+            markedForReview = base.markedForReview.filter { id -> filtered.any { it.id == id } }
+        )
+    }
+
     // ----------------- AI 配置 -----------------
 
     fun updateAiConfig(config: AiConfig) {
@@ -187,6 +286,7 @@ object ReadingRepository {
         loadSessions()
         loadAiConfig()
         loadQuestions()
+        loadSectionProgress()
     }
 
     private fun loadArticles() {
@@ -322,6 +422,48 @@ object ReadingRepository {
         store.edit().putString("questions_map_json", o.toString()).apply()
     }
 
+    /**
+     * 章节进度持久化：JSON map（key=articleId#sectionId）。
+     */
+    private fun loadSectionProgress() {
+        val raw = store.getString("section_progress_json", null) ?: return
+        runCatching {
+            val obj = JSONObject(raw)
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val key = keys.next()
+                val o = obj.optJSONObject(key) ?: continue
+                sectionProgress[key] = SectionProgress(
+                    articleId = o.optString("articleId", ""),
+                    sectionId = o.optString("sectionId", ""),
+                    completed = o.optBoolean("completed", false),
+                    wrongCount = o.optInt("wrongCount", 0),
+                    unansweredCount = o.optInt("unansweredCount", 0),
+                    lastUpdated = o.optLong("lastUpdated", 0L)
+                )
+            }
+            Log.d(TAG, "loadSectionProgress: ${sectionProgress.size} entries")
+        }.onFailure {
+            Log.w(TAG, "loadSectionProgress FAILED: ${it.message}", it)
+        }
+    }
+
+    private fun saveSectionProgress() {
+        if (!::store.isInitialized) return
+        val o = JSONObject()
+        val asMap: Map<String, SectionProgress> = sectionProgress
+        asMap.forEach { (key, p) ->
+            o.put(key, JSONObject()
+                .put("articleId", p.articleId)
+                .put("sectionId", p.sectionId)
+                .put("completed", p.completed)
+                .put("wrongCount", p.wrongCount)
+                .put("unansweredCount", p.unansweredCount)
+                .put("lastUpdated", p.lastUpdated))
+        }
+        store.edit().putString("section_progress_json", o.toString()).apply()
+    }
+
     // ----------------- JSON 互转 -----------------
 
     private fun articleToJson(article: Article): JSONObject {
@@ -373,6 +515,7 @@ object ReadingRepository {
                 .put("title", b.title)
                 .put("level", b.level)
                 .put("children", childrenArr)
+                .put("id", b.id)  // 持久化章节稳定 ID
         }
     }
 
@@ -421,7 +564,8 @@ object ReadingRepository {
                     com.yiqiu.readingquiz.data.model.ArticleBlock.Section(
                         title = b.optString("title", ""),
                         level = b.optInt("level", 1),
-                        children = children
+                        children = children,
+                        id = b.optString("id", "")  // 兼容旧 JSON 无 id 字段
                     )
                 )
             }
@@ -528,6 +672,8 @@ object ReadingRepository {
             .put("blankAnswers", JSONArray(q.blankAnswers))
             .put("analysis", q.analysis)
             .put("category", q.category)
+            .put("sectionId", q.sectionId ?: JSONObject.NULL)
+            .put("anchorText", q.anchorText)
     }
 
     private fun questionFromJson(o: JSONObject): Question {
@@ -551,7 +697,10 @@ object ReadingRepository {
             answer = o.optJSONArray("answer").toStringList(),
             blankAnswers = o.optJSONArray("blankAnswers").toStringList(),
             analysis = o.optString("analysis", ""),
-            category = o.optString("category", "")
+            category = o.optString("category", ""),
+            // 章节绑定：optString("sectionId") 遇 JSONObject.NULL 时返回 "null" 字符串；用 isNull 严格判断
+            sectionId = if (o.isNull("sectionId")) null else o.optString("sectionId", "").ifBlank { null },
+            anchorText = o.optString("anchorText", "")
         )
     }
 

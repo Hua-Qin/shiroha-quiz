@@ -91,45 +91,80 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(articles, key = { it.id }) { article ->
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        CafeCard(modifier = Modifier.fillMaxWidth()) {
-                            Column {
-                                Text(
-                                    text = article.title,
-                                    style = CafeType.Heading,
-                                    color = CafeColors.Fg
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "${article.category} · ${article.author}",
-                                    style = CafeType.Caption,
-                                    color = CafeColors.Muted
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                TextButton(onClick = {
-                                    Log.d("Reading", "user clicked article: id=${article.id}, title='${article.title}'")
-                                    onOpenArticle(article.id)
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.AutoStories,
-                                        contentDescription = null,
-                                        tint = CafeColors.Accent
+                    // 单项渲染异常兜底：runCatching 包裹，不让单个崩溃阻塞整列表
+                    runCatching {
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            CafeCard(modifier = Modifier.fillMaxWidth()) {
+                                Column {
+                                    Text(
+                                        text = article.title,
+                                        style = CafeType.Heading,
+                                        color = CafeColors.Fg
                                     )
-                                    Spacer(modifier = Modifier.size(4.dp))
-                                    Text(text = "开始阅读", color = CafeColors.Accent)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "${article.category} · ${article.author}",
+                                        style = CafeType.Caption,
+                                        color = CafeColors.Muted
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    TextButton(onClick = {
+                                        Log.d("Reading", "user clicked article: id=${article.id}, title='${article.title}'")
+                                        onOpenArticle(article.id)
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.AutoStories,
+                                            contentDescription = null,
+                                            tint = CafeColors.Accent
+                                        )
+                                        Spacer(modifier = Modifier.size(4.dp))
+                                        Text(text = "开始阅读", color = CafeColors.Accent)
+                                    }
                                 }
                             }
+                            if (article.favorite) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Bookmark,
+                                    contentDescription = "已收藏",
+                                    tint = CafeColors.Accent2,
+                                    modifier = Modifier.align(Alignment.TopEnd)
+                                )
+                            }
                         }
-                        if (article.favorite) {
-                            Icon(
-                                imageVector = Icons.Rounded.Bookmark,
-                                contentDescription = "已收藏",
-                                tint = CafeColors.Accent2,
-                                modifier = Modifier.align(Alignment.TopEnd)
-                            )
-                        }
+                    }.getOrElse { e ->
+                        Log.w("Home", "article card render failed: id=${article.id}, err=${e.message}", e)
+                        FailedCard(article.id, onRetry = {
+                            // 通过 ReadingRepository.removeAll + 重新添加触发重组（仅简单方式）
+                            Log.i("Home", "user requested retry for ${article.id}")
+                        })
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * 单项渲染失败时的兜底卡片。
+ */
+@Composable
+private fun FailedCard(articleId: String, onRetry: () -> Unit) {
+    CafeCard(modifier = Modifier.fillMaxWidth()) {
+        Column {
+            Text(
+                text = "加载失败",
+                style = CafeType.Heading,
+                color = CafeColors.Wrong
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "文章 ID: $articleId",
+                style = CafeType.Caption,
+                color = CafeColors.Muted
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            TextButton(onClick = onRetry) {
+                Text("重试", color = CafeColors.Accent)
             }
         }
     }

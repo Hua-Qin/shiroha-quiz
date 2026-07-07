@@ -20,7 +20,11 @@ data class Question(
     val blankAnswers: List<String>,
     val analysis: String,
     val category: String,
-    val explanation: String = analysis
+    val explanation: String = analysis,
+    // 章节绑定：sectionId 指向 ArticleBlock.Section.id；null 表示未绑定（旧数据兼容）
+    val sectionId: String? = null,
+    // 题目关联的原文片段（用于跨章节去重与展示上下文）
+    val anchorText: String = ""
 )
 
 data class UserAnswer(
