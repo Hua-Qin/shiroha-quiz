@@ -2,10 +2,12 @@ package com.yiqiu.readingquiz.ui.app
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -17,6 +19,7 @@ import com.yiqiu.readingquiz.ui.screens.QuestionEditorScreen
 import com.yiqiu.readingquiz.ui.screens.QuizScreen
 import com.yiqiu.readingquiz.ui.screens.ReadingScreen
 import com.yiqiu.readingquiz.ui.screens.ScoreScreen
+import com.yiqiu.readingquiz.ui.theme.CafeMotion
 
 /**
  * 路由密封类。
@@ -44,8 +47,14 @@ fun ReadingAppShell() {
     AnimatedContent(
         targetState = current,
         transitionSpec = {
-            (fadeIn() + slideInVertically { it / 8 }) togetherWith
-                (fadeOut() + slideOutVertically { -it / 8 })
+            (fadeIn(tween(CafeMotion.pageEnter, easing = CafeMotion.easeOut)) +
+                slideInVertically(
+                    animationSpec = tween(CafeMotion.pageEnter, easing = CafeMotion.easeOut)
+                ) { CafeMotion.pageSlideDp }) togetherWith
+                (fadeOut(tween(CafeMotion.pageEnter, easing = CafeMotion.easeOut)) +
+                    slideOutVertically(
+                        animationSpec = tween(CafeMotion.pageEnter, easing = CafeMotion.easeOut)
+                    ) { -CafeMotion.pageSlideDp })
         },
         label = "page-transition"
     ) { route ->
@@ -98,7 +107,3 @@ fun ReadingAppShell() {
         }
     }
 }
-
-private infix fun androidx.compose.animation.EnterTransition.togetherWith(
-    exit: androidx.compose.animation.ExitTransition
-) = androidx.compose.animation.ContentTransform(this, exit)

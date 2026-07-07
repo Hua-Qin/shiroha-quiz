@@ -9,34 +9,30 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.ContentCopy
-import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.FileDownload
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -47,42 +43,56 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.yiqiu.readingquiz.ai.ErrorLogStore
 import com.yiqiu.readingquiz.ai.ModelPresets
 import com.yiqiu.readingquiz.ai.ReadingAiClient
 import com.yiqiu.readingquiz.data.AiConfig
 import com.yiqiu.readingquiz.data.ReadingRepository
 import com.yiqiu.readingquiz.data.importexport.FileImporter
+import com.yiqiu.readingquiz.ui.components.CafeBadge
+import com.yiqiu.readingquiz.ui.components.CafeBadgeVariant
+import com.yiqiu.readingquiz.ui.components.CafeButton
+import com.yiqiu.readingquiz.ui.components.CafeButtonAi
+import com.yiqiu.readingquiz.ui.components.CafeButtonVariant
 import com.yiqiu.readingquiz.ui.components.CafeCard
-import com.yiqiu.readingquiz.ui.components.CafeGhostButton
-import com.yiqiu.readingquiz.ui.components.CafePrimaryButton
+import com.yiqiu.readingquiz.ui.components.CafeEyebrow
+import com.yiqiu.readingquiz.ui.components.CafeListRow
+import com.yiqiu.readingquiz.ui.components.CafeTopBar
 import com.yiqiu.readingquiz.ui.theme.CafeColors
+import com.yiqiu.readingquiz.ui.theme.CafeRadius
 import com.yiqiu.readingquiz.ui.theme.CafeSpacing
 import com.yiqiu.readingquiz.ui.theme.CafeType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+// 文件级私有尺寸常量（无对应全局 token 时使用，避免在屏幕上散落 .dp 字面量）
+private val ErrorLogDialogMaxHeight = 400.dp   // 错误日志对话框内容区最大高度
+private val ErrorLogEntryGap = 4.dp            // 错误日志条目内部竖直 gap
+private val ModelDropdownMaxHeight = 360.dp    // 模型下拉菜单内容最大高度
+
 /**
- * AI 设置页。
+ * AI 设置页（cafe-ui 重写版）。
  *
- * 性能优化（修复「卡顿 + 无法下滑」两个问题）：
+ * 性能优化：
  * 1. 顶层用 LazyColumn 替代 Column，让超长内容可滚动
- * 2. 提取子 Composable（SectionPresetCard / StatusCard / ImportSection），避免每帧重建 30+ 嵌套节点
+ * 2. 提取子 Composable（PresetCard / StatusCard / ModelDropdownField / ErrorLogDialog），
+ *    避免每帧重建 30+ 嵌套节点
  * 3. forEach 加 key，便于 LazyColumn diff
- * 4. ExposedDropdownMenu 内层 LazyColumn → Column + Modifier.verticalScroll + heightIn（解决嵌套滚动冲突）
+ * 4. DropdownMenu 内层 LazyColumn → Column + Modifier.verticalScroll + heightIn
  * 5. remember(key1) 锁定 ReadingRepository.aiConfig.value 的初始读取，避免重组时回退
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AiSettingsScreen(onBack: () -> Unit) {
     Log.d("Nav", "→ ai-settings")
-    // 锁定初始值（避免 Composable 重组时回退到旧值）
     val initial = remember { ReadingRepository.aiConfig.value }
-    // 协程作用域（用于异步网络请求，避免主线程 NetworkOnMainThreadException）
     val scope = rememberCoroutineScope()
 
     var baseUrl by remember { mutableStateOf(initial.apiBaseUrl) }
@@ -101,7 +111,7 @@ fun AiSettingsScreen(onBack: () -> Unit) {
     // 错误日志弹窗
     var showLogDialog by remember { mutableStateOf(false) }
 
-    // 导入文章（位于 AI 配置下方）
+    // 导入文章
     val context = LocalContext.current
     var importMessage by remember { mutableStateOf<String?>(null) }
     val openDocumentLauncher = rememberLauncherForActivityResult(
@@ -111,7 +121,6 @@ fun AiSettingsScreen(onBack: () -> Unit) {
             importMessage = "已取消导入。"
             return@rememberLauncherForActivityResult
         }
-        // 真实处理：捕获所有异常，给出明确文案，避免崩溃
         importMessage = try {
             val result = FileImporter.importFromUri(context, uri)
             when (result) {
@@ -140,7 +149,6 @@ fun AiSettingsScreen(onBack: () -> Unit) {
 
     val onFetchModels: () -> Unit = onFetchModels@{
         Log.d("AiSettings", "fetchModels clicked")
-        // 前置校验：API Base URL 与 API Key 必填；空值直接给出明确提示，避免调用后报错
         if (baseUrl.isBlank()) {
             status = "请先填写 API Base URL"
             statusIsError = true
@@ -160,7 +168,6 @@ fun AiSettingsScreen(onBack: () -> Unit) {
             modelName = "",
             timeoutSeconds = timeout.toIntOrNull() ?: 60
         )
-        // 异步执行网络请求（避免主线程 NetworkOnMainThreadException）
         scope.launch {
             val r = withContext(Dispatchers.IO) {
                 ReadingAiClient.fetchModels(cfg)
@@ -186,7 +193,6 @@ fun AiSettingsScreen(onBack: () -> Unit) {
 
     val onTestConnection: () -> Unit = onTestConnection@{
         Log.d("AiSettings", "testConnection clicked")
-        // 前置校验：缺密钥/URL/模型时直接提示
         when {
             baseUrl.isBlank() -> {
                 status = "请先填写 API Base URL"
@@ -213,7 +219,6 @@ fun AiSettingsScreen(onBack: () -> Unit) {
             modelName = modelName,
             timeoutSeconds = timeout.toIntOrNull() ?: 60
         )
-        // 异步执行网络请求
         scope.launch {
             val r = withContext(Dispatchers.IO) {
                 ReadingAiClient.testConnection(cfg)
@@ -234,7 +239,6 @@ fun AiSettingsScreen(onBack: () -> Unit) {
 
     val onSave: () -> Unit = onSave@{
         Log.d("AiSettings", "save clicked, model=$modelName")
-        // 前置校验：保存时至少需要 baseUrl（密钥缺失时仍允许保存，方便用户分阶段配置）
         if (baseUrl.isBlank()) {
             status = "保存失败：请先填写 API Base URL"
             statusIsError = true
@@ -266,187 +270,237 @@ fun AiSettingsScreen(onBack: () -> Unit) {
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().background(CafeColors.Bg)
+        modifier = Modifier.fillMaxSize().background(CafeColors.Bg),
+        contentPadding = PaddingValues(
+            horizontal = CafeSpacing.containerPad,
+            vertical = CafeSpacing.md
+        ),
+        verticalArrangement = Arrangement.spacedBy(CafeSpacing.md)
     ) {
         item(key = "top-bar") {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(CafeSpacing.ContainerPad),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = Icons.Rounded.ArrowBack,
-                        contentDescription = "返回",
-                        tint = CafeColors.Fg
+            CafeTopBar(title = "AI 设置", onBack = onBack)
+        }
+
+        // ============ API 配置组 ============
+        item(key = "api-eyebrow") {
+            CafeEyebrow(text = "API 设置", showLeadingDot = true)
+        }
+
+        item(key = "api-card") {
+            CafeCard(modifier = Modifier.fillMaxWidth()) {
+                Column(verticalArrangement = Arrangement.spacedBy(CafeSpacing.md)) {
+                    OutlinedTextField(
+                        value = baseUrl,
+                        onValueChange = { baseUrl = it },
+                        label = { Text("API Base URL") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = apiKey,
+                        onValueChange = { apiKey = it },
+                        label = { Text("API Key") },
+                        visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    ModelDropdownField(
+                        modelName = modelName,
+                        onModelNameChange = { modelName = it },
+                        modelOptions = modelOptions,
+                        menuOpen = modelMenuOpen,
+                        onMenuOpenChange = { newState ->
+                            if (modelOptions.isNotEmpty()) modelMenuOpen = newState
+                            else modelMenuOpen = false
+                        },
+                        onModelSelected = { id ->
+                            modelName = id
+                            modelMenuOpen = false
+                        }
+                    )
+                    OutlinedTextField(
+                        value = timeout,
+                        onValueChange = { timeout = it.filter(Char::isDigit) },
+                        label = { Text("超时秒数") },
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
-                Spacer(modifier = Modifier.padding(8.dp))
-                Text(text = "AI 设置", style = CafeType.Heading, color = CafeColors.Fg)
             }
         }
 
-        item(key = "preset-section-header") {
-            SectionHeader("快速选择服务")
-        }
-
-        // 预设卡片（每个独立 item，便于 LazyColumn diff）
-        items(ModelPresets.ALL, key = { it.id }) { preset ->
-            PresetCard(preset = preset, onApply = { applyPreset(preset) })
+        // ============ 模型预设组 ============
+        item(key = "preset-eyebrow") {
+            CafeEyebrow(text = "模型预设", showLeadingDot = true)
         }
 
         item(key = "preset-tip") {
             TipText("提示：智谱清言与阶跃星辰均提供 OpenAI 兼容 API，可直接使用「获取模型列表」自动拉取完整模型清单。")
         }
 
-        item(key = "input-base-url") {
-            OutlinedTextField(
-                value = baseUrl, onValueChange = { baseUrl = it },
-                label = { Text("API Base URL") },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = CafeSpacing.ContainerPad)
-            )
-        }
-        item(key = "input-api-key") {
-            OutlinedTextField(
-                value = apiKey, onValueChange = { apiKey = it },
-                label = { Text("API Key") },
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = CafeSpacing.ContainerPad)
-            )
+        // 预设列表
+        items(ModelPresets.ALL, key = { it.id }) { preset ->
+            PresetCard(preset = preset, onApply = { applyPreset(preset) })
         }
 
-        item(key = "model-dropdown") {
-            ModelDropdownField(
-                modelName = modelName,
-                onModelNameChange = { modelName = it },
-                modelOptions = modelOptions,
-                menuOpen = modelMenuOpen,
-                onMenuOpenChange = { newState ->
-                    // 仅在已有模型列表时响应展开；空列表强制折叠避免无内容弹出
-                    if (modelOptions.isNotEmpty()) modelMenuOpen = newState
-                    else modelMenuOpen = false
-                },
-                onModelSelected = { id ->
-                    modelName = id
-                    modelMenuOpen = false
+        // ============ 测试连接组 ============
+        item(key = "test-eyebrow") {
+            CafeEyebrow(text = "测试连接", showLeadingDot = true)
+        }
+
+        item(key = "test-card") {
+            CafeCard(modifier = Modifier.fillMaxWidth()) {
+                Column(verticalArrangement = Arrangement.spacedBy(CafeSpacing.xs)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(CafeSpacing.xs)
+                    ) {
+                        CafeButton(
+                            text = if (fetchingModels) "获取中..." else "获取模型列表",
+                            onClick = onFetchModels,
+                            variant = CafeButtonVariant.Ghost,
+                            enabled = !fetchingModels && !testing,
+                            loading = fetchingModels,
+                            modifier = Modifier.weight(1f)
+                        )
+                        CafeButtonAi(
+                            text = if (testing) "测试中..." else "测试连接",
+                            onClick = onTestConnection,
+                            enabled = !testing && !fetchingModels,
+                            loading = testing,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    CafeButton(
+                        text = "保存配置",
+                        onClick = onSave,
+                        variant = CafeButtonVariant.Primary,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
-            )
-        }
-
-        item(key = "action-buttons") {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = CafeSpacing.ContainerPad),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                CafeGhostButton(
-                    text = if (fetchingModels) "获取中..." else "获取模型列表",
-                    onClick = onFetchModels,
-                    enabled = !fetchingModels && !testing,
-                    modifier = Modifier.weight(1f)
-                )
-                CafeGhostButton(
-                    text = if (testing) "测试中..." else "测试连接",
-                    onClick = onTestConnection,
-                    enabled = !testing && !fetchingModels,
-                    modifier = Modifier.weight(1f)
-                )
             }
         }
 
-        item(key = "input-timeout") {
-            OutlinedTextField(
-                value = timeout, onValueChange = { timeout = it.filter(Char::isDigit) },
-                label = { Text("超时秒数") },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = CafeSpacing.ContainerPad)
-            )
-        }
-
-        item(key = "save-button") {
-            CafePrimaryButton(
-                text = "保存",
-                onClick = onSave,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = CafeSpacing.ContainerPad)
-            )
-        }
-
-        item(key = "import-section-header") {
-            SectionHeader("导入文章")
-        }
-
-        item(key = "import-tip") {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = CafeSpacing.ContainerPad),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.FileDownload,
-                    contentDescription = null,
-                    tint = CafeColors.Accent
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(
-                    text = "支持 JSON / Markdown / TXT 格式",
-                    style = CafeType.Caption,
-                    color = CafeColors.Muted
-                )
-            }
-        }
-
-        item(key = "import-button") {
-            CafeGhostButton(
-                text = "选择文件导入",
-                onClick = onImportClick,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = CafeSpacing.ContainerPad)
-            )
-        }
-
-        importMessage?.let { msg ->
-            item(key = "import-msg-$msg") {
-                Text(
-                    text = msg,
-                    style = CafeType.Caption,
-                    color = if (msg.startsWith("已取消") || msg.startsWith("导入失败") || msg.startsWith("导入异常"))
-                        CafeColors.Wrong else CafeColors.Accent2,
-                    modifier = Modifier.padding(horizontal = CafeSpacing.ContainerPad)
-                )
-            }
-        }
-
+        // ============ 状态反馈 ============
         status?.let {
             item(key = "status-card") {
                 StatusCard(message = it, isError = statusIsError)
             }
         }
 
-        item(key = "error-log-button") {
+        // ============ 导入文章组 ============
+        item(key = "import-eyebrow") {
+            CafeEyebrow(text = "导入文章", showLeadingDot = true)
+        }
+
+        item(key = "import-tip") {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = CafeSpacing.ContainerPad),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(CafeSpacing.xs)
             ) {
-                IconButton(onClick = { showLogDialog = true }) {
-                    Icon(
-                        imageVector = Icons.Rounded.BugReport,
-                        contentDescription = "查看错误日志",
-                        tint = CafeColors.Muted
-                    )
-                }
-                Spacer(modifier = Modifier.size(8.dp))
+                Icon(
+                    imageVector = Icons.Rounded.FileDownload,
+                    contentDescription = null,
+                    tint = CafeColors.Accent
+                )
                 Text(
-                    text = "查看错误日志（${ErrorLogStore.entries.size}）",
-                    style = CafeType.Caption,
+                    text = "支持 JSON / Markdown / TXT 格式",
+                    style = CafeType.bodyXSmall,
                     color = CafeColors.Muted
                 )
             }
         }
 
+        item(key = "import-button") {
+            CafeButton(
+                text = "选择文件导入",
+                onClick = onImportClick,
+                variant = CafeButtonVariant.Ghost,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        importMessage?.let { msg ->
+            item(key = "import-msg-$msg") {
+                val isError = msg.startsWith("已取消") ||
+                    msg.startsWith("导入失败") ||
+                    msg.startsWith("导入异常")
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CafeSpacing.xs)
+                ) {
+                    CafeBadge(
+                        text = if (isError) "失败" else "成功",
+                        variant = if (isError) CafeBadgeVariant.Wrong else CafeBadgeVariant.Correct
+                    )
+                    Text(
+                        text = msg,
+                        style = CafeType.bodyXSmall,
+                        color = if (isError) CafeColors.Wrong else CafeColors.Accent2
+                    )
+                }
+            }
+        }
+
+        // ============ 错误日志组 ============
+        item(key = "error-log-eyebrow") {
+            CafeEyebrow(text = "错误日志", showLeadingDot = true)
+        }
+
+        item(key = "error-log-card") {
+            CafeCard(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CafeSpacing.xs)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.BugReport,
+                        contentDescription = null,
+                        tint = CafeColors.Muted
+                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "最近错误记录",
+                            style = CafeType.cardTitle,
+                            color = CafeColors.Fg
+                        )
+                        Text(
+                            text = "共 ${ErrorLogStore.entries.size} 条",
+                            style = CafeType.meta,
+                            color = CafeColors.Muted
+                        )
+                    }
+                    CafeBadge(
+                        text = "${ErrorLogStore.entries.size}",
+                        variant = CafeBadgeVariant.Default
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = CafeSpacing.xs),
+                    horizontalArrangement = Arrangement.spacedBy(CafeSpacing.xs)
+                ) {
+                    CafeButton(
+                        text = "查看日志",
+                        onClick = { showLogDialog = true },
+                        variant = CafeButtonVariant.Ghost,
+                        modifier = Modifier.weight(1f)
+                    )
+                    CafeButton(
+                        text = "清空",
+                        onClick = { ErrorLogStore.clear() },
+                        variant = CafeButtonVariant.Ghost,
+                        enabled = ErrorLogStore.entries.isNotEmpty(),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+
         item(key = "footer-tip") {
-            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "提示：API Key 仅保存在本机，不会上传到任何远端服务。",
-                style = CafeType.Caption,
+                style = CafeType.bodyXSmall,
                 color = CafeColors.Muted,
-                modifier = Modifier.padding(horizontal = CafeSpacing.ContainerPad)
+                modifier = Modifier.padding(top = CafeSpacing.xs)
             )
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 
@@ -456,151 +510,206 @@ fun AiSettingsScreen(onBack: () -> Unit) {
 }
 
 /**
- * 错误日志弹窗：展示 ErrorLogStore 中的记录，支持一键复制到剪贴板和清空。
+ * 错误日志弹窗：cafe-ui 风格（Surface + 圆角 Card）。
  */
 @Composable
 private fun ErrorLogDialog(onDismiss: () -> Unit) {
     val context = LocalContext.current
-    AlertDialog(
+    Dialog(
         onDismissRequest = onDismiss,
-        title = { Text("错误日志（最近 ${ErrorLogStore.entries.size} 条）") },
-        text = {
-            if (ErrorLogStore.entries.isEmpty()) {
-                Text("暂无错误记录。", style = CafeType.Body, color = CafeColors.Muted)
-            } else {
-                LazyColumn(
-                    modifier = Modifier.heightIn(max = 400.dp).fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(CafeRadius.rCardLg),
+            color = CafeColors.Surface,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(CafeSpacing.containerPad)
+        ) {
+            Column(
+                modifier = Modifier.padding(CafeSpacing.cardPad),
+                verticalArrangement = Arrangement.spacedBy(CafeSpacing.xs)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CafeSpacing.xs)
                 ) {
-                    items(ErrorLogStore.entries.size) { index ->
-                        val entry = ErrorLogStore.entries.getOrNull(index) ?: return@items
-                        Column {
-                            Text(
-                                text = "${entry.level}/${entry.tag}: ${entry.message}",
-                                style = CafeType.Caption,
-                                color = when (entry.level) {
-                                    "E" -> CafeColors.Wrong
-                                    "W" -> CafeColors.Accent2
-                                    else -> CafeColors.Muted
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "错误日志",
+                            style = CafeType.cardTitle,
+                            color = CafeColors.Fg
+                        )
+                        Text(
+                            text = "最近 ${ErrorLogStore.entries.size} 条",
+                            style = CafeType.meta,
+                            color = CafeColors.Muted
+                        )
+                    }
+                    TextButton(onClick = onDismiss) {
+                        Text("关闭", color = CafeColors.Muted)
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = ErrorLogDialogMaxHeight)
+                        .clip(RoundedCornerShape(CafeRadius.rCard))
+                        .background(CafeColors.Bg)
+                        .padding(CafeSpacing.xs)
+                ) {
+                    if (ErrorLogStore.entries.isEmpty()) {
+                        Text(
+                            text = "暂无错误记录。",
+                            style = CafeType.body,
+                            color = CafeColors.Muted,
+                            modifier = Modifier.padding(CafeSpacing.xs)
+                        )
+                    } else {
+                        Column(
+                            modifier = Modifier.verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(CafeSpacing.xs)
+                        ) {
+                            ErrorLogStore.entries.forEach { entry ->
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.spacedBy(ErrorLogEntryGap)
+                                ) {
+                                    Text(
+                                        text = "${entry.level}/${entry.tag}: ${entry.message}",
+                                        style = CafeType.meta,
+                                        color = when (entry.level) {
+                                            "E" -> CafeColors.Wrong
+                                            "W" -> CafeColors.Accent2
+                                            else -> CafeColors.Muted
+                                        }
+                                    )
+                                    entry.throwable?.let {
+                                        Text(
+                                            text = it,
+                                            style = CafeType.meta,
+                                            color = CafeColors.Muted
+                                        )
+                                    }
                                 }
-                            )
-                            entry.throwable?.let {
-                                Text(
-                                    text = it,
-                                    style = CafeType.Caption,
-                                    color = CafeColors.Muted
-                                )
                             }
                         }
                     }
                 }
-            }
-        },
-        confirmButton = {
-            Row {
-                if (ErrorLogStore.entries.isNotEmpty()) {
-                    TextButton(onClick = { ErrorLogStore.clear() }) {
-                        Icon(
-                            imageVector = Icons.Rounded.Delete,
-                            contentDescription = null,
-                            tint = CafeColors.Wrong
-                        )
-                        Spacer(modifier = Modifier.size(4.dp))
-                        Text("清空")
-                    }
-                }
-                TextButton(onClick = {
-                    if (ErrorLogStore.entries.isNotEmpty()) {
-                        val text = ErrorLogStore.toClipboardText()
-                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        clipboard.setPrimaryClip(ClipData.newPlainText("错误日志", text))
-                        Toast.makeText(context, "已复制 ${ErrorLogStore.entries.size} 条日志", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, "暂无日志可复制", Toast.LENGTH_SHORT).show()
-                    }
-                }) {
-                    Icon(
-                        imageVector = Icons.Rounded.ContentCopy,
-                        contentDescription = null,
-                        tint = CafeColors.Accent
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(CafeSpacing.xs)
+                ) {
+                    CafeButton(
+                        text = "清空",
+                        onClick = { ErrorLogStore.clear() },
+                        variant = CafeButtonVariant.Ghost,
+                        enabled = ErrorLogStore.entries.isNotEmpty(),
+                        modifier = Modifier.weight(1f)
                     )
-                    Spacer(modifier = Modifier.size(4.dp))
-                    Text("一键复制")
+                    CafeButton(
+                        text = "一键复制",
+                        onClick = {
+                            if (ErrorLogStore.entries.isNotEmpty()) {
+                                val text = ErrorLogStore.toClipboardText()
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                clipboard.setPrimaryClip(ClipData.newPlainText("错误日志", text))
+                                Toast.makeText(context, "已复制 ${ErrorLogStore.entries.size} 条日志", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, "暂无日志可复制", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        variant = CafeButtonVariant.Primary,
+                        leadingIcon = Icons.Rounded.ContentCopy,
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("关闭") }
         }
-    )
+    }
 }
 
-// ============== 子 Composable（拆出来减少 AiSettingsScreen 的重组代价） ==============
+// ============== 子 Composable ==============
 
-@Composable
-private fun SectionHeader(title: String) {
-    Text(
-        text = title,
-        style = CafeType.Heading,
-        color = CafeColors.Fg,
-        modifier = Modifier.padding(horizontal = CafeSpacing.ContainerPad, vertical = 8.dp)
-    )
-}
-
+/**
+ * 提示文本（cafe-ui CafeCard 轻量风格：surface + border + bodySmall muted 文字）。
+ */
 @Composable
 private fun TipText(text: String) {
-    Text(
-        text = text,
-        style = CafeType.Caption,
-        color = CafeColors.Muted,
-        modifier = Modifier.padding(horizontal = CafeSpacing.ContainerPad)
-    )
+    CafeCard(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(horizontal = CafeSpacing.cardPad, vertical = CafeSpacing.cardPadSm)
+    ) {
+        Text(
+            text = text,
+            style = CafeType.bodyXSmall,
+            color = CafeColors.Muted
+        )
+    }
 }
 
+/**
+ * 预设卡片：cafe-ui CafeListRow 风格（name = 模型名，meta = 描述，trailing = 应用按钮）。
+ */
 @Composable
 private fun PresetCard(
     preset: ModelPresets.Preset,
     onApply: () -> Unit
 ) {
-    CafeCard(modifier = Modifier.fillMaxWidth().padding(horizontal = CafeSpacing.ContainerPad)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = preset.displayName,
-                    style = CafeType.Heading,
-                    color = CafeColors.Fg
-                )
-                Text(
-                    text = "默认模型：${preset.defaultModel}",
-                    style = CafeType.Caption,
-                    color = CafeColors.Muted
-                )
-                Text(
-                    text = preset.baseUrl,
-                    style = CafeType.Caption,
-                    color = CafeColors.Muted
-                )
-            }
-            CafeGhostButton(text = "应用", onClick = onApply)
+    CafeCard(modifier = Modifier.fillMaxWidth()) {
+        Column(verticalArrangement = Arrangement.spacedBy(CafeSpacing.xs)) {
+            CafeListRow(
+                name = preset.displayName,
+                meta = "默认模型：${preset.defaultModel}",
+                showTopBorder = false,
+                trailing = {
+                    CafeButton(
+                        text = "应用",
+                        onClick = onApply,
+                        variant = CafeButtonVariant.Ghost
+                    )
+                }
+            )
+            Text(
+                text = preset.baseUrl,
+                style = CafeType.meta,
+                color = CafeColors.Muted,
+                modifier = Modifier.padding(horizontal = CafeSpacing.listRowPadH)
+            )
         }
     }
 }
 
+/**
+ * 状态卡片：cafe-ui CafeCard + 状态 Badge。
+ */
 @Composable
 private fun StatusCard(message: String, isError: Boolean) {
-    CafeCard(modifier = Modifier.fillMaxWidth().padding(horizontal = CafeSpacing.ContainerPad)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+    CafeCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(CafeSpacing.xs)
+        ) {
             Icon(
                 imageVector = Icons.Rounded.CheckCircle,
                 contentDescription = null,
                 tint = if (isError) CafeColors.Wrong else CafeColors.Accent2
             )
-            Spacer(modifier = Modifier.padding(8.dp))
-            Text(text = message, style = CafeType.Body, color = CafeColors.Fg)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = message, style = CafeType.body, color = CafeColors.Fg)
+            }
+            CafeBadge(
+                text = if (isError) "失败" else "成功",
+                variant = if (isError) CafeBadgeVariant.Wrong else CafeBadgeVariant.Correct
+            )
         }
     }
 }
 
+/**
+ * 模型下拉：cafe-ui CafeListRow + DropdownMenu 弹出风格。
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ModelDropdownField(
@@ -611,38 +720,62 @@ private fun ModelDropdownField(
     onMenuOpenChange: (Boolean) -> Unit,
     onModelSelected: (String) -> Unit
 ) {
-    ExposedDropdownMenuBox(
-        expanded = menuOpen && modelOptions.isNotEmpty(),
-        onExpandedChange = onMenuOpenChange,
-        modifier = Modifier.padding(horizontal = CafeSpacing.ContainerPad)
-    ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
             value = modelName,
             onValueChange = onModelNameChange,
             label = { Text("模型名") },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = menuOpen)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor()
+            modifier = Modifier.fillMaxWidth()
         )
-        ExposedDropdownMenu(
-            expanded = menuOpen,
-            onDismissRequest = { onMenuOpenChange(false) },
-            modifier = Modifier.heightIn(max = 360.dp)
-        ) {
-            if (modelOptions.isEmpty()) {
-                DropdownMenuItem(
-                    text = { Text("请先点击「获取模型列表」", color = CafeColors.Muted) },
-                    onClick = { onMenuOpenChange(false) }
-                )
-            } else {
-                // 用 Column + verticalScroll 替代嵌套 LazyColumn（避免测量冲突）
-                Column(modifier = Modifier.heightIn(max = 360.dp).verticalScroll(rememberScrollState())) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            CafeListRow(
+                name = if (modelOptions.isEmpty()) "请先点击「获取模型列表」" else "从已获取模型中选择",
+                meta = if (modelOptions.isEmpty()) "暂无模型数据"
+                else "已加载 ${modelOptions.size} 个模型",
+                showTopBorder = false,
+                onClick = {
+                    if (modelOptions.isNotEmpty()) {
+                        onMenuOpenChange(!menuOpen)
+                    }
+                },
+                trailing = {
+                    if (modelOptions.isNotEmpty()) {
+                        Text(
+                            text = if (menuOpen) "▲" else "▼",
+                            style = CafeType.bodySmall,
+                            color = CafeColors.Muted
+                        )
+                    }
+                }
+            )
+            DropdownMenu(
+                expanded = menuOpen,
+                onDismissRequest = { onMenuOpenChange(false) },
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .heightIn(max = ModelDropdownMaxHeight)
+            ) {
+                Column(modifier = Modifier.heightIn(max = ModelDropdownMaxHeight).verticalScroll(rememberScrollState())) {
                     modelOptions.forEach { id ->
                         DropdownMenuItem(
-                            text = { Text(id) },
+                            text = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(CafeSpacing.xs)
+                                ) {
+                                    if (modelName == id) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.CheckCircle,
+                                            contentDescription = null,
+                                            tint = CafeColors.Accent2
+                                        )
+                                    }
+                                    Text(
+                                        text = id,
+                                        color = if (modelName == id) CafeColors.Fg else CafeColors.Muted
+                                    )
+                                }
+                            },
                             onClick = { onModelSelected(id) }
                         )
                     }

@@ -201,8 +201,8 @@ private fun NotePadCard(
         modifier = Modifier
             .fillMaxSize()
             // 纸张质感：浅米黄背景 + 淡边框 + 圆角 + 微阴影
-            .background(NotePadPaperBg, shape = RoundedCornerShape(CafeRadius.Frame))
-            .border(1.dp, NotePadPaperBorder, RoundedCornerShape(CafeRadius.Frame))
+            .background(CafeColors.PaperBg, shape = RoundedCornerShape(CafeRadius.Frame))
+            .border(1.dp, CafeColors.PaperBorder, RoundedCornerShape(CafeRadius.Frame))
             .padding(8.dp)
     ) {
         // 顶栏：拖拽手柄 + 标题 + 关闭按钮
@@ -270,7 +270,7 @@ private fun NotePadCard(
                 .fillMaxWidth()
                 .heightIn(min = 100.dp)
                 .weight(1f)
-                .background(NotePadEditorBg, RoundedCornerShape(CafeRadius.Sm))
+                .background(CafeColors.PaperEditor, RoundedCornerShape(CafeRadius.Sm))
                 .border(0.5.dp, CafeColors.Border, RoundedCornerShape(CafeRadius.Sm))
                 .padding(8.dp)
         ) {
@@ -492,10 +492,7 @@ private fun annotatedToMarkdown(annotated: AnnotatedString): String {
     return sb.toString()
 }
 
-// 笔记浮窗主题色（独立于 CafeColors，体现纸张质感）
-private val NotePadPaperBg: Color = Color(0xFFFFF8E7)        // 浅米黄纸张
-private val NotePadPaperBorder: Color = Color(0xFFE6D9B8)   // 纸张淡边框
-private val NotePadEditorBg: Color = Color(0xFFFFFBEF)       // 编辑区略浅
+// 笔记浮窗主题色已迁移到 CafeColors.PaperBg / PaperBorder / PaperEditor（保持 token 体系单一真源）
 
 /**
  * 便利函数：在 Composable 中直接弹窗显示笔记浮窗（封装 Dialog 状态管理）。

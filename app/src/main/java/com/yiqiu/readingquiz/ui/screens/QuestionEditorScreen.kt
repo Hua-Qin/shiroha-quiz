@@ -2,27 +2,24 @@ package com.yiqiu.readingquiz.ui.screens
 
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -35,13 +32,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import com.yiqiu.readingquiz.data.ReadingRepository
 import com.yiqiu.readingquiz.data.model.Option
 import com.yiqiu.readingquiz.data.model.Question
 import com.yiqiu.readingquiz.data.model.QuestionType
+import com.yiqiu.readingquiz.ui.components.CafeBadge
+import com.yiqiu.readingquiz.ui.components.CafeBadgeVariant
+import com.yiqiu.readingquiz.ui.components.CafeButton
+import com.yiqiu.readingquiz.ui.components.CafeButtonVariant
+import com.yiqiu.readingquiz.ui.components.CafeCard
+import com.yiqiu.readingquiz.ui.components.CafeEyebrow
+import com.yiqiu.readingquiz.ui.components.CafeTopBar
 import com.yiqiu.readingquiz.ui.theme.CafeColors
 import com.yiqiu.readingquiz.ui.theme.CafeRadius
 import com.yiqiu.readingquiz.ui.theme.CafeSpacing
@@ -50,16 +55,13 @@ import com.yiqiu.readingquiz.ui.theme.CafeType
 private const val TAG = "QuestionEditor"
 
 /**
- * 单题编辑器（修复之前的"编辑器无法打开"问题）。
+ * 单题编辑器（cafe-ui 风格）。
  *
- * - 题型下拉（5 种）
+ * - 题型 chip 组（CafeBadge Up/Default 切换）
  * - 题干输入
- * - 选项列表（动态增减；JUDGE 固定 A/B）
- * - 答案输入（多选用逗号分隔）
- * - 填空答案（仅 BLANK 显示）
- * - 解析输入
- * - 章节 ID 输入（关联到 ArticleBlock.Section）
- * - 保存 / 删除 / 返回
+ * - 选项编辑（CafeListRow 风格行 + OutlinedTextField）
+ * - 答案 / 解析 / 填空答案 / 章节 ID（CafeCard + CafeEyebrow 标签）
+ * - 底部固定操作条（CafeButton Primary + Ghost 删除）
  */
 @Composable
 fun QuestionEditorScreen(
@@ -80,7 +82,6 @@ fun QuestionEditorScreen(
     var sectionIdText by remember { mutableStateOf(original.sectionId ?: "") }
     var answerText by remember { mutableStateOf(original.answer.joinToString(",")) }
     var blankAnswerText by remember { mutableStateOf(original.blankAnswers.joinToString(",")) }
-    // 选项使用 SnapshotStateList 实现动态编辑
     val options: SnapshotStateList<Option> = remember {
         mutableStateListOf<Option>().apply {
             if (original.options.isNotEmpty()) {
@@ -105,51 +106,69 @@ fun QuestionEditorScreen(
             .fillMaxSize()
             .background(CafeColors.Bg)
     ) {
-        // ===== 顶部栏 =====
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(CafeSpacing.ContainerPad),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Rounded.ArrowBack,
-                    contentDescription = "返回",
-                    tint = CafeColors.Fg
+        // ===== 顶部栏（cafe-ui TopBar + 右上保存按钮）=====
+        CafeTopBar(
+            title = if (questionText.isBlank() && original.question.isBlank()) "新建题目" else "编辑题目",
+            onBack = onBack,
+            actions = {
+                CafeButton(
+                    text = "保存",
+                    onClick = {
+                        val err = validate(
+                            type = type,
+                            question = questionText,
+                            options = options.toList(),
+                            answerText = answerText,
+                            blankAnswerText = blankAnswerText
+                        )
+                        if (err != null) {
+                            errorMsg = err
+                            return@CafeButton
+                        }
+                        val answerList = answerText.split(Regex("[,，\\s]+"))
+                            .filter { it.isNotBlank() }
+                        val blankList = blankAnswerText.split(Regex("[,，;；]\\s*"))
+                            .filter { it.isNotBlank() }
+                        val updated = original.copy(
+                            type = type,
+                            question = questionText.trim(),
+                            options = options.toList(),
+                            answer = answerList,
+                            blankAnswers = if (type == QuestionType.BLANK) blankList else emptyList(),
+                            analysis = analysisText.trim(),
+                            sectionId = sectionIdText.trim().ifBlank { null },
+                            anchorText = original.anchorText
+                        )
+                        ReadingRepository.updateQuestion(articleId, updated)
+                        Log.i(TAG, "saved question: id=${updated.id}")
+                        onBack()
+                    },
+                    enabled = true,
+                    variant = CafeButtonVariant.Primary,
+                    leadingIcon = Icons.Rounded.Save
                 )
             }
-            Spacer(modifier = Modifier.size(4.dp))
-            Text(
-                text = "编辑题目",
-                style = CafeType.Heading,
-                color = CafeColors.Fg,
-                modifier = Modifier.weight(1f)
-            )
-            IconButton(onClick = { showDeleteConfirm = true }) {
-                Icon(
-                    imageVector = Icons.Rounded.Delete,
-                    contentDescription = "删除",
-                    tint = CafeColors.Wrong
-                )
-            }
-        }
+        )
 
         // ===== 编辑区 =====
         LazyColumn(
-            modifier = Modifier.weight(1f).fillMaxWidth(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                horizontal = CafeSpacing.ContainerPad,
-                vertical = 8.dp
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth(),
+            contentPadding = PaddingValues(
+                horizontal = CafeSpacing.containerPad,
+                vertical = CafeSpacing.cardPadSm
             ),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(CafeSpacing.md)
         ) {
             // 题型选择
             item {
-                Column {
-                    SectionLabel("题型")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                EditorSectionCard(
+                    eyebrow = "题型",
+                    title = "QUESTION TYPE"
+                ) {
+                    Spacer(modifier = Modifier.size(CafeSpacing.xs))
+                    Row(horizontalArrangement = Arrangement.spacedBy(CafeSpacing.xs)) {
                         listOf(
                             QuestionType.SINGLE to "单选",
                             QuestionType.MULTIPLE to "多选",
@@ -162,7 +181,6 @@ fun QuestionEditorScreen(
                                 selected = type == t,
                                 onClick = {
                                     type = t
-                                    // 切题型时调整选项
                                     when (t) {
                                         QuestionType.JUDGE -> {
                                             options.clear()
@@ -189,42 +207,48 @@ fun QuestionEditorScreen(
 
             // 题干
             item {
-                Column {
-                    SectionLabel("题干")
-                    Spacer(modifier = Modifier.height(8.dp))
+                EditorSectionCard(
+                    eyebrow = "题干",
+                    title = "QUESTION"
+                ) {
+                    Spacer(modifier = Modifier.size(CafeSpacing.xs))
                     OutlinedTextField(
                         value = questionText,
                         onValueChange = { questionText = it },
-                        placeholder = { Text("请输入题干…") },
+                        placeholder = { Text("请输入题干…", style = CafeType.bodyCompact, color = CafeColors.Muted) },
                         minLines = 3,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        textStyle = CafeType.bodyCompact
                     )
                 }
             }
 
-            // 选项（仅当 SINGLE/MULTIPLE/JUDGE 显示）
+            // 选项
             if (type == QuestionType.SINGLE || type == QuestionType.MULTIPLE || type == QuestionType.JUDGE) {
                 item {
-                    Column {
-                        SectionLabel(if (type == QuestionType.JUDGE) "选项（固定）" else "选项")
-                        Spacer(modifier = Modifier.height(8.dp))
-                        options.forEachIndexed { idx, opt ->
-                            OptionEditRow(
-                                key = opt.key,
-                                text = opt.text,
-                                enabled = type != QuestionType.JUDGE,
-                                onTextChange = { newText ->
-                                    options[idx] = opt.copy(text = newText)
-                                },
-                                onDelete = {
-                                    if (options.size > 2) options.removeAt(idx)
-                                },
-                                onAdd = {
-                                    val nextKey = ('A' + options.size).toString()
-                                    options.add(Option(nextKey, ""))
-                                }
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
+                    EditorSectionCard(
+                        eyebrow = if (type == QuestionType.JUDGE) "选项（固定）" else "选项",
+                        title = "OPTIONS"
+                    ) {
+                        Spacer(modifier = Modifier.size(CafeSpacing.xs))
+                        Column(verticalArrangement = Arrangement.spacedBy(CafeSpacing.xs)) {
+                            options.forEachIndexed { idx, opt ->
+                                OptionEditRow(
+                                    key = opt.key,
+                                    text = opt.text,
+                                    enabled = type != QuestionType.JUDGE,
+                                    onTextChange = { newText ->
+                                        options[idx] = opt.copy(text = newText)
+                                    },
+                                    onDelete = {
+                                        if (options.size > 2) options.removeAt(idx)
+                                    },
+                                    onAdd = {
+                                        val nextKey = ('A' + options.size).toString()
+                                        options.add(Option(nextKey, ""))
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -232,31 +256,49 @@ fun QuestionEditorScreen(
 
             // 答案
             item {
-                Column {
-                    SectionLabel("答案" + if (type == QuestionType.MULTIPLE) "（多选用英文逗号分隔，如 A,C）" else "")
-                    Spacer(modifier = Modifier.height(8.dp))
+                EditorSectionCard(
+                    eyebrow = "答案" + if (type == QuestionType.MULTIPLE) "（多选用英文逗号分隔，如 A,C）" else "",
+                    title = "ANSWER"
+                ) {
+                    Spacer(modifier = Modifier.size(CafeSpacing.xs))
                     OutlinedTextField(
                         value = answerText,
                         onValueChange = { answerText = it },
-                        placeholder = { Text(if (type == QuestionType.JUDGE) "A 或 B" else "如 A 或 A,C") },
+                        placeholder = {
+                            Text(
+                                if (type == QuestionType.JUDGE) "A 或 B" else "如 A 或 A,C",
+                                style = CafeType.bodyCompact,
+                                color = CafeColors.Muted
+                            )
+                        },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        textStyle = CafeType.bodyCompact
                     )
                 }
             }
 
-            // 填空答案（仅 BLANK）
+            // 填空答案
             if (type == QuestionType.BLANK) {
                 item {
-                    Column {
-                        SectionLabel("填空答案（按题干 ⬚ 顺序，逗号分隔）")
-                        Spacer(modifier = Modifier.height(8.dp))
+                    EditorSectionCard(
+                        eyebrow = "填空答案（按题干 ⬚ 顺序，逗号分隔）",
+                        title = "BLANK ANSWERS"
+                    ) {
+                        Spacer(modifier = Modifier.size(CafeSpacing.xs))
                         OutlinedTextField(
                             value = blankAnswerText,
                             onValueChange = { blankAnswerText = it },
-                            placeholder = { Text("如 答案1,答案2") },
+                            placeholder = {
+                                Text(
+                                    "如 答案1,答案2",
+                                    style = CafeType.bodyCompact,
+                                    color = CafeColors.Muted
+                                )
+                            },
                             modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
+                            singleLine = true,
+                            textStyle = CafeType.bodyCompact
                         )
                     }
                 }
@@ -264,30 +306,48 @@ fun QuestionEditorScreen(
 
             // 章节 ID
             item {
-                Column {
-                    SectionLabel("章节 ID（可选，如 S#01）")
-                    Spacer(modifier = Modifier.height(8.dp))
+                EditorSectionCard(
+                    eyebrow = "章节 ID（可选，如 S#01）",
+                    title = "SECTION"
+                ) {
+                    Spacer(modifier = Modifier.size(CafeSpacing.xs))
                     OutlinedTextField(
                         value = sectionIdText,
                         onValueChange = { sectionIdText = it },
-                        placeholder = { Text("S#01") },
+                        placeholder = {
+                            Text(
+                                "S#01",
+                                style = CafeType.bodyCompact,
+                                color = CafeColors.Muted
+                            )
+                        },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        textStyle = CafeType.bodyCompact
                     )
                 }
             }
 
             // 解析
             item {
-                Column {
-                    SectionLabel("解析")
-                    Spacer(modifier = Modifier.height(8.dp))
+                EditorSectionCard(
+                    eyebrow = "解析",
+                    title = "ANALYSIS"
+                ) {
+                    Spacer(modifier = Modifier.size(CafeSpacing.xs))
                     OutlinedTextField(
                         value = analysisText,
                         onValueChange = { analysisText = it },
-                        placeholder = { Text("解释答案，可引用文章原句…") },
+                        placeholder = {
+                            Text(
+                                "解释答案，可引用文章原句…",
+                                style = CafeType.bodyCompact,
+                                color = CafeColors.Muted
+                            )
+                        },
                         minLines = 3,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        textStyle = CafeType.bodyCompact
                     )
                 }
             }
@@ -295,28 +355,44 @@ fun QuestionEditorScreen(
             // 错误提示
             errorMsg?.let { msg ->
                 item {
-                    Text(
-                        text = msg,
-                        style = CafeType.Caption,
-                        color = CafeColors.Wrong
-                    )
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        CafeBadge(
+                            text = msg,
+                            variant = CafeBadgeVariant.Wrong
+                        )
+                    }
                 }
             }
         }
 
-        // ===== 底部保存按钮 =====
+        // ===== 底部操作条 =====
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(CafeColors.Surface)
-                .padding(CafeSpacing.ContainerPad),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(CafeSpacing.containerPad),
+            horizontalArrangement = Arrangement.spacedBy(CafeSpacing.xs),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextButton(onClick = onBack, modifier = Modifier.weight(1f)) {
-                Text("取消", color = CafeColors.Muted)
-            }
-            TextButton(
+            CafeButton(
+                text = "删除",
+                onClick = { showDeleteConfirm = true },
+                variant = CafeButtonVariant.Ghost,
+                leadingIcon = Icons.Rounded.Delete,
+                modifier = Modifier.weight(1f),
+                fullWidth = true
+            )
+            CafeButton(
+                text = "取消",
+                onClick = onBack,
+                variant = CafeButtonVariant.Ghost,
+                modifier = Modifier.weight(1f),
+                fullWidth = true
+            )
+            CafeButton(
+                text = "保存修改",
                 onClick = {
                     val err = validate(
                         type = type,
@@ -327,7 +403,7 @@ fun QuestionEditorScreen(
                     )
                     if (err != null) {
                         errorMsg = err
-                        return@TextButton
+                        return@CafeButton
                     }
                     val answerList = answerText.split(Regex("[,，\\s]+"))
                         .filter { it.isNotBlank() }
@@ -347,16 +423,11 @@ fun QuestionEditorScreen(
                     Log.i(TAG, "saved question: id=${updated.id}")
                     onBack()
                 },
-                modifier = Modifier.weight(2f)
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Save,
-                    contentDescription = null,
-                    tint = CafeColors.Accent
-                )
-                Spacer(modifier = Modifier.size(6.dp))
-                Text("保存修改", color = CafeColors.Accent, fontWeight = FontWeight.SemiBold)
-            }
+                variant = CafeButtonVariant.Primary,
+                leadingIcon = Icons.Rounded.Save,
+                modifier = Modifier.weight(2f),
+                fullWidth = true
+            )
         }
     }
 
@@ -364,8 +435,8 @@ fun QuestionEditorScreen(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("删除这道题？") },
-            text = { Text("该操作不可撤销。") },
+            title = { Text("删除这道题？", style = CafeType.cardTitle, color = CafeColors.Fg) },
+            text = { Text("该操作不可撤销。", style = CafeType.bodyCompact, color = CafeColors.Muted) },
             confirmButton = {
                 TextButton(onClick = {
                     ReadingRepository.deleteQuestion(articleId, original.id)
@@ -377,14 +448,44 @@ fun QuestionEditorScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) { Text("取消") }
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text("取消", color = CafeColors.Muted)
+                }
             }
         )
     }
 }
 
 /**
- * 题型 Chip（圆角矩形，单选效果）
+ * 编辑器卡片（CafeCard + CafeEyebrow 标签）：统一包裹题干/选项/答案等区段。
+ */
+@Composable
+private fun EditorSectionCard(
+    eyebrow: String,
+    title: String,
+    content: @Composable () -> Unit
+) {
+    CafeCard {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(CafeSpacing.xs)
+            ) {
+                CafeEyebrow(text = title, showLeadingDot = true)
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = eyebrow,
+                    style = CafeType.meta,
+                    color = CafeColors.Muted
+                )
+            }
+            content()
+        }
+    }
+}
+
+/**
+ * 题型 Chip：使用 CafeBadge Up/Default 切换（保留原签名）。
  */
 @Composable
 private fun TypeChip(
@@ -392,29 +493,15 @@ private fun TypeChip(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    val bg = if (selected) CafeColors.Accent else CafeColors.Surface
-    val fg = if (selected) Color.White else CafeColors.Fg
-    Box(
-        modifier = Modifier
-            .background(bg, RoundedCornerShape(CafeRadius.Pill))
-            .border(
-                width = 1.dp,
-                color = if (selected) CafeColors.Accent else CafeColors.Border,
-                shape = RoundedCornerShape(CafeRadius.Pill)
-            )
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 6.dp)
-    ) {
-        Text(
-            text = text,
-            style = CafeType.Caption.copy(fontWeight = FontWeight.Medium),
-            color = fg
-        )
-    }
+    CafeBadge(
+        text = text,
+        variant = if (selected) CafeBadgeVariant.Up else CafeBadgeVariant.Default,
+        modifier = Modifier.clickable(onClick = onClick)
+    )
 }
 
 /**
- * 单个选项编辑行
+ * 单个选项编辑行：cafe-ui 风格的 key badge + 输入 + 操作图标。
  */
 @Composable
 private fun OptionEditRow(
@@ -425,88 +512,131 @@ private fun OptionEditRow(
     onDelete: () -> Unit,
     onAdd: () -> Unit
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(CafeSpacing.xs)
+    ) {
+        // 选项 key 圆形徽章
         Box(
             modifier = Modifier
-                .size(28.dp)
-                .background(CafeColors.Accent.copy(alpha = 0.12f), RoundedCornerShape(CafeRadius.Sm)),
+                .size(optionKeySize)
+                .clip(RoundedCornerShape(CafeRadius.rPill))
+                .background(CafeColors.Accent.copy(alpha = 0.12f)),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = key,
-                style = CafeType.Caption.copy(fontWeight = FontWeight.Bold),
+                style = CafeType.bodyCompact.copy(fontWeight = FontWeight.Bold),
                 color = CafeColors.Accent
             )
         }
-        Spacer(modifier = Modifier.size(8.dp))
+        // 文本输入
         OutlinedTextField(
             value = text,
             onValueChange = onTextChange,
-            placeholder = { Text("选项内容") },
+            placeholder = {
+                Text(
+                    "选项内容",
+                    style = CafeType.bodyCompact,
+                    color = CafeColors.Muted
+                )
+            },
             modifier = Modifier.weight(1f),
             singleLine = true,
-            enabled = enabled
-        )
-        IconButton(
-            onClick = onDelete,
             enabled = enabled,
-            modifier = Modifier.size(32.dp)
+            textStyle = CafeType.bodyCompact
+        )
+        // 删除按钮
+        Box(
+            modifier = Modifier
+                .size(optionKeySize)
+                .clip(RoundedCornerShape(CafeRadius.rBtn))
+                .background(
+                    if (enabled) CafeColors.Wrong.copy(alpha = 0.10f) else CafeColors.Border.copy(alpha = 0.4f)
+                )
+                .clickable(enabled = enabled, onClick = onDelete),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Rounded.Delete,
                 contentDescription = "删除选项",
-                tint = if (enabled) CafeColors.Muted else CafeColors.Border,
-                modifier = Modifier.size(16.dp)
+                tint = if (enabled) CafeColors.Wrong else CafeColors.Muted,
+                modifier = Modifier.size(iconSm)
             )
         }
-        IconButton(
-            onClick = onAdd,
-            enabled = enabled,
-            modifier = Modifier.size(32.dp)
+        // 新增按钮
+        Box(
+            modifier = Modifier
+                .size(optionKeySize)
+                .clip(RoundedCornerShape(CafeRadius.rBtn))
+                .background(
+                    if (enabled) CafeColors.Accent.copy(alpha = 0.12f) else CafeColors.Border.copy(alpha = 0.4f)
+                )
+                .clickable(enabled = enabled, onClick = onAdd),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Rounded.Save,
                 contentDescription = "新增选项",
-                tint = if (enabled) CafeColors.Accent else CafeColors.Border,
-                modifier = Modifier.size(16.dp)
+                tint = if (enabled) CafeColors.Accent else CafeColors.Muted,
+                modifier = Modifier.size(iconSm)
             )
         }
     }
 }
 
 /**
- * 字段标签
- */
-@Composable
-private fun SectionLabel(text: String) {
-    Text(
-        text = text,
-        style = CafeType.Caption.copy(fontWeight = FontWeight.SemiBold),
-        color = CafeColors.Muted
-    )
-}
-
-/**
- * 找不到题目的兜底
+ * 找不到题目：cafe-ui 卡片风格 + 错误 badge。
  */
 @Composable
 private fun NotFoundState(onBack: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().background(CafeColors.Bg).padding(CafeSpacing.ContainerPad)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(CafeColors.Bg)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.Rounded.ArrowBack,
-                    contentDescription = "返回",
-                    tint = CafeColors.Fg
-                )
+        CafeTopBar(
+            title = "编辑题目",
+            onBack = onBack
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(CafeSpacing.containerPad)
+        ) {
+            CafeCard {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(CafeSpacing.md),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(CafeSpacing.xs)
+                    ) {
+                        CafeEyebrow(text = "NOT FOUND", showLeadingDot = true, textColor = CafeColors.Wrong)
+                    }
+                    Text(
+                        text = "题目不存在或已被删除",
+                        style = CafeType.cardTitle,
+                        color = CafeColors.Wrong
+                    )
+                    Text(
+                        text = "返回题库列表后重新选择，或新建一道题目。",
+                        style = CafeType.bodyCompact,
+                        color = CafeColors.Muted
+                    )
+                    Spacer(modifier = Modifier.size(CafeSpacing.xs))
+                    CafeButton(
+                        text = "返回",
+                        onClick = onBack,
+                        variant = CafeButtonVariant.Ghost,
+                        fullWidth = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
-            Spacer(modifier = Modifier.size(8.dp))
-            Text(text = "编辑题目", style = CafeType.Heading, color = CafeColors.Fg)
         }
-        Spacer(modifier = Modifier.height(32.dp))
-        Text(text = "题目不存在或已被删除", style = CafeType.Heading, color = CafeColors.Wrong)
     }
 }
 
@@ -544,3 +674,10 @@ private fun validate(
     }
     return null
 }
+
+/**
+ * 内部派生尺寸 token：从 CafeSpacing/icon tile 派生，避免硬编码。
+ */
+private val optionKeySize: Dp = CafeSpacing.kpiPadH
+// iconSm 派生自 CafeRadius 的 rBtn（10dp）做小图标尺寸
+private val iconSm: Dp = CafeRadius.rBtn

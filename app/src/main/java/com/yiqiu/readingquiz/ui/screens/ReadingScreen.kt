@@ -17,21 +17,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Flag
-import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.BookmarkBorder
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Fullscreen
 import androidx.compose.material.icons.rounded.FullscreenExit
 import androidx.compose.material.icons.rounded.LibraryBooks
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -41,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -50,26 +48,36 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.yiqiu.readingquiz.data.ReadingRepository
-import com.yiqiu.readingquiz.data.model.Article
 import com.yiqiu.readingquiz.data.model.ArticleBlock
-import com.yiqiu.readingquiz.data.model.ReadingNote
+import com.yiqiu.readingquiz.ui.components.CafeButton
+import com.yiqiu.readingquiz.ui.components.CafeButtonVariant
+import com.yiqiu.readingquiz.ui.components.CafeEyebrow
 import com.yiqiu.readingquiz.ui.components.CafeHighlightText
-import com.yiqiu.readingquiz.ui.components.CafePrimaryButton
+import com.yiqiu.readingquiz.ui.components.CafeKpiCard
+import com.yiqiu.readingquiz.ui.components.CafeTopBar
 import com.yiqiu.readingquiz.ui.components.EditArticleDialog
 import com.yiqiu.readingquiz.ui.components.NoteActionMenu
 import com.yiqiu.readingquiz.ui.components.NotePadWindow
 import com.yiqiu.readingquiz.ui.theme.CafeColors
+import com.yiqiu.readingquiz.ui.theme.CafeRadius
 import com.yiqiu.readingquiz.ui.theme.CafeSpacing
 import com.yiqiu.readingquiz.ui.theme.CafeType
 import dev.jeziellago.compose.markdowntext.MarkdownText
-import java.util.UUID
+
+// 文件级私有间距 / 尺寸常量（无对应全局 token 时使用，避免在屏幕上散落 .dp 字面量）
+private val ChipPadV = 8.dp            // 题目库 chip 竖直 padding
+private val ChipAccentDot = 8.dp       // 题目库 chip 内 accent 圆点直径
+private val ChipIconSize = 16.dp       // 题目库 chip 内图标尺寸
+private val BottomActionIconBtnSize = 40.dp  // 底部操作栏图标按钮尺寸
 
 /**
- * 阅读页。
- * - 严格遵守 spec 附录 A.1：使用 Icons.Filled.Flag（已收藏）+ Icons.Rounded.BookmarkBorder（未收藏）+ Icons.Rounded.Fullscreen / FullscreenExit。
- * - Task 4：删除 snapshotFlow 自动全屏，改用 `immersive` 手动开关（TopBar 隐藏，BottomActionBar 保留）。
- * - Task 5：删除 Share 按钮。
- * - Task 3：递归渲染 ArticleBlock.Section。
+ * 阅读页（cafe-ui 风格重写）。
+ * - TopBar 用 CafeTopBar（题目库 chip 在 actions 中保留上一轮已实现样式）。
+ * - SectionHeader 用 CafeEyebrow 标签（level 1 = accent + leading dot，level 2/3 = muted）。
+ * - 章节进度用 CafeKpiCard 风格改造 SectionProgressBar。
+ * - BottomActionBar 改为 CafeButton + accent chip（题目库）。
+ * - ProgressIndicator 用 CafeKpiCard 风格。
+ * - 内容渲染沿用 renderBlocks 扩展（CafeHighlightText / MarkdownText）。
  */
 @Composable
 fun ReadingScreen(
@@ -82,10 +90,15 @@ fun ReadingScreen(
     val article = remember(articleId) { ReadingRepository.getArticle(articleId) }
     Log.d("Reading", "open: articleId=$articleId, section=$initialSectionId, found=${article != null}")
     if (article == null) {
-        Column(modifier = Modifier.fillMaxSize().padding(CafeSpacing.ContainerPad)) {
-            Text(text = "文章不存在", style = CafeType.Heading, color = CafeColors.Wrong)
-            Spacer(modifier = Modifier.height(12.dp))
-            CafePrimaryButton(text = "返回", onClick = onBack)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(CafeColors.Bg)
+                .padding(CafeSpacing.containerPad)
+        ) {
+            Text(text = "文章不存在", style = CafeType.displaySection, color = CafeColors.Wrong)
+            Spacer(modifier = Modifier.height(CafeSpacing.md))
+            CafeButton(text = "返回", onClick = onBack)
         }
         return
     }
@@ -120,52 +133,90 @@ fun ReadingScreen(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(CafeColors.Bg)) {
-        // Task 4：TopBar 仅在 immersive=false 时显示
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(CafeColors.Bg)
+    ) {
+        // immersive=false 时显示 TopBar
         if (!immersive) {
-            TopBar(
-                article = article,
-                isMarked = isMarked,
-                immersive = immersive,
+            CafeTopBar(
+                title = article.title,
+                subtitle = article.category.ifBlank { null },
                 onBack = onBack,
-                onToggleMark = {
-                    isMarked = !isMarked
-                    ReadingRepository.toggleFavorite(article.id)
-                },
-                onToggleImmersive = {
-                    immersive = !immersive
-                    Log.d("Reading", "immersive=$immersive")
+                actions = {
+                    // 收藏 IconButton（实心 Flag / 空心 BookmarkBorder）
+                    IconButton(
+                        onClick = {
+                            isMarked = !isMarked
+                            ReadingRepository.toggleFavorite(article.id)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (isMarked) Icons.Filled.Flag else Icons.Rounded.BookmarkBorder,
+                            contentDescription = if (isMarked) "已标记" else "标记疑问",
+                            tint = if (isMarked) CafeColors.Accent2 else CafeColors.Fg
+                        )
+                    }
+                    // 笔记 IconButton（点击弹出 NoteActionMenu）
+                    IconButton(onClick = { showActionMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Edit,
+                            contentDescription = "记笔记",
+                            tint = CafeColors.Fg
+                        )
+                    }
+                    // 沉浸模式 IconButton（topbar 上用 FullscreenExit 表示"退出沉浸"）
+                    IconButton(
+                        onClick = {
+                            immersive = !immersive
+                            Log.d("Reading", "immersive=$immersive")
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.FullscreenExit,
+                            contentDescription = "退出沉浸模式",
+                            tint = CafeColors.Fg
+                        )
+                    }
+                    // 题目库 chip：accent 圆点 + "题目库" 文字（保留上一轮已实现的样式）
+                    if (onOpenQuestionBank != null) {
+                        QuestionBankChip(
+                            onClick = { onOpenQuestionBank(article.id) }
+                        )
+                    }
                 }
             )
             ProgressIndicator(percent = progress)
-            // 新增章节进度条（已学章节 X/Y）
+            // 章节进度条（已学章节 X/Y）
             SectionProgressBar(articleId = article.id)
         }
 
         LazyColumn(
             state = listState,
-            contentPadding = PaddingValues(CafeSpacing.ContainerPad),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(horizontal = CafeSpacing.containerPad, vertical = CafeSpacing.md),
+            verticalArrangement = Arrangement.spacedBy(CafeSpacing.md),
             modifier = Modifier.weight(1f)
         ) {
             item {
-                Text(text = article.title, style = CafeType.Title, color = CafeColors.Fg)
-                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = article.title, style = CafeType.displaySection, color = CafeColors.Fg)
+                Spacer(modifier = Modifier.height(CafeSpacing.xs))
                 Text(
-                    text = "${article.author} · ${article.source}",
-                    style = CafeType.Caption,
+                    text = listOfNotNull(
+                        article.author.ifBlank { null },
+                        article.source.ifBlank { null }
+                    ).joinToString(" · "),
+                    style = CafeType.bodyXSmall,
                     color = CafeColors.Muted
                 )
             }
-            // Task 3：递归渲染 Section / Paragraph / Image
             renderBlocks(article.blocks)
         }
 
-        // Task 4：BottomActionBar 始终保留（仅 IconButton 可隐藏）
+        // BottomActionBar 始终保留（仅 TopBar 可隐藏）
         BottomActionBar(
             immersive = immersive,
             articleId = article.id,
-            sectionId = initialSectionId,
             initialSectionId = initialSectionId,
             onEditClick = { showActionMenu = true },
             onEnterQuiz = {
@@ -175,7 +226,8 @@ fun ReadingScreen(
             onToggleImmersive = {
                 immersive = !immersive
                 Log.d("Reading", "immersive=$immersive")
-            }
+            },
+            onOpenQuestionBank = onOpenQuestionBank
         )
     }
 
@@ -205,113 +257,111 @@ fun ReadingScreen(
     }
 }
 
+/**
+ * 题目库 chip：accent 圆点 + "题目库" 文字（保留上一轮已实现的醒目样式）。
+ * 用 cafe-ui token 重建：accent.copy(alpha=0.12f) 浅色背景 + 完全圆角。
+ */
 @Composable
-private fun TopBar(
-    article: Article,
-    isMarked: Boolean,
-    immersive: Boolean,
-    onBack: () -> Unit,
-    onToggleMark: () -> Unit,
-    onToggleImmersive: () -> Unit
-) {
+private fun QuestionBankChip(onClick: () -> Unit) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(CafeSpacing.ContainerPad),
-        verticalAlignment = Alignment.CenterVertically
+            .background(
+                CafeColors.Accent.copy(alpha = 0.12f),
+                RoundedCornerShape(CafeRadius.rPill)
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = CafeSpacing.xs, vertical = ChipPadV),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(CafeSpacing.xs)
     ) {
-        IconButton(onClick = onBack) {
-            Icon(
-                imageVector = Icons.Rounded.ArrowBack,
-                contentDescription = "返回",
-                tint = CafeColors.Fg
-            )
-        }
-        Spacer(modifier = Modifier.size(8.dp))
-        Text(text = article.category, style = CafeType.Caption, color = CafeColors.Muted)
-        Spacer(modifier = Modifier.weight(1f))
-        IconButton(onClick = onToggleMark) {
-            val icon: androidx.compose.ui.graphics.vector.ImageVector =
-                if (isMarked) Icons.Filled.Flag else Icons.Rounded.BookmarkBorder
-            Icon(
-                imageVector = icon,
-                contentDescription = if (isMarked) "已标记" else "标记疑问",
-                tint = if (isMarked) CafeColors.Accent2 else CafeColors.Fg
-            )
-        }
-        IconButton(onClick = onToggleImmersive) {
-            Icon(
-                imageVector = Icons.Rounded.FullscreenExit,
-                contentDescription = "退出沉浸模式",
-                tint = CafeColors.Fg
-            )
-        }
+        Box(
+            modifier = Modifier
+                .size(ChipAccentDot)
+                .background(CafeColors.Accent, RoundedCornerShape(CafeRadius.rPill))
+        )
+        Icon(
+            imageVector = Icons.Rounded.LibraryBooks,
+            contentDescription = null,
+            tint = CafeColors.Accent,
+            modifier = Modifier.size(ChipIconSize)
+        )
+        Text(
+            text = "题目库",
+            style = CafeType.eyebrow.copy(color = CafeColors.Accent),
+            color = CafeColors.Accent
+        )
     }
 }
 
+/**
+ * 阅读进度指示器（cafe-ui CafeKpiCard 风格）。
+ * - surface + 1px border + rBtn 圆角
+ * - eyebrow label "READING PROGRESS" + 24sp/700 value + meta delta
+ */
 @Composable
 private fun ProgressIndicator(percent: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = CafeSpacing.ContainerPad),
+            .padding(horizontal = CafeSpacing.containerPad, vertical = CafeSpacing.xs),
+        horizontalArrangement = Arrangement.spacedBy(CafeSpacing.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = "$percent%", style = CafeType.Caption, color = CafeColors.Muted)
-        Spacer(modifier = Modifier.size(8.dp))
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .height(4.dp)
-                .background(CafeColors.Border)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(fraction = percent / 100f)
-                    .height(4.dp)
-                    .background(CafeColors.Accent)
-            )
-        }
+        CafeKpiCard(
+            label = "Reading",
+            value = "$percent%",
+            modifier = Modifier.weight(1f),
+            delta = if (percent >= 100) "DONE" else "IN PROGRESS"
+        )
     }
 }
 
+/**
+ * 底部操作栏：编辑图标 + 题目库 chip + 主 CTA。
+ * - 主 CTA：进入答题 / 答本章节题（CafeButton Primary）
+ * - 题目库 chip：accent 圆点 + "题目库"
+ */
 @Composable
 private fun BottomActionBar(
     immersive: Boolean,
     articleId: String,
-    sectionId: String?,
     initialSectionId: String?,
     onEditClick: () -> Unit,
     onEnterQuiz: () -> Unit,
     onToggleImmersive: () -> Unit,
-    onOpenQuestionBank: ((String) -> Unit)? = null
+    onOpenQuestionBank: ((String) -> Unit)?
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(CafeSpacing.ContainerPad),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(horizontal = CafeSpacing.containerPad, vertical = CafeSpacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(CafeSpacing.xs),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onEditClick) {
+        IconButton(
+            onClick = onEditClick,
+            modifier = Modifier
+                .background(Color.Transparent, RoundedCornerShape(CafeRadius.rMd))
+                .size(BottomActionIconBtnSize)
+        ) {
             Icon(
                 imageVector = Icons.Rounded.Edit,
                 contentDescription = "记笔记",
                 tint = CafeColors.Fg
             )
         }
+        // 题目库 chip：保留上一轮已实现样式（accent 圆点 + "题目库"）
         if (onOpenQuestionBank != null) {
-            IconButton(onClick = { onOpenQuestionBank(articleId) }) {
-                Icon(
-                    imageVector = Icons.Rounded.LibraryBooks,
-                    contentDescription = "题目库",
-                    tint = CafeColors.Fg
-                )
-            }
+            QuestionBankChip(onClick = { onOpenQuestionBank(articleId) })
         }
-        // Task 4：沉浸模式下显示 Fullscreen 进入按钮，否则隐藏（TopBar 已有 FullscreenExit）
+        // 沉浸模式下显示 Fullscreen 进入按钮
         if (immersive) {
-            IconButton(onClick = onToggleImmersive) {
+            IconButton(
+                onClick = onToggleImmersive,
+                modifier = Modifier
+                    .background(Color.Transparent, RoundedCornerShape(CafeRadius.rMd))
+                    .size(BottomActionIconBtnSize)
+            ) {
                 Icon(
                     imageVector = Icons.Rounded.Fullscreen,
                     contentDescription = "进入沉浸模式",
@@ -320,9 +370,10 @@ private fun BottomActionBar(
             }
         }
         Spacer(modifier = Modifier.weight(1f))
-        CafePrimaryButton(
+        CafeButton(
             text = if (initialSectionId != null) "答本章节题" else "进入答题",
-            onClick = onEnterQuiz
+            onClick = onEnterQuiz,
+            variant = CafeButtonVariant.Primary
         )
     }
 }
@@ -355,7 +406,30 @@ private fun androidx.compose.foundation.lazy.LazyListScope.renderBlocks(
             }
             is ArticleBlock.Section -> {
                 item(key = counter.next("s")) {
-                    SectionHeader(block.title, block.level)
+                    val indent = when (block.level) {
+                        1 -> 0.dp
+                        2 -> CafeSpacing.xs
+                        else -> CafeSpacing.md
+                    }
+                    val tag = "Chapter · Lv ${block.level}"
+                    val titleStyle = when (block.level) {
+                        1 -> CafeType.displaySection.copy(color = CafeColors.Accent)
+                        2 -> CafeType.cardTitle.copy(color = CafeColors.Fg)
+                        else -> CafeType.bodySmall.copy(color = CafeColors.Fg)
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = indent, top = CafeSpacing.md, bottom = CafeSpacing.xs)
+                    ) {
+                        CafeEyebrow(
+                            text = tag,
+                            showLeadingDot = block.level == 1,
+                            textColor = if (block.level == 1) CafeColors.Accent else CafeColors.Muted
+                        )
+                        Spacer(modifier = Modifier.size(CafeSpacing.xs))
+                        Text(text = block.title, style = titleStyle)
+                    }
                 }
                 renderBlocks(block.children, counter)
             }
@@ -372,20 +446,6 @@ private class KeyCounter {
     fun next(prefix: String): String = "$prefix-${seq.incrementAndGet()}"
 }
 
-@Composable
-private fun SectionHeader(title: String, level: Int) {
-    // CafeType 无 BodyBold，使用 Body + Bold weight 替代（FontWeight.SemiBold 即可视觉区分层级）
-    val (style, indent) = when (level) {
-        1 -> CafeType.Title to 0.dp
-        2 -> CafeType.Heading to 8.dp
-        else -> CafeType.Body to 16.dp
-    }
-    val color = if (level == 1) CafeColors.Accent else CafeColors.Fg
-    Row(modifier = Modifier.padding(start = indent, top = 8.dp, bottom = 4.dp)) {
-        Text(text = title, style = style, color = color)
-    }
-}
-
 /**
  * 文章内嵌图片：用 Coil AsyncImage 加载，点击弹出全屏预览。
  */
@@ -399,13 +459,14 @@ private fun ArticleImage(path: String, caption: String) {
             contentScale = ContentScale.FillWidth,
             modifier = Modifier
                 .fillMaxWidth()
+                .clip(RoundedCornerShape(CafeRadius.rCard))
                 .clickable { showPreview = true }
         )
         if (caption.isNotBlank()) {
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(CafeSpacing.xs))
             Text(
                 text = caption,
-                style = CafeType.Caption,
+                style = CafeType.bodyXSmall,
                 color = CafeColors.Muted
             )
         }
@@ -461,7 +522,9 @@ private fun ImagePreviewDialog(path: String, onDismiss: () -> Unit) {
             // 关闭按钮
             IconButton(
                 onClick = onDismiss,
-                modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(CafeSpacing.md)
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Close,
@@ -503,6 +566,7 @@ private fun buildSectionIndexMap(blocks: List<ArticleBlock>): Map<String, Int> {
 
 /**
  * 章节进度条（已学章节 X/Y）。
+ * 用 cafe-ui CafeKpiCard 风格重写：surface + 1px border + 圆角 + eyebrow label + kpi value。
  * 订阅 ReadingRepository.sectionProgress 实现实时更新。
  */
 @Composable
@@ -517,29 +581,15 @@ private fun SectionProgressBar(articleId: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = CafeSpacing.ContainerPad, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = CafeSpacing.containerPad, vertical = CafeSpacing.xs),
+        horizontalArrangement = Arrangement.spacedBy(CafeSpacing.sm)
     ) {
-        Text(
-            text = "已学章节 $completedCount / $totalSections",
-            style = CafeType.Caption,
-            color = CafeColors.Accent2
+        CafeKpiCard(
+            label = "Sections",
+            value = "$completedCount / $totalSections",
+            modifier = Modifier.weight(1f),
+            delta = if (totalSections > 0 && completedCount >= totalSections) "DONE" else "IN PROGRESS"
         )
-        Spacer(modifier = Modifier.size(8.dp))
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .height(3.dp)
-                .background(CafeColors.Border)
-        ) {
-            val frac = if (totalSections > 0) completedCount.toFloat() / totalSections else 0f
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(fraction = frac.coerceIn(0f, 1f))
-                    .height(3.dp)
-                    .background(CafeColors.Accent2)
-            )
-        }
     }
 }
 
