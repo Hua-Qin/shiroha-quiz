@@ -154,24 +154,58 @@ object ReadingAiClient {
         config: AiConfig,
         article: Article,
         questionCount: Int = 5
+    ): AiResult<List<Question>> = generateQuestionsInternal(
+        config = config,
+        article = article,
+        questionCount = questionCount,
+        systemPrompt = AiPrompts.ARTICLE_QUIZ_GENERATION_SYSTEM_PROMPT,
+        logTag = "generateQuestions"
+    )
+
+    /**
+     * 一键生成专业题库。
+     * 不指定数量时（questionCount <= 0），由 AI 根据文章字数 / 章节数自主决定题目数量。
+     * 使用 QUESTION_BANK_GENERATION_SYSTEM_PROMPT，结构更严谨、题型分布更均匀。
+     */
+    fun generateQuestionBank(
+        config: AiConfig,
+        article: Article,
+        questionCount: Int = 0
+    ): AiResult<List<Question>> = generateQuestionsInternal(
+        config = config,
+        article = article,
+        questionCount = questionCount,
+        systemPrompt = AiPrompts.QUESTION_BANK_GENERATION_SYSTEM_PROMPT,
+        logTag = "generateQuestionBank"
+    )
+
+    /**
+     * 生成题目的共享实现，供 generateQuestionsFromArticle / generateQuestionBank 复用。
+     */
+    private fun generateQuestionsInternal(
+        config: AiConfig,
+        article: Article,
+        questionCount: Int,
+        systemPrompt: String,
+        logTag: String
     ): AiResult<List<Question>> {
-        Log.d(TAG, "generateQuestions: articleId=${article.id}, count=$questionCount")
+        Log.d(TAG, "$logTag: articleId=${article.id}, count=$questionCount")
         val err = validateConfigOrError(config)
         if (err != null) {
-            Log.w(TAG, "generateQuestions config invalid: $err")
-            ErrorLogStore.log(TAG, "generateQuestions 配置无效：$err", "W")
+            Log.w(TAG, "$logTag config invalid: $err")
+            ErrorLogStore.log(TAG, "$logTag 配置无效：$err", "W")
             return AiResult.Failure("config", err)
         }
         val userPayload = buildArticlePayload(article, questionCount)
         val content = try {
             requestChatCompletion(
                 config = config,
-                systemPrompt = AiPrompts.ARTICLE_QUIZ_GENERATION_SYSTEM_PROMPT,
+                systemPrompt = systemPrompt,
                 userPayload = userPayload
             )
         } catch (e: AiHttpException) {
-            Log.w(TAG, "generateQuestions HTTP ${e.code}: ${e.message}")
-            ErrorLogStore.log(TAG, "generateQuestions HTTP ${e.code}：${e.message}", "E", e)
+            Log.w(TAG, "$logTag HTTP ${e.code}: ${e.message}")
+            ErrorLogStore.log(TAG, "$logTag HTTP ${e.code}：${e.message}", "E", e)
             val hint = when (e.code) {
                 401, 403 -> "（API Key 无效或权限不足）"
                 429 -> "（请求频率超限）"
@@ -179,17 +213,17 @@ object ReadingAiClient {
             }
             return AiResult.Failure("http", "HTTP ${e.code}${hint}：${e.message}")
         } catch (e: Throwable) {
-            Log.w(TAG, "generateQuestions FAILED: ${e.message}", e)
-            ErrorLogStore.log(TAG, "generateQuestions 网络异常：${e.message}", "E", e)
+            Log.w(TAG, "$logTag FAILED: ${e.message}", e)
+            ErrorLogStore.log(TAG, "$logTag 网络异常：${e.message}", "E", e)
             return AiResult.Failure("exception", "${e.javaClass.simpleName}: ${e.message ?: "未知错误"}")
         }
         if (content == null) {
-            Log.w(TAG, "generateQuestions: null content (empty choices)")
-            ErrorLogStore.log(TAG, "generateQuestions：AI 返回空内容", "W")
+            Log.w(TAG, "$logTag: null content (empty choices)")
+            ErrorLogStore.log(TAG, "$logTag：AI 返回空内容", "W")
             return AiResult.Failure("parse", "AI 返回了空内容，请重试或更换模型")
         }
         val result = parseQuestions(content)
-        Log.i(TAG, "generateQuestions result: ${(result as? AiResult.Success)?.value?.size ?: "failure ${(result as AiResult.Failure).message}"}")
+        Log.i(TAG, "$logTag result: ${(result as? AiResult.Success)?.value?.size ?: "failure ${(result as AiResult.Failure).message}"}")
         return result
     }
 
@@ -505,15 +539,19 @@ object ReadingAiClient {
                 is com.yiqiu.readingquiz.data.model.ArticleBlock.Section -> flattenSection(block)
             }
         }
+        val autoCount = questionCount <= 0
         return JSONObject()
             .put("task", "generate_questions_from_article")
             .put("questionCount", questionCount)
+            .put("autoCount", autoCount)   // true → 由 AI 根据字数/章节数自主决定
             .put("article", JSONObject()
                 .put("id", article.id)
                 .put("title", article.title)
                 .put("author", article.author)
                 .put("source", article.source)
                 .put("category", article.category)
+                .put("wordCount", plainText.length)
+                .put("sectionCount", sectionsArr.length())
                 .put("content", plainText)
                 .put("sections", sectionsArr)
             )

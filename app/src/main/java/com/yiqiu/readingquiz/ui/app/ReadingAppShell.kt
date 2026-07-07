@@ -12,6 +12,8 @@ import androidx.compose.runtime.remember
 import com.yiqiu.readingquiz.ui.screens.AiSettingsScreen
 import com.yiqiu.readingquiz.ui.screens.ChapterOutlineScreen
 import com.yiqiu.readingquiz.ui.screens.HomeScreen
+import com.yiqiu.readingquiz.ui.screens.QuestionBankScreen
+import com.yiqiu.readingquiz.ui.screens.QuestionEditorScreen
 import com.yiqiu.readingquiz.ui.screens.QuizScreen
 import com.yiqiu.readingquiz.ui.screens.ReadingScreen
 import com.yiqiu.readingquiz.ui.screens.ScoreScreen
@@ -27,6 +29,8 @@ sealed class Route {
     data class Score(val articleId: String) : Route()
     data object AiSettings : Route()
     data class ChapterOutline(val articleId: String) : Route()
+    data class QuestionBank(val articleId: String) : Route()
+    data class QuestionEditor(val articleId: String, val questionId: String) : Route()
 }
 
 @Composable
@@ -63,7 +67,19 @@ fun ReadingAppShell() {
                 articleId = route.articleId,
                 onBack = { stack.removeAt(stack.lastIndex) },
                 onEnterQuiz = { id -> stack.add(Route.Quiz(id, route.initialSectionId)) },
-                initialSectionId = route.initialSectionId
+                initialSectionId = route.initialSectionId,
+                onOpenQuestionBank = { id -> stack.add(Route.QuestionBank(id)) }
+            )
+            is Route.QuestionBank -> QuestionBankScreen(
+                articleId = route.articleId,
+                onBack = { stack.removeAt(stack.lastIndex) },
+                onEnterQuiz = { id -> stack.add(Route.Quiz(id, null)) },
+                onEditQuestion = { id, qid -> stack.add(Route.QuestionEditor(id, qid)) }
+            )
+            is Route.QuestionEditor -> QuestionEditorScreen(
+                articleId = route.articleId,
+                questionId = route.questionId,
+                onBack = { stack.removeAt(stack.lastIndex) }
             )
             is Route.Quiz -> QuizScreen(
                 articleId = route.articleId,

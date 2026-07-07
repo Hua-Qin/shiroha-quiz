@@ -278,6 +278,48 @@ object ReadingRepository {
     fun getQuestions(articleId: String): List<Question> =
         questionsByArticle[articleId] ?: emptyList()
 
+    /**
+     * 向指定文章的题目列表追加题目（保留现有题目）。
+     */
+    fun addQuestions(articleId: String, newQuestions: List<Question>) {
+        val existing = questionsByArticle[articleId] ?: emptyList()
+        val merged = existing + newQuestions
+        questionsByArticle[articleId] = merged
+        Log.d(TAG, "addQuestions: articleId=$articleId, added=${newQuestions.size}, total=${merged.size}")
+        saveQuestions()
+    }
+
+    /**
+     * 删除指定文章的某道题目。
+     */
+    fun deleteQuestion(articleId: String, questionId: String) {
+        val list = questionsByArticle[articleId] ?: return
+        val newList = list.filterNot { it.id == questionId }
+        if (newList.size == list.size) {
+            Log.w(TAG, "deleteQuestion: id=$questionId not found in articleId=$articleId")
+            return
+        }
+        questionsByArticle[articleId] = newList
+        Log.d(TAG, "deleteQuestion: articleId=$articleId, id=$questionId, remaining=${newList.size}")
+        saveQuestions()
+    }
+
+    /**
+     * 更新单道题目（用于编辑器保存）。
+     */
+    fun updateQuestion(articleId: String, updated: Question) {
+        val list = questionsByArticle[articleId] ?: return
+        val idx = list.indexOfFirst { it.id == updated.id }
+        if (idx < 0) {
+            Log.w(TAG, "updateQuestion: id=${updated.id} not found")
+            return
+        }
+        val newList = list.toMutableList().apply { this[idx] = updated }
+        questionsByArticle[articleId] = newList
+        Log.d(TAG, "updateQuestion: articleId=$articleId, id=${updated.id}")
+        saveQuestions()
+    }
+
     // ----------------- 持久化 -----------------
 
     private fun loadAll() {

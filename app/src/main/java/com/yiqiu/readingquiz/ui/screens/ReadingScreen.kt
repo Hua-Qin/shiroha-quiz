@@ -25,6 +25,7 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Fullscreen
 import androidx.compose.material.icons.rounded.FullscreenExit
+import androidx.compose.material.icons.rounded.LibraryBooks
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -75,7 +76,8 @@ fun ReadingScreen(
     articleId: String,
     onBack: () -> Unit,
     onEnterQuiz: (String) -> Unit,
-    initialSectionId: String? = null
+    initialSectionId: String? = null,
+    onOpenQuestionBank: ((String) -> Unit)? = null
 ) {
     val article = remember(articleId) { ReadingRepository.getArticle(articleId) }
     Log.d("Reading", "open: articleId=$articleId, section=$initialSectionId, found=${article != null}")
@@ -296,6 +298,15 @@ private fun BottomActionBar(
                 contentDescription = "记笔记",
                 tint = CafeColors.Fg
             )
+        }
+        if (onOpenQuestionBank != null) {
+            IconButton(onClick = { onOpenQuestionBank(articleId) }) {
+                Icon(
+                    imageVector = Icons.Rounded.LibraryBooks,
+                    contentDescription = "题目库",
+                    tint = CafeColors.Fg
+                )
+            }
         }
         // Task 4：沉浸模式下显示 Fullscreen 进入按钮，否则隐藏（TopBar 已有 FullscreenExit）
         if (immersive) {
