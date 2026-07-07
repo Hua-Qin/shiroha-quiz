@@ -293,12 +293,14 @@ fun QuestionEditorScreen(
             }
 
             // 错误提示
-            errorMsg?.let {
-                Text(
-                    text = it,
-                    style = CafeType.Caption,
-                    color = CafeColors.Wrong
-                )
+            errorMsg?.let { msg ->
+                item {
+                    Text(
+                        text = msg,
+                        style = CafeType.Caption,
+                        color = CafeColors.Wrong
+                    )
+                }
             }
         }
 

@@ -19,7 +19,7 @@ data class Question(
     val answer: List<String>,
     val blankAnswers: List<String>,
     val analysis: String,
-    val category: String,
+    val category: String = "",
     val explanation: String = analysis,
     // 章节绑定：sectionId 指向 ArticleBlock.Section.id；null 表示未绑定（旧数据兼容）
     val sectionId: String? = null,
