@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -142,7 +143,7 @@ fun NotePadWindow(
             Box(
                 modifier = Modifier
                     .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
-                    .size(280.dp, 320.dp)
+                    .size(width = 280.dp, height = 320.dp)
             ) {
                 NotePadCard(
                     contentValue = contentValue,
@@ -400,14 +401,14 @@ private fun applyBoldToSelection(value: TextFieldValue): TextFieldValue {
     val start = selection.min
     val end = selection.max
     val annotated = value.annotatedString
-    val existingStyles = annotated.spanStyles.filter { span ->
-        // 与选区重叠的 span
-        span.start < end && span.end > start
-    }.map { it.range }
+    // 与选区重叠的 span 列表（用手动构造的 IntRange，避免 1.9.x AnnotatedString.Range.range 缺失问题）
+    val existingOverlaps: List<IntRange> = annotated.spanStyles
+        .filter { span -> span.start < end && span.end > start }
+        .map { span -> IntRange(span.start, span.end - 1) }
 
     // 判断选区是否已全部加粗
     val isAllBold = (start until end).all { idx ->
-        existingStyles.any { range -> idx >= range.first && idx < range.last }
+        existingOverlaps.any { range -> idx >= range.first && idx <= range.last }
     }
 
     val newStyles = mutableListOf<AnnotatedString.Range<SpanStyle>>()

@@ -472,6 +472,24 @@ object ReadingAiClient {
                         .put("content", flattenSection(block))
                         .put("children", childSections))
                 }
+                is com.yiqiu.readingquiz.data.model.ArticleBlock.Paragraph -> {
+                    // 顶层非 Section 段落归入"全局"段（sectionId 为空）
+                    arr.put(JSONObject()
+                        .put("sectionId", "")
+                        .put("level", 0)
+                        .put("title", "")
+                        .put("content", block.text)
+                        .put("children", JSONArray()))
+                }
+                is com.yiqiu.readingquiz.data.model.ArticleBlock.Image -> {
+                    // 图片描述归入段落段
+                    arr.put(JSONObject()
+                        .put("sectionId", "")
+                        .put("level", 0)
+                        .put("title", "")
+                        .put("content", "[图片：${block.caption}]")
+                        .put("children", JSONArray()))
+                }
             }
         }
         return arr

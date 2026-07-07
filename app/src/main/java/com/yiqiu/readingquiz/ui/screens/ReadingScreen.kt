@@ -164,6 +164,7 @@ fun ReadingScreen(
             immersive = immersive,
             articleId = article.id,
             sectionId = initialSectionId,
+            initialSectionId = initialSectionId,
             onEditClick = { showActionMenu = true },
             onEnterQuiz = {
                 Log.d("Reading", "→ quiz")
@@ -277,6 +278,7 @@ private fun BottomActionBar(
     immersive: Boolean,
     articleId: String,
     sectionId: String?,
+    initialSectionId: String?,
     onEditClick: () -> Unit,
     onEnterQuiz: () -> Unit,
     onToggleImmersive: () -> Unit
