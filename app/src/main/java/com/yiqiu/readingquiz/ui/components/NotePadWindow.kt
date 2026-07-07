@@ -228,7 +228,7 @@ private fun NotePadCard(
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = "便笺",
-                style = CafeType.CaptianfontWeight = FontWeight.SemiBold),
+                style = CafeType.bodyXSmall.copy(fontWeight = FontWeight.SemiBold),
                 color = CafeColors.Fg
             )
             Spacer(modifier = Modifier.weight(1f))
@@ -321,7 +321,7 @@ private fun NotePadCard(
             if (existingNotes.isNotEmpty()) {
                 Text(
                     text = "已存 ${existingNotes.size} 条",
-                    style = CafeType.C,ption
+                    style = CafeType.bodyXSmall,
                     color = CafeColors.Muted
                 )
                 Spacer(modifier = Modifier.width(8.dp))
