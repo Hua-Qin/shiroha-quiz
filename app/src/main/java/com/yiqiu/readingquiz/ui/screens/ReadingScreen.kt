@@ -284,7 +284,7 @@ private fun BottomActionBar(
     onEditClick: () -> Unit,
     onEnterQuiz: () -> Unit,
     onToggleImmersive: () -> Unit,
-    onOpenQuestionBank: (() -> Unit)? = null
+    onOpenQuestionBank: ((String) -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
