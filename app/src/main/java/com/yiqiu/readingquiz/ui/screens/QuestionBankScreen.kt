@@ -25,9 +25,11 @@ import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.FileUpload
-import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -43,13 +45,12 @@ import androidx.compose.ui.platform.LocalContext
 import com.yiqiu.readingquiz.ai.ReadingAiClient
 import com.yiqiu.readingquiz.data.ReadingRepository
 import com.yiqiu.readingquiz.data.importexport.QuestionImportParser
+import com.yiqiu.readingquiz.data.model.Option
 import com.yiqiu.readingquiz.data.model.Question
 import com.yiqiu.readingquiz.data.model.QuestionType
 import com.yiqiu.readingquiz.ui.components.CafeBadge
 import com.yiqiu.readingquiz.ui.components.CafeBadgeVariant
-import com.yiqiu.readingquiz.ui.components.CafeButton
 import com.yiqiu.readingquiz.ui.components.CafeButtonAi
-import com.yiqiu.readingquiz.ui.components.CafeButtonVariant
 import com.yiqiu.readingquiz.ui.components.CafeCard
 import com.yiqiu.readingquiz.ui.components.CafeCtaBanner
 import com.yiqiu.readingquiz.ui.components.CafeTopBar
@@ -63,7 +64,13 @@ import kotlinx.coroutines.withContext
 private const val TAG = "QuestionBank"
 
 /**
- * 题库管理页（cafe-ui 风格 + AI 智能出题 + 导入 + 编辑器入口 + 长按删除）。
+ * 题库管理页（极简布局）。
+ *
+ * 结构：
+ * 1. 顶部标题 + 数量
+ * 2. AI 出题（唯一主操作）
+ * 3. 题目列表（全展开，无冗余按钮行）
+ * 4. 长按题目 → 编辑 / 删除
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -82,16 +89,13 @@ fun QuestionBankScreen(
     var status by remember { mutableStateOf<String?>(null) }
     var statusIsError by remember { mutableStateOf(false) }
     var generating by remember { mutableStateOf(false) }
-    var showImportHint by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
 
     LaunchedEffect(articleId) {
         questions = ReadingRepository.getQuestions(articleId)
         Log.d(TAG, "open: articleId=$articleId, count=${questions.size}")
     }
 
-    /**
-     * 文件导入 launcher
-     */
     val importLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
@@ -127,15 +131,12 @@ fun QuestionBankScreen(
                 is QuestionImportParser.Result.Failure -> {
                     status = "导入失败：${result.reason}"
                     statusIsError = true
-                    Log.w(TAG, "import failed: ${result.reason}")
+                    Log.w(TAG, "import fail: ${result.reason}")
                 }
             }
         }
     }
 
-    /**
-     * 一键生成专业题库（协程异步）。
-     */
     fun triggerAiGenerate(count: Int = 0) {
         if (article == null) {
             status = "文章不存在"
@@ -170,7 +171,7 @@ fun QuestionBankScreen(
             .fillMaxSize()
             .background(CafeColors.Bg)
     ) {
-        // ===== 顶部栏（cafe-ui TopBar）=====
+        // ===== 顶部栏 =====
         CafeTopBar(
             title = "题目库",
             subtitle = article?.title ?: "未找到文章",
@@ -180,93 +181,82 @@ fun QuestionBankScreen(
                     text = "共 ${questions.size} 题",
                     variant = CafeBadgeVariant.Up
                 )
+                // 更多操作：手动新增 / 导入
+                Box {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Add,
+                            contentDescription = "更多操作",
+                            tint = CafeColors.Fg
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("手动新增题目") },
+                            onClick = {
+                                showMenu = false
+                                val newQ = Question(
+                                    id = java.util.UUID.randomUUID().toString(),
+                                    type = QuestionType.SINGLE,
+                                    question = "",
+                                    options = listOf(Option("A", ""), Option("B", "")),
+                                    answer = emptyList(),
+                                    blankAnswers = emptyList(),
+                                    analysis = ""
+                                )
+                                ReadingRepository.addQuestions(articleId, listOf(newQ))
+                                onEditQuestion(articleId, newQ.id)
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Rounded.Add,
+                                    contentDescription = null,
+                                    tint = CafeColors.Fg
+                                )
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("导入题目") },
+                            onClick = {
+                                showMenu = false
+                                importLauncher.launch(
+                                    arrayOf("application/json", "text/markdown", "text/plain", "text/*")
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Rounded.FileUpload,
+                                    contentDescription = null,
+                                    tint = CafeColors.Fg
+                                )
+                            }
+                        )
+                    }
+                }
             }
         )
 
-        // ===== 醒目的 AI 智能出题 CTA Banner =====
+        // ===== AI 出题（唯一主操作）=====
         AiGenerateCta(
             enabled = !generating && article != null,
             loading = generating,
             onClick = { triggerAiGenerate() }
         )
 
-        // ===== 操作栏（导入 / 手动新增 / 答题）=====
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = CafeSpacing.containerPad),
-            horizontalArrangement = Arrangement.spacedBy(CafeSpacing.xs)
-        ) {
-            CafeButton(
-                text = "导入题目",
-                onClick = {
-                    importLauncher.launch(arrayOf("application/json", "text/markdown", "text/plain", "text/*"))
-                    showImportHint = true
-                },
-                enabled = !generating,
-                variant = CafeButtonVariant.Ghost,
-                leadingIcon = Icons.Rounded.FileUpload,
-                modifier = Modifier.weight(1f),
-                fullWidth = true
-            )
-            CafeButton(
-                text = "手动新增",
-                onClick = {
-                    val newQ = Question(
-                        id = java.util.UUID.randomUUID().toString(),
-                        type = QuestionType.SINGLE,
-                        question = "",
-                        options = listOf(
-                            com.yiqiu.readingquiz.data.model.Option("A", ""),
-                            com.yiqiu.readingquiz.data.model.Option("B", "")
-                        ),
-                        answer = emptyList(),
-                        blankAnswers = emptyList(),
-                        analysis = ""
-                    )
-                    ReadingRepository.addQuestions(articleId, listOf(newQ))
-                    onEditQuestion(articleId, newQ.id)
-                },
-                enabled = !generating,
-                variant = CafeButtonVariant.Ghost,
-                leadingIcon = Icons.Rounded.Add,
-                modifier = Modifier.weight(1f),
-                fullWidth = true
-            )
-            CafeButton(
-                text = "答题",
-                onClick = { onEnterQuiz(articleId) },
-                enabled = questions.isNotEmpty(),
-                variant = CafeButtonVariant.Primary,
-                leadingIcon = Icons.Rounded.PlayArrow,
-                modifier = Modifier.weight(1f),
-                fullWidth = true
-            )
-        }
-
         // ===== 状态提示 =====
         status?.let { msg ->
             StatusMessage(text = msg, isError = statusIsError)
         }
-        if (showImportHint && status == null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = CafeSpacing.containerPad, vertical = CafeSpacing.xs)
-            ) {
-                Text(
-                    text = "支持 .json / .md / .txt 三种格式",
-                    style = CafeType.meta,
-                    color = CafeColors.Muted
-                )
-            }
-        }
 
-        // ===== 题目列表 =====
+        // ===== 题目列表（全展开，无额外按钮行）=====
         if (questions.isEmpty()) {
             EmptyState()
         } else {
             LazyColumn(
+                modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
                     start = CafeSpacing.containerPad,
                     end = CafeSpacing.containerPad,
@@ -276,9 +266,10 @@ fun QuestionBankScreen(
                 verticalArrangement = Arrangement.spacedBy(CafeSpacing.cardPadSm)
             ) {
                 items(questions, key = { it.id }) { q ->
+                    val idx = questions.indexOf(q) + 1
                     QuestionRow(
                         question = q,
-                        index = questions.indexOf(q) + 1,
+                        index = idx,
                         onClick = { onEditQuestion(articleId, q.id) },
                         onLongClick = { pendingDelete = q }
                     )
@@ -287,19 +278,24 @@ fun QuestionBankScreen(
         }
     }
 
-    // ===== 删除确认对话框 =====
+    // ===== 删除确认 =====
     pendingDelete?.let { target ->
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            title = { Text("删除这道题？", style = CafeType.cardTitle, color = CafeColors.Fg) },
+            title = {
+                Text(
+                    text = "删除这道题？",
+                    style = CafeType.cardTitle,
+                    color = CafeColors.Fg
+                )
+            },
             text = {
-                Column {
+                Column(verticalArrangement = Arrangement.spacedBy(CafeSpacing.xs)) {
                     Text(
                         text = target.question.take(80) + if (target.question.length > 80) "…" else "",
                         style = CafeType.bodyCompact,
                         color = CafeColors.Fg
                     )
-                    Spacer(modifier = Modifier.size(CafeSpacing.xs))
                     Text(
                         text = "该操作不可撤销。",
                         style = CafeType.meta,
@@ -311,7 +307,7 @@ fun QuestionBankScreen(
                 TextButton(onClick = {
                     ReadingRepository.deleteQuestion(articleId, target.id)
                     questions = ReadingRepository.getQuestions(articleId)
-                    Log.i(TAG, "deleted question: ${target.id}")
+                    Log.i(TAG, "deleted: ${target.id}")
                     pendingDelete = null
                 }) {
                     Icon(
@@ -332,21 +328,8 @@ fun QuestionBankScreen(
     }
 }
 
-/**
- * 醒目的 AI 智能出题 CTA 区（cafe-ui banner 风格，保留私有函数签名）。
- */
-@Composable
-private fun AiGenerateButton(
-    enabled: Boolean,
-    loading: Boolean,
-    onClick: () -> Unit
-) {
-    AiGenerateCta(enabled = enabled, loading = loading, onClick = onClick)
-}
+// ===== 子组件 =====
 
-/**
- * AI 智能出题 CTA：使用 CafeCtaBanner 风格 + CafeButtonAi 主按钮。
- */
 @Composable
 private fun AiGenerateCta(
     enabled: Boolean,
@@ -368,23 +351,10 @@ private fun AiGenerateCta(
                 loading = loading,
                 onBanner = true
             )
-        },
-        secondaryButton = {
-            // 通过 leadingIcon 保留 AI 图标语义
-            CafeButton(
-                text = "Auto",
-                onClick = onClick,
-                enabled = enabled,
-                variant = CafeButtonVariant.OnDark,
-                leadingIcon = Icons.Rounded.AutoAwesome
-            )
         }
     )
 }
 
-/**
- * 状态提示条：成功用 Correct badge 风格，失败用 Wrong 风格。
- */
 @Composable
 private fun StatusMessage(text: String, isError: Boolean) {
     Box(
@@ -399,9 +369,6 @@ private fun StatusMessage(text: String, isError: Boolean) {
     }
 }
 
-/**
- * 单条题目行（点击编辑 + 长按删除）
- */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun QuestionRow(
@@ -416,7 +383,6 @@ private fun QuestionRow(
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(CafeSpacing.xs)) {
-            // 顶部：序号 + 题型 + 章节 + 已答状态
             Row(verticalAlignment = Alignment.CenterVertically) {
                 CafeBadge(
                     text = "#$index",
@@ -453,7 +419,6 @@ private fun QuestionRow(
                 }
             }
 
-            // 中部：题干
             Text(
                 text = question.question.ifBlank { "（题干为空）" },
                 style = CafeType.body,
@@ -461,7 +426,6 @@ private fun QuestionRow(
                 maxLines = 3
             )
 
-            // 底部：选项数 meta + 编辑入口
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "${question.options.size} OPTIONS · ${typeMeta(question.type)}",
@@ -480,9 +444,6 @@ private fun QuestionRow(
     }
 }
 
-/**
- * 空态：cafe-ui 卡片风格 + icon + 文案
- */
 @Composable
 private fun EmptyState() {
     Box(
@@ -508,7 +469,7 @@ private fun EmptyState() {
                     color = CafeColors.Fg
                 )
                 Text(
-                    text = "点击上方「AI 智能出题」或「导入题目」开始",
+                    text = "点击上方「AI 智能出题」或「更多操作」导入",
                     style = CafeType.bodyXSmall,
                     color = CafeColors.Muted
                 )
@@ -517,9 +478,6 @@ private fun EmptyState() {
     }
 }
 
-/**
- * 题型 → 中文标签
- */
 private fun typeLabel(type: QuestionType): String = when (type) {
     QuestionType.SINGLE -> "单选"
     QuestionType.MULTIPLE -> "多选"
@@ -528,9 +486,6 @@ private fun typeLabel(type: QuestionType): String = when (type) {
     QuestionType.SHORT -> "简答"
 }
 
-/**
- * 题型 → meta 描述（用于卡片底栏）。
- */
 private fun typeMeta(type: QuestionType): String = when (type) {
     QuestionType.SINGLE -> "SINGLE CHOICE"
     QuestionType.MULTIPLE -> "MULTIPLE CHOICE"
@@ -539,7 +494,4 @@ private fun typeMeta(type: QuestionType): String = when (type) {
     QuestionType.SHORT -> "SHORT ANSWER"
 }
 
-/**
- * 内部 icon 尺寸 token：派生自 CafeRadius.rBtn（10dp）作为小图标尺寸。
- */
 private val iconSm = com.yiqiu.readingquiz.ui.theme.CafeRadius.rBtn
